@@ -47,7 +47,10 @@ export const redisClient=new Redis({
     host:"127.0.0.1",
     port:6379
 })
-
+redisClient
+redisClient.on('connecting',()=>{
+    console.log('redis client is connected')
+})
 
 
 const WS_URL = "wss://ws.backpack.exchange";
