@@ -93,7 +93,7 @@ async function listeningToStream(){
        }
 }
 
-export function engineDispatcher({requestId, payload, timeoutMS}:engineDispatcherInputType):Promise<Record<string,any>>{
+export function engineDispatcher(requestId:string, payload:Record<string,any>, timeoutMS:number):Promise<Record<string,any>>{
 
     if(!isListening){
         listeningToStream()
