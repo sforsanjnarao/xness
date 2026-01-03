@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+// @map = rename a column
+// @@map = rename a table
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model User{
+  id String                    @id                 @default(uuid())
+  name String 
+  email String
+  password String
+  order Order[]
+  wallet Wallet[]
+  @@map("user")
+}
+
+
+model Order{
+  id              String        @id                 @default(uuid())
+  userId          String                            @map("user_id")
+  user            User          @relation(fields: [userId], references: [id])
+  side            orderSide 
+  symbol          Symbol
+  status          orderStatus
+
+  quantity        BigInt
+  quantityDecimal Int
+
+  openPrice       Int
+  closePrice      Int
+  priceDecimals   Int
+
+  leverage        Int
+  margin          Int
+  takeProfitPrice Int?                              @map("take_profit")
+  stopLossPrice   Int?                              @map("stop_loss")
+
+  Pnl             Int?                              @map("profit_and_loss")
+
+
+  reason          CloseReason
+
+  createdAt       DateTime      @default(now())     @map("created_at")
+  updatedAt       DateTime      @updatedAt          @map("updated_at")
+  closedAt        DateTime                          @map("closed_at")
+   
+   @@map("order")
+}
+
+enum orderSide {
+  LONG
+  SHORT
+}
+
+
+enum orderStatus {
+  OPEN
+  CLOSED
+  LIQUIDATION
+  @@map("order_status")
+}
+
+
+enum CloseReason {
+  take_profit
+  stop_loss
+  manual
+  liquidation
+
+  @@map("close_reason")
+}
+
+
+//balance 
+model Wallet{
+  id                String      @id @unique @default(uuid())
+  userId            String
+  user              User        @relation(fields: [userId], references: [id])
+  symbol            Symbol
+  balanceRaw        BigInt
+  balanceDecimal    Int
+  createdAt         DateTime    @default(now())          @map("create_at")
+  updatedAt         DateTime    @updatedAt               @map("updated_at")
+}
+
+
+enum Symbol {
+  USDC
+  BTC
+  SOL
+  ETH 
+
+}
+
+//will add candles later

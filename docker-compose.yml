@@ -1,0 +1,12 @@
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=sanjana
+      - POSTGRES_PASSWORD=sura
+    ports:
+      - "5432:5432"
+   
