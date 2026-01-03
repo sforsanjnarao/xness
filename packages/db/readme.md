@@ -30,22 +30,22 @@ form [text](https://www.prisma.io/docs/guides/docker)
 
 
 1. Set up your Node.js and Prisma application
-    1.1. Initialize your project
-    1.2. Install required dependencies
-    1.3. Set up Prisma ORM
-    1.4. Create an Express.js server
+    - 1.1. Initialize your project
+    - 1.2. Install required dependencies
+    - 1.3. Set up Prisma ORM
+    - 1.4. Create an Express.js server
     
 2. Set up a PostgreSQL database with Docker Compose
-    2.1. Create a Docker Compose file for PostgreSQL
-    2.2. Start the PostgreSQL container
-    2.3. Perform database migrations
-    2.4. Test the application
-    2.5. Clean up the standalone database
+    - 2.1. Create a Docker Compose file for PostgreSQL
+    - 2.2. Start the PostgreSQL container
+    - 2.3. Perform database migrations
+    - 2.4. Test the application
+    - 2.5. Clean up the standalone database
     
 3. Run the app and database together with Docker Compose
-    3.1. Option 1: Use Linux Alpine (node:alpine) as a base image
-    3.1. Option 2: Use Linux Debian (node:slim) as a base image
-    3.2. Create and configure a Docker Compose file
-    3.3. Configure environment variable for the container
-    3.4. Build and run the application
-    3.5. Bonus: Add Prisma Studio for database management
+    - 3.1. Option 1: Use Linux Alpine (node:alpine) as a base image
+    - 3.1. Option 2: Use Linux Debian (node:slim) as a base image
+    - 3.2. Create and configure a Docker Compose file
+    - 3.3. Configure environment variable for the container
+    - 3.4. Build and run the application
+    - 3.5. Bonus: Add Prisma Studio for database management
