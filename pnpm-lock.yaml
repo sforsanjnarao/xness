@@ -20,6 +20,9 @@ importers:
 
   apps/engine:
     dependencies:
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@repo/redis-client':
         specifier: workspace:*
         version: link:../../packages/redisClient

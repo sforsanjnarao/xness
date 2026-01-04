@@ -1,8 +1,16 @@
 {
-  "name": "db",
+  "name": "@repo/db",
   "version": "1.0.0",
   "description": "- running postgresql from docker steps:     - Creating the Docker Postgres instance         docker run -d -e POSTGRES_DB=mydb -e POSTGRES_PASSWORD=testpass123 -e POSTGRES_USER=postgres -p \"6500:5432\" postgres",
   "main": "index.js",
+  "types": "./dist/src/prisma.d.ts",  
+  "exports":{
+    ".":{
+      "import":"./index.ts",
+      "default":"./index.ts",
+      "types":"./dist/src/index.d.ts"
+    }
+  },
   "scripts": {
     "db:deploy": "npx prisma migrate deploy && npx prisma generate"
   },

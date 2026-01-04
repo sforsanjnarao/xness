@@ -12,7 +12,8 @@
   "type": "commonjs",
   "dependencies": {
     "@repo/typescript-config":"workspace:*",
-    "@repo/redis-client":"workspace:*"
-    
+    "@repo/redis-client":"workspace:*",
+    "@repo/db":"workspace:*"
+
   }
 }
