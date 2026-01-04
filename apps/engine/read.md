@@ -1,4 +1,4 @@
-### structure of engine
+### internal structure of engine
 
 
 ```mermaid
