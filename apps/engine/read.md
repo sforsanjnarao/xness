@@ -1,7 +1,7 @@
 ### internal structure of engine
 
 
-```mermaid
+```js
 graph TD
     %% --- External Systems ---
     RedisInput[("Redis Stream\n(trading-engine)")]
