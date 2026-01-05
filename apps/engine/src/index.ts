@@ -39,7 +39,7 @@ export const ENGINE_CONSTANTS = {
     MAX_QUEUE_SIZE: 10000,
 } as const
 export const SYMBOL_DECIMALS = {
-    BTC: 8,   // Bitcoin: 1 BTC = 100,000,000 satoshis
+    BTC: 8,   // Bitcoin: 1 BTC = 100,000,000 satoshis 
     ETH: 18,  // Ethereum: 1 ETH = 1,000,000,000,000,000,000 wei
     SOL: 9,   // Solana: 1 SOL = 1,000,000,000 lamports
     USDC: 6,  // USDC: 1 USDC = 1,000,000 micro-units
@@ -58,8 +58,8 @@ const toInt = (val: number) => Math.round(val * 100_000_000);
 const price= new Map<string,{bid:number,ask:number}>()
 //orderId,{engineOrder}
 const orders= new Map<string,engineOrder>() //all orders is gonna be here from the db
-const balance=new Map<string,Map<string,number>>()
-type payloadType=Record<string,string>
+const balance=new Map<string,Map<string,number>>() //userId->symbol,money
+type payloadType=Record<any,any>
 
 let dbArray:any=[]
 
@@ -221,8 +221,8 @@ async function sendCallbackToRedis(orderId:string,status:string ,payload:any){
 }
 async function handlePriceUpdate(payload:payloadType){
     let {a,b,s}=payload
-    let ask=Number(a)
-    let bid=Number(b)
+    let ask=Number(a) //make it bigint
+    let bid=Number(b)  //make it bigint
     let symbol=s as string
 
     price.set(symbol,{ask,bid})
@@ -236,17 +236,67 @@ async function handlePriceUpdate(payload:payloadType){
 
         checkRisk(order,currentPrice)  
     }
+}
+async function createOrder(payload:payloadType) {
+    const {id,userId,side,symbol,qty,leverage,takeProfit,stopLoss}=payload
 
+    const priceData=price.get(symbol)
+    if(!priceData){
+        return sendCallbackToRedis(id,'closed', {reason:"pice_don't exist"})
+    }
+    
+    const openingPrice=side==='long'? priceData.ask : priceData.bid
+
+    //initialMargin=(priceOfAnAsset*qty)/leverage
+    const initialMargin=openingPrice*qty/leverage //conterv to int
+    //floating point no. math not good
+
+    //lock the money with initialMargin
+    const bal=balance.get(userId)?.get('USDC')
+    //also write if u didn't get the make a trip to db
+    if(!bal) return sendCallbackToRedis(id,'failed_to_create',{reason:"didn't get the balance"})
+    if(bal<initialMargin){
+        return sendCallbackToRedis(id,"balance_inefficient",{reason:'balance_inefficient'})
+    }
+    //update balance code here-> bal-IM
+    balance.get(userId)?.set("USDC",bal-initialMargin)
+
+    if(orders.has(id)){
+        return //sendCallback
+    }
+    //store order in ram
+    orders.set(id,
+        {
+            id:id,
+            userId,
+            asset:symbol,
+            side:side,
+            openingPrice:openingPrice,
+            initialMargin:initialMargin,
+            createdAt:Date.now(),
+            qty,
+            leverage,
+            takeProfit, //convert to int
+            stopLoss    //int
+            
+        }
+    )
+
+
+    //now put the open order in dbArray
+
+    //and give the message to user for the order created
+    sendCallbackToRedis(id,'order_created',{reason:"order created successfully"})
     
 }
 async function handleCreateOrder(payload:payloadType){
     //get the payload
-    const {id, userId, asset, side, qty, leverage, takeProfit, stopLoss}:engineOrder=payload
+    const {id, userId, asset, side, qty, leverage, takeProfit, stopLoss}=payload
     //validate everything
     const normalizedAsset = asset.toUpperCase();
 
-    //validate the 
-    if (orders.has(id)) return;
+
+    if (orders.has(id)) return;  //u can crete the order which already exist
 
     const priceData = price.get(normalizedAsset);
 
@@ -330,7 +380,7 @@ async function handleCloseOrder(payload:payloadType){
 }
 export type Symbol = keyof typeof SYMBOL_DECIMALS;
 async function handleBalanceUpdate(payload:payloadType){
-    const {userId, symbol, balanceRaw, balanceDecimal}= payload
+    const {userId, symbol, balanceRaw, balanceDecimal} = payload
     if(!userId || !symbol || !balanceRaw || !balanceDecimal){
         console.error("didn't get the excate data")
         return
