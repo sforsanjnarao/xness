@@ -1,3 +1,4 @@
+```mermaid
 graph TD
     %% 1. Trigger
     Start([Incoming Price Update]) --> Update[Update Prices Map]
@@ -28,3 +29,4 @@ graph TD
     %% Loop Back
     Safe --> LoopStart
     DB --> LoopStart
+```
