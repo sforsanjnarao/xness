@@ -155,7 +155,7 @@ function pushQueueJobsToDb(){
 
 function executeClose(orders,reason,currentPrice,pnl){
     //make credit by ur self
-
+    let credit=orders.initialMargin + pnl
     //cal how many cridet u recive till now
     if(credit<0) credit=0;
     //get the balance 
@@ -433,9 +433,11 @@ async function engine(){
 
                         //routes the response by kind
                         switch(kind){
+                            //market price update
                             case "price-update": await handlePriceUpdate(payload); break
                             case "create-order": await handleCreateOrder(payload); break
                             case "close-order": await handleCloseOrder(payload); break
+                            //wallet updates
                             case "balance-update": await handleBalanceUpdate(payload); break
                             default: console.log("can't find this kind")
                         }
