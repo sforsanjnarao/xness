@@ -20,6 +20,7 @@ export const SYMBOL_DECIMALS = {
     USDC: 6,  // USDC: 1 USDC = 1,000,000 micro-units
 } as const;
 
+export type Symbol = keyof typeof SYMBOL_DECIMALS;
 
 //redis constant
 

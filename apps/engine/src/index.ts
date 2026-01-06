@@ -494,13 +494,22 @@ async function engine(){
                         const payload= msg.payload || msg.data
 
                         //routes the response by kind
+                        // switch(kind){
+                        //     //market price update
+                        //     case "price-update": await handlePriceUpdate(payload); break
+                        //     case "create-order": await handleCreateOrder(payload); break
+                        //     case "close-order": await handleCloseOrder(payload); break
+                        //     //wallet updates
+                        //     case "balance-update": await handleBalanceUpdate(payload); break
+                        //     default: console.log("can't find this kind")
+                        // }
                         switch(kind){
                             //market price update
-                            case "price-update": await handlePriceUpdate(payload); break
-                            case "create-order": await handleCreateOrder(payload); break
-                            case "close-order": await handleCloseOrder(payload); break
+                            case "price-update": await console.log('PRICE____UPDATED'); break
+                            case "create-order": await console.log('CREATE___ORDER'); break
+                            case "close-order": await console.log('CLOSE____ORDER'); break
                             //wallet updates
-                            case "balance-update": await handleBalanceUpdate(payload); break
+                            case "balance-update": console.log('BALANCE___UPDATE'); break
                             default: console.log("can't find this kind")
                         }
                     }catch(err){

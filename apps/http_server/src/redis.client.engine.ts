@@ -122,9 +122,13 @@ export function engineDispatcher(requestId:string, payload:Record<string,any>, t
         publishClient.xadd(
             "trading-engine",
             "*",
-            "payload", payload
-            //now all the data
-        )
+            "payload", JSON.stringify(payload)
+        ).catch(()=>{
+            clearTimeout(timeout);
+            pendingRequest.delete(requestId);
+            ActiveTimeout.delete(requestId);
+            reject(new Error(`[Redis:Publish] Failed to publish request ${requestId}`))
+        })
     })
 }
 

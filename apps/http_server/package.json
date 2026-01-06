@@ -21,7 +21,8 @@
     "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "@repo/types":"workspace:*"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

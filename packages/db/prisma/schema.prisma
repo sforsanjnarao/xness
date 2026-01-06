@@ -95,8 +95,8 @@ model Wallet{
   createdAt         DateTime    @default(now())          @map("create_at")
   updatedAt         DateTime    @updatedAt               @map("updated_at")
 
+  @@unique([userId, symbol], name: "userId_symbol")
 
-  @@unique([userId, symbol])
 }
 
 

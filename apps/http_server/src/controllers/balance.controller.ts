@@ -3,17 +3,13 @@ import { redisClient } from "@repo/redis-client"
 import { prisma } from "@repo/db"
 import { engineDispatcher } from "../redis.client.engine"
 import { v4 as uuidv4 } from 'uuid';
+import {Symbol, SYMBOL_DECIMALS,} from "@repo/types"
 
 enum walletSymbol{
     SOL_USDC="SOL_USDC",
     ETH_USDC="ETH_USDC",
     BTC_USDC="BTC_USDC"
 }
-const SYMBOL_DECIMALS={
-   BTC_USDC:8,
-   ETH_USDC:18,
-   SOL_USDC:9
-} as const
 
 type wallet={
     id: string
@@ -105,7 +101,7 @@ export const depositToWallet=(req:Request, res:Response)=>{
          return res.status(404).json({error:'wallet not found'})
       }
       //we are not taking symbol from the users
-      const walletDecimal=SYMBOL_DECIMALS[symbol as walletSymbol]
+      const walletDecimal=SYMBOL_DECIMALS[symbol as Symbol]
       let calRawBalance=BigInt(Math.round(amount*Math.pow(10,walletDecimal)))
       //we want update specific part of that exist object 
       //find index -> build new object -> replace only that index
@@ -177,6 +173,7 @@ export const depositWallet = async (req: Request, res: Response) => {
     }
 
     try {
+      // 1. DATABASE WRITE
         const updatedWallet = await prisma.wallet.upsert({
             where: {
                 userId_symbol: {
@@ -213,7 +210,7 @@ export const depositWallet = async (req: Request, res: Response) => {
                newBalanceDecimals: updatedWallet.balanceDecimal
             }
          }
-
+         //3. SEND TO ENGINE AND AWAIT RESPONSE
            let engineResponse= await engineDispatcher(depositId,payload,5000)
                if(engineResponse.status==='created'){
                return res.status(201).json({message:'your order is created', engineResponse, depositId})
