@@ -1,6 +1,6 @@
 //what basically engine 
 //a engine is A DETERMINISTIC CALCULATION SERVICE
-import {prisma} from "@repo/db"
+import {prisma} from "../../../packages/db/dist"
 
 export type Side = "long" | "short"
 export interface engineOrder {

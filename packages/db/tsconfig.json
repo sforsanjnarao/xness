@@ -1,12 +1,12 @@
 {
     "extends":"@repo/typescript-config/base.json",
-    "compilerOptions": {
+      "compilerOptions": {
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,
-    "outDir": "./dist",            // Ensure you are outputting to a folder
-    "rootDir": "./",              // Root is current directory
+    "outDir": "dist",            // Ensure you are outputting to a folder
+    "rootDir": ".",              // Root is current directory
     "skipLibCheck": true
   },
   "include": [
@@ -14,4 +14,6 @@
     "prisma.config.ts",
     "generated/**/*"             // <--- CRITICAL: You must include this!
   ]
+
+
 }

@@ -83,7 +83,7 @@ export const depositToWallet=(req:Request, res:Response)=>{
       //1.1: get data from the user 
       const userId= req.user?.id
 
-      const {amount, symbol, decimals}= req.body
+      const {amount, symbol}= req.body
 
 
       //validate the input 

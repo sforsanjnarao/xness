@@ -2,14 +2,14 @@
   "name": "@repo/db",
   "version": "1.0.0",
   "description": "- running postgresql from docker steps:     - Creating the Docker Postgres instance         docker run -d -e POSTGRES_DB=mydb -e POSTGRES_PASSWORD=testpass123 -e POSTGRES_USER=postgres -p \"6500:5432\" postgres",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/prisma.d.ts",
   "type": "module",
-  "exports":{
-    ".":{
-      "import":"./dist/src/index.js",
-      "default":"./dist/src/index.js",
-      "types":"./dist/src/index.d.ts"
+  "main": "./dist/lib/prisma.js",      
+  "types": "./dist/lib/prisma.d.ts",   
+  "exports": {
+    ".": {
+      "types": "./dist/lib/prisma.d.ts",
+      "import": "./dist/lib/prisma.js",
+      "default": "./dist/lib/prisma.js"
     }
   },
   "scripts": {
