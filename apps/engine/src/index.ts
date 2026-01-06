@@ -49,6 +49,15 @@ export const ORDER_PRECISION = {
     PRICE: 100,
     QUANTITY: 100000000000
 } as const;
+
+export type CloseReason =
+  | "TAKE_PROFIT"
+  | "STOP_LOSS"
+  | "LIQUIDATION"
+  | "manual"
+  | "Manual";
+
+
 import { redisClient } from "@repo/redis-client";
 const toInt = (val: number) => Math.round(val * 100_000_000); 
 //read data from the stream (needs a loop in Block)
@@ -98,7 +107,7 @@ function checkRisk(orders:engineOrder ,currentPrice:number){
         (orders.side=='short' && currentPrice>=orders.stopLoss))){
         reason="STOP_LOSS"
     }
-    if(reason) executeClose(orders,reason,currentPrice,pnl,remainingMargin)
+    if(reason) executeClose(orders,reason,currentPrice,pnl)
 
 
    
@@ -140,12 +149,12 @@ function queueDbAction(action:any){
 //flushing the data to the db
 function pushQueueJobsToDb(){
     //take a snapshot of the dbArray min/max 100
-
+    const snapData=dbArray.splice(0,ENGINE_CONSTANTS.DB_BATCH_SIZE)
     //u just need to put everything in right table
     //balance-updated in db
-
+   
     //create-order in db
-
+            //close-order
     //update-order in db
 
 }
@@ -153,10 +162,13 @@ function pushQueueJobsToDb(){
 
 
 
-function executeClose(orders,reason,currentPrice,pnl){
+function executeClose(orders:Map<string, engineOrder>,
+    reason:,
+    currentPrice,
+    pnl
+){
     //make credit by ur self
     let credit=orders.initialMargin + pnl
-    //cal how many cridet u recive till now
     if(credit<0) credit=0;
     //get the balance 
     const getTheBalance=getBalance(orders.userId, orders.asset)
@@ -373,7 +385,7 @@ async function handleCloseOrder(payload:payloadType){
     //get the symbol with the help of orderId
     const priceData=price.get(order.asset)
     const closePrice = priceData ? (order.side === "long" ? priceData.bid : priceData.ask) : order.openingPrice;
-    const pnl = calPnL(order.side, order.openingPrice, closePrice, order.qty);
+    const pnl = calPnL(closePrice, order.openingPrice, order.side, order.qty);
 
    executeClose(order, closePrice, "manual", pnl);
 

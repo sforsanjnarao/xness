@@ -1,5 +1,8 @@
 import { Request, Response } from "express"
 import { redisClient } from "@repo/redis-client"
+import { prisma } from "@repo/db"
+import { engineDispatcher } from "../redis.client.engine"
+import { v4 as uuidv4 } from 'uuid';
 
 enum walletSymbol{
     SOL_USDC="SOL_USDC",
@@ -84,11 +87,14 @@ export const depositToWallet=(req:Request, res:Response)=>{
       //1.1: get data from the user 
       const userId= req.user?.id
 
-      const {amount, symbol}= req.body
+      const {amount, symbol, decimals}= req.body
+
+
       //validate the input 
-      if(amount<0){
+      if(amount<=0){
          return res.status(409).json({error:'need a positive value'})
       }
+      
       //1.2: find the wallet
       const walletIndex=balance.findIndex(w=>w.userId===userId && w.symbol==symbol)
       if(walletIndex==-1){
@@ -108,6 +114,7 @@ export const depositToWallet=(req:Request, res:Response)=>{
          balanceRaw:depositWallet.balanceRaw+calRawBalance,
          updatedAt: new Date()
       }
+
       balance[walletIndex]= updateWallet
       try{
             publishToRedis.xadd(
@@ -137,4 +144,85 @@ export const depositToWallet=(req:Request, res:Response)=>{
       }
 
     
+}
+
+
+
+export const depositWallet = async (req: Request, res: Response) => {
+    const userId = req.user?.id
+
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" })
+    }
+
+   
+    const { symbol, amount } = req.body
+
+    const decimalPlaces = SYMBOL_DECIMALS[symbol as Symbol];
+
+    if (decimalPlaces === undefined) {
+        return res.status(400).json({ 
+            error: `Symbol ${symbol} is not supported or configured.` 
+        })
+    }
+
+    if (amount <= 0) {
+        return res.status(400).json({ error: "Amount must be positive" })
+    }
+
+    const baseUnitAmount = BigInt(Math.round(amount * Math.pow(10, decimalPlaces)))
+
+    if (baseUnitAmount <= 0n) {
+        return res.status(400).json({ error: "invalid amount (too small)" })
+    }
+
+    try {
+        const updatedWallet = await prisma.wallet.upsert({
+            where: {
+                userId_symbol: {
+                    userId,
+                    symbol,
+                }
+            },
+            create: {
+                userId,
+                symbol,
+                balanceRaw: baseUnitAmount,
+                balanceDecimal: decimalPlaces 
+            },
+            update: {
+                balanceRaw: { increment: baseUnitAmount },
+            },
+            select: {
+                symbol: true,
+                balanceRaw: true,
+                balanceDecimal: true
+            }
+        })
+
+        // 2. GENERATE TRACE ID
+        const depositId = uuidv4(); 
+
+        try {
+         const payload={
+            kind: "balance-update",
+            payload: {
+               userId,
+               symbol: updatedWallet.symbol,
+               newBalanceRaw: updatedWallet.balanceRaw.toString(),
+               newBalanceDecimals: updatedWallet.balanceDecimal
+            }
+         }
+
+           let engineResponse= await engineDispatcher(depositId,payload,5000)
+               if(engineResponse.status==='created'){
+               return res.status(201).json({message:'your order is created', engineResponse, depositId})
+             }
+        } catch (error) {
+            console.error("Failed to publish balance update:", error)
+        }
+    } catch (err) {
+        console.error("depositToWallet:", err)
+        return res.status(500).json({ error: "Failed to process deposit" })
+    }
 }

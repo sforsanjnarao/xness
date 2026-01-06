@@ -60,8 +60,12 @@ async function listeningToStream(){
 
             const message= streamData[1]
             for(const [streamMsgId, rawBody] of message){
+
+
                 lastId=streamMsgId as string
+
                 let responseData=parseStreamData(rawBody)
+
                 const trackId= responseData.id
 
                 if(trackId && pendingRequest.has(trackId)){
@@ -82,7 +86,7 @@ async function listeningToStream(){
                     }
                     
                 }
-
+                
             }
             console.log(message)
         }catch(err){
@@ -91,6 +95,7 @@ async function listeningToStream(){
         }
         setImmediate(listenForNewMessage)
        }
+        setImmediate(listenForNewMessage)  
 }
 
 export function engineDispatcher(requestId:string, payload:Record<string,any>, timeoutMS:number):Promise<Record<string,any>>{
@@ -117,6 +122,7 @@ export function engineDispatcher(requestId:string, payload:Record<string,any>, t
         publishClient.xadd(
             "trading-engine",
             "*",
+            "payload", payload
             //now all the data
         )
     })

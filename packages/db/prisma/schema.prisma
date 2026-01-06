@@ -19,8 +19,8 @@ datasource db {
 
 model User{
   id String                    @id                 @default(uuid())
-  name String 
-  email String
+  name String                   
+  email String                  @unique
   password String
   order Order[]
   wallet Wallet[]
@@ -94,6 +94,9 @@ model Wallet{
   balanceDecimal    Int
   createdAt         DateTime    @default(now())          @map("create_at")
   updatedAt         DateTime    @updatedAt               @map("updated_at")
+
+
+  @@unique([userId, symbol])
 }
 
 
