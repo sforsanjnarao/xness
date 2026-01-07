@@ -17,6 +17,20 @@ export interface engineOrder {
     createdAt: number;
 }
 
+export interface precisionEngineOrder {
+    id: string;
+    userId: string;
+    asset: string;
+    side: "long" | "short";
+    qty: bigint;            // Stored as 100000000 (1.00 BTC)
+    leverage: number;       // Leverage is fine as a standard number (10x, 20x)
+    openingPrice: bigint;   // Stored as 6000000000000 (60k)
+    initialMargin: bigint;  // Calculated in BigInt
+    takeProfit?: bigint;
+    stopLoss?: bigint;
+    createdAt: number;
+}
+
 enum walletSymbol{
     SOL_USDC="SOL_USDC",
     ETH_USDC="ETH_USDC",
@@ -59,15 +73,15 @@ export type CloseReason =
 
 
 import { redisClient } from "@repo/redis-client";
-const toInt = (val: number) => Math.round(val * 100_000_000); 
 //read data from the stream (needs a loop in Block)
 //process the data 
 //put everything in the db
 //response back to the backend
-const price= new Map<string,{bid:number,ask:number}>()
+const price= new Map<string,{bid:bigint,ask:bigint}>()
 //orderId,{engineOrder}
-const orders= new Map<string,engineOrder>() //all orders is gonna be here from the db
-const balance=new Map<string,Map<string,number>>() //userId->symbol,money
+const orders= new Map<string,precisionEngineOrder>() //all orders is gonna be here from the db
+const balance = new Map<string, Map<string, bigint>>(); //userId->symbol,money
+
 type payloadType=Record<any,any>
 
 let dbArray:any=[]
@@ -75,43 +89,51 @@ let dbArray:any=[]
 const redis=redisClient()
 
 let lastStreamId="$"
-const fromInt = (val: number) => val / ENGINE_CONSTANTS.PRECISION_SCALE; 
 
-const multiplyInt = (a: number, b: number) => {
-    const bigA = BigInt(Math.round(a))
-    const bigB = BigInt(Math.round(b))
-    const scale = BigInt(100000000);
+//conversion part
+// 10.1*100000000
+let scale=Math.pow(10,8)
+let toEnginePrecision=(num:number):bigint=>{
+    return BigInt(Math.round(num*scale))
+}
 
-    return Number((bigA * bigB) / scale);
+let fromEnginePrecision = (val: bigint | number): number => {
+    const num = Number(val);
+    return num / scale;
 };
-function calPnL(currentPrice:number,openPrice:number,side:Side,quantity:number){
+
+
+const multiplyInt = (a: bigint, b: bigint) => {
+    return (a * b) / BigInt(scale);
+};
+function calPnL(currentPrice:bigint,openPrice:bigint,side:Side,quantity:bigint){
     const pnl=side=='long'? (currentPrice-openPrice)*quantity : (openPrice-currentPrice)*quantity
     return pnl
 }
-
-// function checkRisk(orders:engineOrder ,currentPrice:number){
-//     //cal pnl, margin, liquidation and closing the order
-//     let pnl=calPnL(currentPrice, orders.openingPrice, orders.side, orders.qty)
-//     let remainingMargin= orders.initialMargin + pnl //equity = credit
-//     let mainMargin=orders.initialMargin * toInt(0.05)
+let marginThreshold=0.05
+function checkRisk(order:precisionEngineOrder ,currentPrice:bigint){
+    //cal pnl, margin, liquidation and closing the order
+    let pnl=calPnL(currentPrice, order.openingPrice, order.side, order.qty)
+    let remainingMargin= order.initialMargin + pnl //equity = credit
+    let mainMargin=order.initialMargin * toEnginePrecision(marginThreshold)
     
-//     let reason=null;
-//     if(remainingMargin<=mainMargin){
-//         reason='LIQUIDATION'
-//     }else if(orders.takeProfit && 
-//     ((orders.side=='long' && currentPrice>=orders.takeProfit)|| 
-//     (orders.side=='short' && currentPrice<=orders.takeProfit))){
-//             reason="TAKE_PROFIT"
-//     }else if(orders.stopLoss &&
-//         ((orders.side=='long' && currentPrice<=orders.stopLoss)|| 
-//         (orders.side=='short' && currentPrice>=orders.stopLoss))){
-//         reason="STOP_LOSS"
-//     }
-//     if(reason) executeClose(orders,reason,currentPrice,pnl)
+    let reason=null;
+    if(remainingMargin<=mainMargin){
+        reason='LIQUIDATION'
+    }else if(order.takeProfit && 
+    ((order.side=='long' && currentPrice>=order.takeProfit)|| 
+    (order.side=='short' && currentPrice<=order.takeProfit))){
+            reason="TAKE_PROFIT"
+    }else if(order.stopLoss &&
+        ((order.side=='long' && currentPrice<=order.stopLoss)|| 
+        (order.side=='short' && currentPrice>=order.stopLoss))){
+        reason="STOP_LOSS"
+    }
+    if(reason) executeClose(order,reason,currentPrice,pnl)
 
 
    
-// }
+}
 function getBalance(userId:string, symbol:string){
     if(!balance.has(userId)){
         balance.set(userId, new Map())
@@ -162,57 +184,57 @@ function pushQueueJobsToDb(){
 
 
 
-// function executeClose(orders:Map<string, engineOrder>,
-//     reason:'i dont want',
-//     currentPrice,
-//     pnl
-// ){
-//     //make credit by ur self
-//     let credit=orders.initialMargin + pnl
-//     if(credit<0) credit=0;
-//     //get the balance 
-//     const getTheBalance=getBalance(orders.userId, orders.asset)
+function executeClose(order:precisionEngineOrder,
+    reason:string,
+    currentPrice:bigint,
+    pnl:bigint
+){
+    //make credit by ur self
+    let credit=order.initialMargin + pnl
+    if(credit<0) credit=BigInt(0);
+    //get the balance 
+    const getTheBalance=getBalance(order.userId, order.asset)
 
-//     //set the balance
-//     setBalance(getTheBalance,orders.userId, orders.asset)
+    //set the balance
+    setBalance(getTheBalance,order.userId, order.asset)
 
-//     //delete the order from in-memory
-//     orders.delete(orders.id)
-//     //get the reason
-//     const closeReasonMap: Record<string, string> = {
-//         'TAKE_PROFIT': 'take_profit',
-//         'STOP_LOSS': 'stop_loss',
-//         'LIQUIDATION': 'liquidation',
-//         'manual': 'manual',
-//         'Manual': 'manual'
-//     };
-//     const dbCloseReason=closeReasonMap[reason] || 0
+    //delete the order from in-memory
+    orders.delete(order.id)
+    //get the reason
+    const closeReasonMap: Record<string, string> = {
+        'TAKE_PROFIT': 'take_profit',
+        'STOP_LOSS': 'stop_loss',
+        'LIQUIDATION': 'liquidation',
+        'manual': 'manual',
+        'Manual': 'manual'
+    };
+    const dbCloseReason=closeReasonMap[reason] || 0
     
-// //mirroring the prisma
-//     // prisma.order.update({
-//     //     where: { id },
-//     //     data: update
-//     // })
-//     //push it to the db queue
-//    queueDbAction({
-//     type:'order_close',
-//     payload:{
-//         id:orders.id,
-//         update:{
-//             status:"closed",
-//             //convert then into db one
-//             closePrice: Math.round(fromInt(currentPrice) * ORDER_PRECISION.PRICE),
-//             pnl: Math.round(fromInt(pnl) * ORDER_PRECISION.PRICE),
-//             closedAt: Date.now(),
-//             reason:dbCloseReason
-//         }
-//     }
-//    })
+//mirroring the prisma
+    // prisma.order.update({
+    //     where: { id },
+    //     data: update
+    // })
+    //push it to the db queue
+   queueDbAction({
+    type:'order_close',
+    payload:{
+        id:order.id,
+        update:{
+            status:"closed",
+            //convert then into db one
+            closePrice: Math.round(fromEnginePrecision(currentPrice) * ORDER_PRECISION.PRICE),
+            pnl: Math.round(fromEnginePrecision(pnl) * ORDER_PRECISION.PRICE),
+            closedAt: Date.now(),
+            reason:dbCloseReason
+        }
+    }
+   })
 
-//    console.log(`Order ${orders.id} close with this ${pnl}`)
-//     //sending close data to the queue
-//     sendCallbackToRedis(orders.id, "closed",{pnl:fromInt(pnl),currentPrice:fromInt(currentPrice), reason})
-// }
+   console.log(`Order ${order.id} close with this ${pnl}`)
+    //sending close data to the queue
+    sendCallbackToRedis(order.id, "closed",{pnl:fromEnginePrecision(pnl),currentPrice:fromEnginePrecision(currentPrice), reason})
+}
 
 //if the order got produced or not
 // and put it in the redis callback
@@ -220,8 +242,8 @@ async function sendCallbackToRedis(orderId:string,status:string ,payload:any){
    try{
      //crating an message for the queue 
         await redis.xadd(
-            "*",
             "callback_queue",
+            "*",
             "id",orderId,
             "status",status,
             "payload", payload
@@ -233,11 +255,14 @@ async function sendCallbackToRedis(orderId:string,status:string ,payload:any){
 }
 async function handlePriceUpdate(payload:payloadType){
     let {a,b,s}=payload
-    let ask=Number(a) //make it bigint
-    let bid=Number(b)  //make it bigint
+    let ask=toEnginePrecision(a) //bigint
+    let bid=toEnginePrecision(b) //bigint
     let symbol=s as string
 
     price.set(symbol,{ask,bid})
+    
+    
+    // console.log('A:',a,"B:",b,"symbol:",symbol)
     //going through all open orders
     for(let order of orders.values()){
         //filter through require symbol
@@ -246,66 +271,66 @@ async function handlePriceUpdate(payload:payloadType){
         //if long ---> bid  || short ---> ask
         const currentPrice=order.side=='long' ? bid : ask
 
-        // checkRisk(order,currentPrice)  
+        checkRisk(order,currentPrice)  
     }
 }
-async function createOrder(payload:payloadType) {
-    const {id,userId,side,symbol,qty,leverage,takeProfit,stopLoss}=payload
+// async function createOrder(payload:payloadType) {
+//     const {id,userId,side,symbol,qty,leverage,takeProfit,stopLoss}=payload
 
-    const priceData=price.get(symbol)
-    if(!priceData){
-        return sendCallbackToRedis(id,'closed', {reason:"pice_don't exist"})
-    }
+//     const priceData=price.get(symbol)
+//     if(!priceData){
+//         return sendCallbackToRedis(id,'closed', {reason:"pice_don't exist"})
+//     }
     
-    const openingPrice=side==='long'? priceData.ask : priceData.bid
+//     const openingPrice=side==='long'? priceData.ask : priceData.bid
 
-    //initialMargin=(priceOfAnAsset*qty)/leverage
-    const initialMargin=openingPrice*qty/leverage //conterv to int
-    //floating point no. math not good
+//     //initialMargin=(priceOfAnAsset*qty)/leverage
+//     const initialMargin=openingPrice*qty/leverage //conterv to int
+//     //floating point no. math not good
 
-    //lock the money with initialMargin
-    const bal=balance.get(userId)?.get('USDC')
-    //also write if u didn't get the make a trip to db
-    if(!bal) return sendCallbackToRedis(id,'failed_to_create',{reason:"didn't get the balance"})
-    if(bal<initialMargin){
-        return sendCallbackToRedis(id,"balance_inefficient",{reason:'balance_inefficient'})
-    }
-    //update balance code here-> bal-IM
-    balance.get(userId)?.set("USDC",bal-initialMargin)
+//     //lock the money with initialMargin
+//     const bal=balance.get(userId)?.get('USDC')
+//     //also write if u didn't get the make a trip to db
+//     if(!bal) return sendCallbackToRedis(id,'failed_to_create',{reason:"didn't get the balance"})
+//     if(bal<initialMargin){
+//         return sendCallbackToRedis(id,"balance_inefficient",{reason:'balance_inefficient'})
+//     }
+//     //update balance code here-> bal-IM
+//     balance.get(userId)?.set("USDC",bal-initialMargin)
 
-    if(orders.has(id)){
-        return //sendCallback
-    }
-    //store order in ram
-    orders.set(id,
-        {
-            id:id,
-            userId,
-            asset:symbol,
-            side:side,
-            openingPrice:openingPrice,
-            initialMargin:initialMargin,
-            createdAt:Date.now(),
-            qty,
-            leverage,
-            takeProfit, //convert to int
-            stopLoss    //int
+//     if(orders.has(id)){
+//         return //sendCallback
+//     }
+//     //store order in ram
+//     orders.set(id,
+//         {
+//             id:id,
+//             userId,
+//             asset:symbol,
+//             side:side,
+//             openingPrice:openingPrice,
+//             initialMargin:initialMargin,
+//             createdAt:Date.now(),
+//             qty,
+//             leverage,
+//             takeProfit, //convert to int
+//             stopLoss    //int
             
-        }
-    )
+//         }
+//     )
 
 
-    //now put the open order in dbArray
+//     //now put the open order in dbArray
 
-    //and give the message to user for the order created
-    sendCallbackToRedis(id,'order_created',{reason:"order created successfully"})
+//     //and give the message to user for the order created
+//     sendCallbackToRedis(id,'order_created',{reason:"order created successfully"})
     
-}
+// }
 async function handleCreateOrder(payload:payloadType){
     //get the payload
-    const {id, userId, asset, side, qty, leverage, takeProfit, stopLoss}=payload
+    const {id, userId, symbol, side, qty, leverage, takeProfit, stopLoss}=payload
     //validate everything
-    const normalizedAsset = asset.toUpperCase();
+    const normalizedAsset = symbol.toUpperCase();
 
 
     if (orders.has(id)) return;  //u can crete the order which already exist
@@ -316,12 +341,14 @@ async function handleCreateOrder(payload:payloadType){
         return sendCallbackToRedis(id, "no_price", { reason: "Price data not available for asset" });
     }
 
+
     const openingPrice = side === "long" ? priceData.ask : priceData.bid;
-    const qtyInt = toInt(Number(qty));
-    const lev = Number(leverage) || 1;
+    console.log("openPrice:",openingPrice)
+    const qtyInt = toEnginePrecision(Number(qty));
+    const lev:bigint = BigInt(leverage);
     //some margin stuff
     const totalValue = multiplyInt(openingPrice, qtyInt);
-    const marginRequired = Math.round(totalValue / lev)
+    const marginRequired = totalValue / lev
 
     const userBal = getBalance(userId, "USDC");
     if (userBal < marginRequired) {
@@ -330,21 +357,22 @@ async function handleCreateOrder(payload:payloadType){
 
 
     //update balance
-    setBalance(20,userId ,asset)
+    setBalance(userBal - marginRequired,userId ,symbol)
 
     //need to make the order
-    const order: engineOrder = {
+    const order: precisionEngineOrder = {
             id, userId, asset: normalizedAsset, side,
             qty: qtyInt,
-            leverage: lev,
+            leverage: Number(lev),
             openingPrice,
             initialMargin: marginRequired,
-            takeProfit: takeProfit ? toInt(Number(takeProfit)) : undefined,
-            stopLoss: stopLoss ? toInt(Number(stopLoss)) : undefined,
+            takeProfit: takeProfit ? toEnginePrecision(Number(takeProfit)) : undefined,
+            stopLoss: stopLoss ? toEnginePrecision(Number(stopLoss)) : undefined,
             createdAt: Date.now()
         }
     //set new order in-memory  
     orders.set(id,order)
+    console.log('ORDER_MAP:',orders)
 
     //send it to dbArray
     queueDbAction({
@@ -357,9 +385,9 @@ async function handleCreateOrder(payload:payloadType){
             quantity: Math.round(Number(qty) * ORDER_PRECISION.QUANTITY),
             quantityDecimals: 5,
             leverage: lev,
-            openPrice: Math.round(fromInt(openingPrice) * ORDER_PRECISION.PRICE),
+            openPrice: Math.round(fromEnginePrecision(openingPrice) * ORDER_PRECISION.PRICE),
             priceDecimals: 2,
-            margin: Math.round(fromInt(marginRequired) * ORDER_PRECISION.PRICE),
+            margin: Math.round(fromEnginePrecision(marginRequired) * ORDER_PRECISION.PRICE),
             status: "open",
             createdAt: new Date()
         }
@@ -367,7 +395,7 @@ async function handleCreateOrder(payload:payloadType){
     console.log('pushed to db')
 
     //notify the user
-    sendCallbackToRedis(id,'created',{price: fromInt(openingPrice)})
+    sendCallbackToRedis(id,'created',{price: fromEnginePrecision(openingPrice)})
 }
 
 // async function handleCloseOrder(payload:payloadType){
@@ -423,8 +451,8 @@ async function loadState(){
     let dbQuantity=Number(order.quantity)/100000000000
 
     //engine-> engine precision
-    let openPrice=toInt(dbPrice)
-    let qty=toInt(dbQuantity)
+    let openPrice=toEnginePrecision(dbPrice)
+    let qty=toEnginePrecision(dbQuantity)
 
     //and putting in the memory
     orders.set(order.id, {
@@ -435,9 +463,9 @@ async function loadState(){
             qty: qty,
             leverage: order.leverage,
             openingPrice: openPrice,
-            initialMargin: multiplyInt(openPrice, qty) / order.leverage,
-            takeProfit: order.takeProfitPrice ? toInt(Number(order.takeProfitPrice) / 100) : undefined,
-            stopLoss: order.stopLossPrice ? toInt(Number(order.stopLossPrice) / 100) : undefined,
+            initialMargin: multiplyInt(openPrice, qty) / BigInt(order.leverage),
+            takeProfit: order.takeProfitPrice ? toEnginePrecision(Number(order.takeProfitPrice) / 100) : undefined,
+            stopLoss: order.stopLossPrice ? toEnginePrecision(Number(order.stopLossPrice) / 100) : undefined,
             createdAt: order.createdAt.getTime()
         });
     }
@@ -452,7 +480,7 @@ async function loadState(){
         const decimals = wallet.balanceDecimal ?? SYMBOL_DECIMALS[wallet.symbol as Symbol] ?? 8;
         const rawVal = wallet.balanceRaw ? Number(wallet.balanceRaw) : 0;
         const actualValue = rawVal / Math.pow(10, decimals);
-        const engineScaledValue = toInt(actualValue);
+        const engineScaledValue = actualValue;
     //put that value in the user's wallet with the symbol
         balance.get(wallet.userId)!.set(wallet.symbol,engineScaledValue)
  })
@@ -460,7 +488,7 @@ async function loadState(){
 
 }
 async function engine(){
-    // await loadState()
+    await loadState()
     try{
         //start the loop
         while(true){
@@ -475,34 +503,24 @@ async function engine(){
             if(!response) continue
 
             //pase the response
-            console.log('RESPONSE:',response)
             for(const [streamName,messages] of response){
-                console.log('STREAM:',streamName,
-                    "MESSAGE:",messages)
                 for (const [id, fields] of messages) {
-                    console.log('ID:',id,
-                        'FIELD:',fields
-                    )
                     lastStreamId=id;
 
                     try{
                         let rawData = ""
                         for (let i = 0; i < fields.length; i += 2) {
                             // httpServer uses "payload", pricePoller uses "data"
-                            if (fields[i] === "data" || fields[i] === "payload") {
+                             if (fields[i] === "data" || fields[i] === "payload") {
                                 rawData = fields[i + 1] ?? ""
                             }
-                            console.log("RAW_DATA:",rawData)
                         }
 
                         if (!rawData) continue
-                        console.log("RAW_DATA:",rawData)
                         const msg=JSON.parse(rawData)
-                        console.log("PARSED_MESSAGE:",msg)
+                        // console.log("PARSED_MESSAGE:",msg)
                         const kind=msg.kind || msg.type
                         const payload= msg.payload || msg.data
-                        console.log('PAYLOAD:',payload)
-
 
                         //routes the response by kind
                         switch(kind){

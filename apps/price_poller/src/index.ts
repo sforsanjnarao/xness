@@ -140,7 +140,47 @@ function structuredData(msg:message){
 
 
 
-async function sendItToRedisStream(msg:message){
+async function sendItToRedisStream(msg: message) {
+    try {
+        const event: PriceEvent = {
+            kind: "price-update",
+            payload: msg,
+            receivedAt: Date.now()
+        }
+        
+        // Change: Send as a single JSON string in 'data' field
+        await redisClient.xadd(
+            "trading-engine",
+            "*",
+            "data", JSON.stringify({
+                kind: "price-update",
+                payload: {
+                    s: event.payload.data.s,
+                    b: event.payload.data.b,
+                    a: event.payload.data.a,
+                    E: event.payload.data.E
+                }
+            })
+        )
+        console.log("Written to Redis:", msg.data.s);
+    } catch (err) {
+        console.error('err:', err)
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function sendItRedisStream(msg:message){
     try{
         const event:PriceEvent={
             kind: "price-update",
