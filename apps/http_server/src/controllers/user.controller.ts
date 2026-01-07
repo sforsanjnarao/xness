@@ -13,6 +13,7 @@ import {prisma} from '@repo/db'
 export const signupController=async (req:Request, res:Response)=>{
 
     try{
+        console.log('llala')
         const {name, email, password} =req.body
         if(!name || !email || !password){
            return res.status(409).json({error:'field is missing'})    //409 for conflict
@@ -23,6 +24,7 @@ export const signupController=async (req:Request, res:Response)=>{
                 email:email
             }
         })
+        console.log('bababa')
         if(existingUser){
             return res.status(400).json({error: 'user already exist'})
         }
@@ -36,23 +38,26 @@ export const signupController=async (req:Request, res:Response)=>{
                 password:hashPassword
             }
         })
+        console.log("userPosted:",user)
             // create default wallets
-            await prisma.wallet.createMany({
-            data: [
-                { userId: user.id, symbol: "USDC", balanceRaw: BigInt(0), balanceDecimal: 6 },
-                // { userId: user.id, symbol: "BTC",  balanceRaw: BigInt(0), balanceDecimal: 8 },
-                // { userId: user.id, symbol: "ETH",  balanceRaw: BigInt(0), balanceDecimal: 8 }
-            ]
-            });
+            // await prisma.wallet.createMany({
+            // data: [
+            //     { userId: user.id, symbol: "USDC", balanceRaw: BigInt(0), balanceDecimal: 6 },
+            //     // { userId: user.id, symbol: "BTC",  balanceRaw: BigInt(0), balanceDecimal: 8 },
+            //     // { userId: user.id, symbol: "ETH",  balanceRaw: BigInt(0), balanceDecimal: 8 }
+            // ]
+            // });
         const token= jwt.sign({userId:user.id},'sanjana')     //payload must be an object
-
+        console.log('token:',token)
         res.cookie('token', token,{  
             httpOnly:true,       //need more security
             secure:true
         })
+        console.log('cookie got set')
 
         res.status(200).json({message:'welcome in', user:{userId:user.id, name:user.name, email:user.email}})  //can't send token in the response
     }catch(err){
+        console.error("SIGNUP ERROR:", err); 
         res.status(500).json({error: 'something got wrong'})
     }
 }
@@ -93,6 +98,7 @@ export const signinController=async (req:Request, res:Response)=>{
 export const profileController=async (req:Request, res:Response)=>{
     try{
         const userId= req.user?.id
+        console.log('userId:',userId)
         if(!userId){
             return res.status(401).json({error:'user unauthincated'}) //401 ---> unauthincated
         }     

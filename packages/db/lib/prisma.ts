@@ -8,6 +8,14 @@ import { PrismaClient } from '../generated/prisma/client.js'
 
 const connectionString = process.env.DATABASE_URL // Use the POOLED URL
 
+// Debugging logs
+console.log("DB Path:", connectionString); 
+
+if (!connectionString) {
+    throw new Error("DATABASE_URL is not defined! Check your .env file.");
+}
+
+
 const pool = new Pool({ connectionString })
 const adapter = new PrismaPg(pool)
 

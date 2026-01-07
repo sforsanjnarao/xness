@@ -1,6 +1,6 @@
 //what basically engine 
 //a engine is A DETERMINISTIC CALCULATION SERVICE
-import {prisma} from "../../../packages/db/dist"
+import {prisma} from "@repo/db"
 
 export type Side = "long" | "short"
 export interface engineOrder {
@@ -89,29 +89,29 @@ function calPnL(currentPrice:number,openPrice:number,side:Side,quantity:number){
     return pnl
 }
 
-function checkRisk(orders:engineOrder ,currentPrice:number){
-    //cal pnl, margin, liquidation and closing the order
-    let pnl=calPnL(currentPrice, orders.openingPrice, orders.side, orders.qty)
-    let remainingMargin= orders.initialMargin + pnl //equity = credit
-    let mainMargin=orders.initialMargin * toInt(0.05)
+// function checkRisk(orders:engineOrder ,currentPrice:number){
+//     //cal pnl, margin, liquidation and closing the order
+//     let pnl=calPnL(currentPrice, orders.openingPrice, orders.side, orders.qty)
+//     let remainingMargin= orders.initialMargin + pnl //equity = credit
+//     let mainMargin=orders.initialMargin * toInt(0.05)
     
-    let reason=null;
-    if(remainingMargin<=mainMargin){
-        reason='LIQUIDATION'
-    }else if(orders.takeProfit && 
-    ((orders.side=='long' && currentPrice>=orders.takeProfit)|| 
-    (orders.side=='short' && currentPrice<=orders.takeProfit))){
-            reason="TAKE_PROFIT"
-    }else if(orders.stopLoss &&
-        ((orders.side=='long' && currentPrice<=orders.stopLoss)|| 
-        (orders.side=='short' && currentPrice>=orders.stopLoss))){
-        reason="STOP_LOSS"
-    }
-    if(reason) executeClose(orders,reason,currentPrice,pnl)
+//     let reason=null;
+//     if(remainingMargin<=mainMargin){
+//         reason='LIQUIDATION'
+//     }else if(orders.takeProfit && 
+//     ((orders.side=='long' && currentPrice>=orders.takeProfit)|| 
+//     (orders.side=='short' && currentPrice<=orders.takeProfit))){
+//             reason="TAKE_PROFIT"
+//     }else if(orders.stopLoss &&
+//         ((orders.side=='long' && currentPrice<=orders.stopLoss)|| 
+//         (orders.side=='short' && currentPrice>=orders.stopLoss))){
+//         reason="STOP_LOSS"
+//     }
+//     if(reason) executeClose(orders,reason,currentPrice,pnl)
 
 
    
-}
+// }
 function getBalance(userId:string, symbol:string){
     if(!balance.has(userId)){
         balance.set(userId, new Map())
@@ -162,57 +162,57 @@ function pushQueueJobsToDb(){
 
 
 
-function executeClose(orders:Map<string, engineOrder>,
-    reason:,
-    currentPrice,
-    pnl
-){
-    //make credit by ur self
-    let credit=orders.initialMargin + pnl
-    if(credit<0) credit=0;
-    //get the balance 
-    const getTheBalance=getBalance(orders.userId, orders.asset)
+// function executeClose(orders:Map<string, engineOrder>,
+//     reason:'i dont want',
+//     currentPrice,
+//     pnl
+// ){
+//     //make credit by ur self
+//     let credit=orders.initialMargin + pnl
+//     if(credit<0) credit=0;
+//     //get the balance 
+//     const getTheBalance=getBalance(orders.userId, orders.asset)
 
-    //set the balance
-    setBalance(getTheBalance,orders.userId, orders.asset)
+//     //set the balance
+//     setBalance(getTheBalance,orders.userId, orders.asset)
 
-    //delete the order from in-memory
-    orders.delete(orders.id)
-    //get the reason
-    const closeReasonMap: Record<string, string> = {
-        'TAKE_PROFIT': 'take_profit',
-        'STOP_LOSS': 'stop_loss',
-        'LIQUIDATION': 'liquidation',
-        'manual': 'manual',
-        'Manual': 'manual'
-    };
-    const dbCloseReason=closeReasonMap[reason] || 0
+//     //delete the order from in-memory
+//     orders.delete(orders.id)
+//     //get the reason
+//     const closeReasonMap: Record<string, string> = {
+//         'TAKE_PROFIT': 'take_profit',
+//         'STOP_LOSS': 'stop_loss',
+//         'LIQUIDATION': 'liquidation',
+//         'manual': 'manual',
+//         'Manual': 'manual'
+//     };
+//     const dbCloseReason=closeReasonMap[reason] || 0
     
-//mirroring the prisma
-    // prisma.order.update({
-    //     where: { id },
-    //     data: update
-    // })
-    //push it to the db queue
-   queueDbAction({
-    type:'order_close',
-    payload:{
-        id:orders.id,
-        update:{
-            status:"closed",
-            //convert then into db one
-            closePrice: Math.round(fromInt(currentPrice) * ORDER_PRECISION.PRICE),
-            pnl: Math.round(fromInt(pnl) * ORDER_PRECISION.PRICE),
-            closedAt: Date.now(),
-            reason:dbCloseReason
-        }
-    }
-   })
+// //mirroring the prisma
+//     // prisma.order.update({
+//     //     where: { id },
+//     //     data: update
+//     // })
+//     //push it to the db queue
+//    queueDbAction({
+//     type:'order_close',
+//     payload:{
+//         id:orders.id,
+//         update:{
+//             status:"closed",
+//             //convert then into db one
+//             closePrice: Math.round(fromInt(currentPrice) * ORDER_PRECISION.PRICE),
+//             pnl: Math.round(fromInt(pnl) * ORDER_PRECISION.PRICE),
+//             closedAt: Date.now(),
+//             reason:dbCloseReason
+//         }
+//     }
+//    })
 
-   console.log(`Order ${orders.id} close with this ${pnl}`)
-    //sending close data to the queue
-    sendCallbackToRedis(orders.id, "closed",{pnl:fromInt(pnl),currentPrice:fromInt(currentPrice), reason})
-}
+//    console.log(`Order ${orders.id} close with this ${pnl}`)
+//     //sending close data to the queue
+//     sendCallbackToRedis(orders.id, "closed",{pnl:fromInt(pnl),currentPrice:fromInt(currentPrice), reason})
+// }
 
 //if the order got produced or not
 // and put it in the redis callback
@@ -246,7 +246,7 @@ async function handlePriceUpdate(payload:payloadType){
         //if long ---> bid  || short ---> ask
         const currentPrice=order.side=='long' ? bid : ask
 
-        checkRisk(order,currentPrice)  
+        // checkRisk(order,currentPrice)  
     }
 }
 async function createOrder(payload:payloadType) {
@@ -370,26 +370,26 @@ async function handleCreateOrder(payload:payloadType){
     sendCallbackToRedis(id,'created',{price: fromInt(openingPrice)})
 }
 
-async function handleCloseOrder(payload:payloadType){
-    //get the payload
-    const {userId, orderId}=payload
-    if(!orderId){
-        return sendCallbackToRedis(orderId, "order_not_found",{reason:"order if not found"})
-    }
-    //get that specific order from in memory
-    const order= orders.get(orderId)
-    if(!order){
-        return sendCallbackToRedis(orderId, "order_not_found",{reason:"order not found"})
-    }
+// async function handleCloseOrder(payload:payloadType){
+//     //get the payload
+//     const {userId, orderId}=payload
+//     if(!orderId){
+//         return sendCallbackToRedis(orderId, "order_not_found",{reason:"order if not found"})
+//     }
+//     //get that specific order from in memory
+//     const order= orders.get(orderId)
+//     if(!order){
+//         return sendCallbackToRedis(orderId, "order_not_found",{reason:"order not found"})
+//     }
 
-    //get the symbol with the help of orderId
-    const priceData=price.get(order.asset)
-    const closePrice = priceData ? (order.side === "long" ? priceData.bid : priceData.ask) : order.openingPrice;
-    const pnl = calPnL(closePrice, order.openingPrice, order.side, order.qty);
+//     //get the symbol with the help of orderId
+//     const priceData=price.get(order.asset)
+//     const closePrice = priceData ? (order.side === "long" ? priceData.bid : priceData.ask) : order.openingPrice;
+//     const pnl = calPnL(closePrice, order.openingPrice, order.side, order.qty);
 
-   executeClose(order, closePrice, "manual", pnl);
+//    executeClose(order, closePrice, "manual", pnl);
 
-}
+// }
 export type Symbol = keyof typeof SYMBOL_DECIMALS;
 async function handleBalanceUpdate(payload:payloadType){
     const {userId, symbol, balanceRaw, balanceDecimal} = payload
@@ -460,7 +460,7 @@ async function loadState(){
 
 }
 async function engine(){
-    await loadState()
+    // await loadState()
     try{
         //start the loop
         while(true){
@@ -475,9 +475,14 @@ async function engine(){
             if(!response) continue
 
             //pase the response
-            console.log(response)
+            console.log('RESPONSE:',response)
             for(const [streamName,messages] of response){
+                console.log('STREAM:',streamName,
+                    "MESSAGE:",messages)
                 for (const [id, fields] of messages) {
+                    console.log('ID:',id,
+                        'FIELD:',fields
+                    )
                     lastStreamId=id;
 
                     try{
@@ -487,31 +492,29 @@ async function engine(){
                             if (fields[i] === "data" || fields[i] === "payload") {
                                 rawData = fields[i + 1] ?? ""
                             }
+                            console.log("RAW_DATA:",rawData)
                         }
+
                         if (!rawData) continue
+                        console.log("RAW_DATA:",rawData)
                         const msg=JSON.parse(rawData)
+                        console.log("PARSED_MESSAGE:",msg)
                         const kind=msg.kind || msg.type
                         const payload= msg.payload || msg.data
+                        console.log('PAYLOAD:',payload)
+
 
                         //routes the response by kind
-                        // switch(kind){
-                        //     //market price update
-                        //     case "price-update": await handlePriceUpdate(payload); break
-                        //     case "create-order": await handleCreateOrder(payload); break
-                        //     case "close-order": await handleCloseOrder(payload); break
-                        //     //wallet updates
-                        //     case "balance-update": await handleBalanceUpdate(payload); break
-                        //     default: console.log("can't find this kind")
-                        // }
                         switch(kind){
                             //market price update
-                            case "price-update": await console.log('PRICE____UPDATED'); break
-                            case "create-order": await console.log('CREATE___ORDER'); break
-                            case "close-order": await console.log('CLOSE____ORDER'); break
+                            case "price-update": await handlePriceUpdate(payload); break
+                            case "create-order": await handleCreateOrder(payload); break
+                            // case "close-order": await handleCloseOrder(payload); break
                             //wallet updates
-                            case "balance-update": console.log('BALANCE___UPDATE'); break
+                            case "balance-update": await handleBalanceUpdate(payload); break
                             default: console.log("can't find this kind")
                         }
+                        
                     }catch(err){
                         console.error(`[SKIP] Malformed message ${id}:`, err);
                     }
@@ -524,5 +527,124 @@ async function engine(){
 }
 engine()
 
+
+
+
+//mock engine
+// const redis = redisClient(); // For Reading
+// const publisher = redisClient(); // For Replying (New!)
+
+// let lastStreamId = "$";
+
+
+// async function engine() {
+//     console.log("Mock Engine Started...");
+//     while (true) {
+//         try {
+//             const response = await redis.xread("BLOCK", 0, "STREAMS", "trading-engine", lastStreamId);
+//             if (!response) continue;
+
+//             for (const [streamName, messages] of response) {
+//                 for (const [id, fields] of messages) {
+//                     lastStreamId = id;
+                    
+//                     let rawData = "";
+//                     for (let i = 0; i < fields.length; i += 2) {
+//                         if (fields[i] === "payload") rawData = fields[i + 1] ?? "";
+//                     }
+//                     if (!rawData) continue;
+
+//                     const msg = JSON.parse(rawData);
+//                     const kind = msg.kind;
+//                     const payload = msg.payload; // Contains all your order data
+
+//                     if (kind === "create-order") {
+//                         console.log(`[Engine] Creating Order in DB: ${payload.id}`);
+
+//                         // 1. SAVE TO DB (Simulating Real Engine)
+//                         // Ensure your payload matches your Prisma Schema types
+//                         await prisma.order.create({
+//                             data: {
+//                                 user: { connect: { id: payload.userId } },
+
+//                                 symbol: payload?.symbol,
+//                                 side: payload.side,
+//                                 status: "OPEN",
+
+//                                 quantity: BigInt(payload.qty),
+//                                 quantityDecimal: payload.quantityDecimal ?? 8,
+
+//                                 openPrice: payload.openPrice || 100,
+//                                 priceDecimals: payload.priceDecimals ?? 8,
+
+//                                 leverage: payload.leverage,
+//                                 margin: payload?.margin || 1,
+
+//                                 takeProfitPrice: payload.takeProfitPrice ?? null,
+//                                 stopLossPrice: payload.stopLossPrice ?? null,
+//                             }
+//                         });
+//                         // 2. Reply to Redis
+//                         const reply = {
+//                             id: payload.id,
+//                             status: "created",
+//                             message: "Order successfully opened"
+//                         };
+
+//                         await publisher.xadd(
+//                             "callback-queue", 
+//                             "*", 
+//                             "id", payload.id, 
+//                             "data", JSON.stringify(reply)
+//                         );
+//                     } else if (kind === "close-order") {
+//                         console.log(`[Engine Mock] Closing Order: ${payload.orderId}`);
+
+//                         // 1. MOCK CALCULATIONS
+//                         const mockClosePrice = 43000 * 100000000; // Mock Price
+//                         const mockPnl = 50 * 100000000; // Mock Profit (50 USDC)
+
+//                         // 2. UPDATE DB (So the status changes to CLOSED)
+//                         try {
+//                             await prisma.order.update({
+//                                 where: {
+//                                     id: payload.orderId
+//                                 },
+//                                 data: {
+//                                     status: "CLOSED",
+//                                     closePrice: mockClosePrice,
+//                                     closedAt: new Date()
+//                                 }
+//                             });
+
+//                             // 3. SEND REPLY TO REDIS
+//                             const reply = {
+//                                 id: payload.orderId,
+//                                 status: "closed",
+//                                 pnl: mockPnl,
+//                                 message: "Order closed successfully"
+//                             };
+
+//                             await publisher.xadd(
+//                                 "callback-queue", 
+//                                 "*", 
+//                                 "id", payload.orderId, 
+//                                 "data", JSON.stringify(reply)
+//                             );
+//                             console.log(`[Engine Mock] Order Closed in DB & Reply Sent`);
+
+//                         } catch (dbError) {
+//                             console.error("Failed to close order in DB:", dbError);
+//                             // Optional: Send error reply to Redis
+//                         }
+//                     }
+//                 }
+//             }
+//         } catch (err) {
+//             console.error("Mock Engine Error:", err);
+//         }
+//     }
+// }
+// engine();
 
 
