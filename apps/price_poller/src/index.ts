@@ -17,6 +17,21 @@ import Redis from 'ioredis'
 // }
 
 
+//  1) "1766738936470-0"
+//      2)  1) "kind"
+//          2) "price-update"
+//          3) "symbol"
+//          4) "BTC_USDC"
+//          5) "bid"
+//          6) "88629.8"
+//          7) "ask"
+//          8) "88641.1"
+//          9) "eventTime"
+//         10) "1766738936436930"
+//         11) "receivedAt"
+//         12) "1766738936471"
+
+
 export enum MarketSymbol{
     BTC_USDC = "BTC_USDC",
     SOL_USDC = "SOL_USDC",

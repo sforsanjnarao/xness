@@ -45,7 +45,7 @@ async function listeningToStream(){
                         "BLOCK",
                         0,
                         "STREAMS",
-                        "queue",
+                        "callback-queue",
                         lastId
                     )
 

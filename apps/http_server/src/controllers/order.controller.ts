@@ -14,7 +14,7 @@ enum orderStatus{
 enum orderSymbol{
 
 }
-export type futureMarketOrderTypes={
+ type futureMarketOrderTypes={
     id:string
     userId:string
     side:orderSides
@@ -126,9 +126,11 @@ export const createOrder=async (req:Request, res:Response)=>{
         }
         //need to send all of this to the engine to process
         let engineResponse= await engineDispatcher(orderId,payload,5000)
-        if(engineResponse.status==='created'){
+        const parseEngineResponse=JSON.parse(engineResponse.data)
+        if(parseEngineResponse.status=='created'){
             return res.status(201).json({message:'your order is created', engineResponse, orderId})
         }
+        console.log("engineResponse:",parseEngineResponse)
         mapEngineResponse(res,engineResponse.status,orderId)
         // res.status(409).json({error:'failed to create order or timeout',engineResponse, orderId})
         
@@ -173,7 +175,7 @@ export const closeOrder=async (req:Request, res:Response)=>{
         const {orderId}= req.params
         if(!orderId) return res.status(400).json({error:'order id is required'})
         //if don't have userId
-        const {closeReason='manual'}=req.body
+        const {closeReason}=req.body
         
 
         //verify it belong to the same user or not
@@ -187,7 +189,7 @@ export const closeOrder=async (req:Request, res:Response)=>{
         })
 
         if(!closeOrderId){
-            return res.status(404).json({error:"order not found"})
+            res.status(404).json({error:"order not found"})
         }
         const payload={
             kind:'close-order',
@@ -200,7 +202,9 @@ export const closeOrder=async (req:Request, res:Response)=>{
         }
 
         const engineResponse=await engineDispatcher(orderId, payload, 5000)
-        if(engineResponse.status=="closed"){
+        const parseEngineResponse=JSON.parse(engineResponse.data)
+        
+        if(parseEngineResponse.status=="closed"){
             return res.status(200).json({
                 message:'order closed successfully',
                 orderId,

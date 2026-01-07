@@ -3,6 +3,8 @@ import  cookieParser from 'cookie-parser'
 import authRoute from './routes/user.routes'
 import orderRoute from './routes/order.routes'
 import balanceRoute from './routes/balance.route'
+
+import "../utils/biginit-json";
 const app=express()
 
 app.use(express.json())

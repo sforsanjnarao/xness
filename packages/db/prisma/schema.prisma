@@ -40,7 +40,7 @@ model Order{
   quantityDecimal Int
 
   openPrice       Int
-  closePrice      Int
+  closePrice      Int?
   priceDecimals   Int
 
   leverage        Int
@@ -51,11 +51,11 @@ model Order{
   Pnl             Int?                              @map("profit_and_loss")
 
 
-  reason          CloseReason
+  reason          CloseReason?
 
   createdAt       DateTime      @default(now())     @map("created_at")
-  updatedAt       DateTime      @updatedAt          @map("updated_at")
-  closedAt        DateTime                          @map("closed_at")
+  updatedAt       DateTime?     @updatedAt          @map("updated_at")
+  closedAt        DateTime?                         @map("closed_at")
    
    @@map("order")
 }

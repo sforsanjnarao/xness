@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "order" ALTER COLUMN "closePrice" DROP NOT NULL,
+ALTER COLUMN "reason" DROP NOT NULL,
+ALTER COLUMN "updated_at" DROP NOT NULL,
+ALTER COLUMN "closed_at" DROP NOT NULL;
