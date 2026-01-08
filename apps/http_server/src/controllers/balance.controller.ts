@@ -139,10 +139,11 @@ export const depositWallet = async (req: Request, res: Response) => {
          const payload={
             kind: "balance-update",
             payload: {
-               userId,
-               symbol: updatedWallet.symbol,
-               balanceRaw: updatedWallet.balanceRaw, 
-               balanceDecimal: updatedWallet.balanceDecimal
+                depositId,
+                userId,
+                symbol: updatedWallet.symbol,
+                balanceRaw: updatedWallet.balanceRaw, 
+                balanceDecimal: updatedWallet.balanceDecimal
             }
          }
          //3. SEND TO ENGINE AND AWAIT RESPONSE

@@ -15,6 +15,11 @@ const subscriberClient= redisClient()
 const pendingRequest= new Map<string,ResolveFunction>()
 const ActiveTimeout=new Map<string,NodeJS.Timeout>()
 
+const STREAMS = {
+    INPUT: "trading-engine",
+    OUTPUT: "callback_queue"
+};
+
 
 
 const parseStreamData = (rawFields: string[]): EngineResponse => {
@@ -32,73 +37,79 @@ const parseStreamData = (rawFields: string[]): EngineResponse => {
 }
 
 let isListening:Boolean=false
-async function listeningToStream(){
-    if(isListening) return
-    isListening=true
-    console.log('lalala')
+async function listeningToStream() {
+    if (isListening) return;
+    isListening = true;
+    console.log('[Redis:Listener] 🎧 Started listening...');
 
-    let lastId="$"
+    let lastId = "$";
 
-    async function listenForNewMessage(){
-       try{
-            let stream= await subscriberClient.xread(
-                        "BLOCK",
-                        0,
-                        "STREAMS",
-                        "callback_queue",
-                        lastId
-                    )
-                console.log('got the stream')
-            if(!stream || stream?.length==0){
-                return setImmediate(()=>listenForNewMessage())
-            }
+    while (true) {
+        try {
+            const stream = await subscriberClient.xread(
+                "BLOCK", 0,
+                "STREAMS", STREAMS.OUTPUT, lastId
+            );
+            console.log('STREAM:',stream)
 
-            let streamData=stream[0]
-            if(!streamData){
-                return setImmediate(()=>listenForNewMessage())
-            }
+            const streamKey = stream?.[0];
+            if (!streamKey || !streamKey[1] || streamKey[1].length === 0) continue;
 
-            const message= streamData[1]
-            console.log('message',message)
-            for(const [streamMsgId, rawBody] of message){
+            const messages = streamKey[1]; 
+            console.log('MESSAGE:',messages)
+            for (const [streamMsgId, rawBody] of messages) {
+                lastId = streamMsgId as string;
 
+                // Parse Raw Redis Fields
+                const redisObj = parseStreamData(rawBody as string[]);
+                console.log('REDIS_OBJ:',redisObj)
 
-                lastId=streamMsgId as string
-
-                let responseData=parseStreamData(rawBody)
-                console.log('responseData:',responseData)
-
-                const trackId= responseData.id
-
-                if(trackId && pendingRequest.has(trackId)){
-                    const resolveFunction= pendingRequest.get(trackId)
-
-                    //cleanup
-                    let timeoutTimer=ActiveTimeout.get(trackId)
-                    if(timeoutTimer) clearTimeout(timeoutTimer)
-
-                    pendingRequest.delete(trackId)
-                    ActiveTimeout.delete(trackId)
-
-                    subscriberClient.xdel("queue",streamMsgId).catch(err => {
-                            console.error(`[Redis:Listener] Failed to XDEL message ${streamMsgId}`, err)
-                        })
-                    if(resolveFunction){
-                        resolveFunction(responseData)
+                //  Parse JSON Payload inside if it exists
+                let finalData: any = { ...redisObj };
+                if (redisObj.payload && typeof redisObj.payload=="string") {
+                    try {
+                        const parsedPayload = JSON.parse(redisObj.payload);
+                        console.log('parsedPayload', parsedPayload)
+                        finalData = { ...finalData, ...parsedPayload };
+                        console.log('finalData:',finalData)
+                    } catch (e) {
+                        console.error("JSON Parse Error:", e);
                     }
-                    
                 }
-                
-            }
-            console.log('baaaaaa..',message)
-            setImmediate(listenForNewMessage)
 
-        }catch(err){
-            console.error("[Redis:Listener] 🔴 Polling error. Retrying in 2s...", err);
-                setTimeout(listenForNewMessage, 5000)
+                //  Find Request ID
+                // engine sends id or orderId inside the payload
+                const requestId = finalData.id || finalData.orderId; 
+                console.log('requestId:', requestId)
+
+                if (requestId && pendingRequest.has(requestId)) {
+                    console.log('true')
+                    const resolve = pendingRequest.get(requestId);
+                    console.log('Resolve:',resolve)
+                    const timeout = ActiveTimeout.get(requestId);
+                    console.log('timeout:',timeout)
+
+                    if (timeout) {
+                        clearTimeout(timeout);
+                        console.log('is it done')
+                    }
+
+                    pendingRequest.delete(requestId);
+                    ActiveTimeout.delete(requestId);
+
+                    // delete from Correct Stream
+                    subscriberClient.xdel(STREAMS.OUTPUT, streamMsgId).catch(console.error);
+
+                    if (resolve){
+                       resolve(finalData);
+                    } 
+                }
+            }
+        } catch (err) {
+            console.error("[Redis:Listener] 🔴 Polling error:", err);
+            await new Promise(r => setTimeout(r, 2000));
         }
-       }
-        listenForNewMessage()  
+    }
 }
 
 export function engineDispatcher(requestId:string, payload:Record<string,any>, timeoutMS:number):Promise<Record<string,any>>{
@@ -106,7 +117,7 @@ export function engineDispatcher(requestId:string, payload:Record<string,any>, t
     if(!isListening){
         listeningToStream()
     }
-    console.log('baba')
+
 
     return new Promise((resolve, reject)=>{
         const timeout=setTimeout(()=>{

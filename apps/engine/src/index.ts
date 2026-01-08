@@ -39,7 +39,7 @@ enum walletSymbol{
     BTC_USDC="BTC_USDC"
 }
 type balanceType={
-    id: string
+    depositId: string
     userId: string
     symbol:Symbol
     balanceRaw:bigint       //bigInt Means floating
@@ -138,24 +138,37 @@ function getBalance(userId:string, symbol:string):bigint{
     return balance.get(userId)?.get(symbol) ?? 0n
 
 }
-function setBalance(amount:bigint, userId:string, symbol:string){
-    console.log('setting..Balance:',amount ,userId, symbol)
+// function setBalance(amount:bigint, userId:string, symbol:string){
+function setBalance(amount:bigint, payload:any){
+    const decimals = payload.balanceDecimal ?? SYMBOL_DECIMALS[payload.symbol as Symbol]
+    console.log('setting..Balance:',amount ,payload.userId, payload.symbol)
     //set the balance to the data structure
-     if(!balance.has(userId)) balance.set(userId,new Map())
-        balance.get(userId)?.set(symbol,amount)
+     if(!balance.has(payload.userId)) balance.set(payload.userId,new Map())
+        balance.get(payload.userId)?.set(payload.symbol,amount)
     console.log(' set to the in memory')
     //push it to dbQueue to do to the db(slowly)
     queueDbAction({
         type:'update_balance',
         payload:{
             balance:amount,
-            userId,
-            symbol
+            userId:payload.userId,
+            symbol:payload.symbol
         }
     })
+    let updatedPayload={
+        kind:'update_balance',
+        payload:{
+            id:payload.depositId,
+            userId:payload.userId,
+            symbol:payload.symbol,
+            balanceRaw:amount,
+            balanceDecimal:decimals
+        }
+    }
     console.log(' send it to the db queue')
     //send a use callback
-    sendBalanceCallBack({amount},userId,symbol)
+    // sendBalanceCallBack({amount},userId,symbol)
+    sendCallbackToRedis(payload.depositId,'balance_updated',updatedPayload)
 }
 async function sendBalanceCallBack(payload:any,userId:string,symbol:string){
     try{
@@ -212,9 +225,13 @@ function executeClose(order:precisionEngineOrder,
     if(credit<0) credit=BigInt(0);
     //get the balance 
     const getTheBalance=getBalance(order.userId, order.asset)
-
+    // const payload={
+    //     userId:order.userId,
+    //     symbol:order.asset
+    // }
     //set the balance
-    setBalance(getTheBalance,order.userId, order.asset)
+    // setBalance(getTheBalance,payload)
+    mutateBalance(order.userId, order.asset, getTheBalance + credit);
 
     //delete the order from in-memory
     orders.delete(order.id)
@@ -256,15 +273,15 @@ function executeClose(order:precisionEngineOrder,
 
 //if the order got produced or not
 // and put it in the redis callback
-async function sendCallbackToRedis(orderId:string,status:string ,payload:any){
+async function sendCallbackToRedis(id:string,status:string ,payload:any){
    try{
      //crating an message for the queue 
         await redis.xadd(
             "callback_queue",
             "*",
-            "id",orderId,
+            "id",id,
             "status",status,
-            "payload", payload
+            "payload", JSON.stringify(payload)
         )
         //adding that message in the queue with there expected kind
     }catch(err){
@@ -345,8 +362,10 @@ async function handlePriceUpdate(payload:payloadType){
     
 // }
 async function handleCreateOrder(payload:payloadType){
+    console.log("got_the_payload_to_create_order_handler:",payload)
     //get the payload
     const {id, userId, symbol, side, qty, leverage, takeProfit, stopLoss}=payload
+
     //validate everything
     const normalizedAsset = symbol.toUpperCase();
 
@@ -372,10 +391,14 @@ async function handleCreateOrder(payload:payloadType){
     if (userBal < marginRequired) {
         return sendCallbackToRedis(id, "insufficient_balance", { reason: "Not enough balance for margin requirement" })
     }
-
+    //  const create_order_balance_payload={
+    //     userId:userId,
+    //     symbol:symbol
+    // }
 
     //update balance
-    setBalance(userBal - marginRequired,userId ,symbol)
+    // setBalance(userBal - marginRequired,create_order_balance_payload)
+    mutateBalance(userId, symbol, userBal - marginRequired);
 
     //need to make the order
     const order: precisionEngineOrder = {
@@ -436,19 +459,29 @@ async function handleCreateOrder(payload:payloadType){
 //    executeClose(order, closePrice, "manual", pnl);
 
 // }
-async function handleBalanceUpdate(payload:balanceType){
-    console.log(payload)
-    const {userId, symbol, balanceRaw, balanceDecimal} = payload
-    if(!userId || !symbol || !balanceRaw || !balanceDecimal){
-        console.error("didn't get the excate data")
-        return
-    }
-    //convert
-    const rawValue = balanceRaw //bigint
-    // const decimals = balanceDecimal ?? SYMBOL_DECIMALS[symbol as Symbol] ?? 8;
-    // const actualValue = rawValue / Math.pow(10, decimals);
-    console.log('got the value:',rawValue)
-    setBalance(rawValue,userId,symbol)
+
+function mutateBalance(userId: string, symbol: string, amount: bigint) {
+    if (!balance.has(userId)) balance.set(userId, new Map());
+    balance.get(userId)!.set(symbol, amount);
+
+    queueDbAction({
+        type: 'update_balance',
+        payload: { userId, symbol, balance: amount }
+    });
+}
+
+function handleBalanceUpdate(payload: balanceType) {
+    const { depositId, userId, symbol, balanceRaw, balanceDecimal } = payload;
+
+    mutateBalance(userId, symbol, balanceRaw);
+
+    sendCallbackToRedis(depositId, 'balance_updated', {
+        id: depositId,
+        userId,
+        symbol,
+        balanceRaw,
+        balanceDecimal
+    });
 }
 
 
@@ -519,7 +552,7 @@ async function engine(){
                 lastStreamId
             )
             if(!response) continue
-
+            console.log('RESPONSE_to_engine:',response)
             //pase the response
             for(const [streamName,messages] of response){
                 for (const [id, fields] of messages) {
@@ -536,7 +569,7 @@ async function engine(){
 
                         if (!rawData) continue
                         const msg=JSON.parse(rawData)
-                        // console.log("PARSED_MESSAGE:",msg)
+                        console.log("PARSED_MESSAGE:",msg)
                         const kind=msg.kind || msg.type
                         const payload= msg.payload || msg.data
 
