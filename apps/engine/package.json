@@ -13,7 +13,8 @@
   "dependencies": {
     "@repo/typescript-config":"workspace:*",
     "@repo/redis-client":"workspace:*",
-    "@repo/db":"workspace:*"
+    "@repo/db":"workspace:*",
+    "@repo/types":"workspace:*"
 
   }
 }

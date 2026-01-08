@@ -1,11 +1,12 @@
 import express, { Router } from 'express'
-import { depositToWallet, getBalance, getBalanceBySymbol } from '../controllers/balance.controller'
+import { depositWallet, getBalance, getBalanceBySymbol } from '../controllers/balance.controller'
+import { protectMiddleware } from '../middleware/protected'
 
 const router:Router=express.Router()
 
-router.get('/',getBalance)
-router.get('/:symbol',getBalanceBySymbol)
-router.post('/deposit',depositToWallet)
+router.get('/',protectMiddleware,getBalance)
+router.get('/:symbol',protectMiddleware,getBalanceBySymbol)
+router.post('/deposit',protectMiddleware,depositWallet)
 
 
 export default router

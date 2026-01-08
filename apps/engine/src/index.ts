@@ -1,6 +1,8 @@
 //what basically engine 
 //a engine is A DETERMINISTIC CALCULATION SERVICE
 import {prisma} from "@repo/db"
+import {Symbol, SYMBOL_DECIMALS} from "@repo/types"
+
 
 export type Side = "long" | "short"
 export interface engineOrder {
@@ -39,7 +41,7 @@ enum walletSymbol{
 type balanceType={
     id: string
     userId: string
-    symbol:walletSymbol
+    symbol:Symbol
     balanceRaw:bigint       //bigInt Means floating
     balanceDecimal:number
     createdAt:Date
@@ -52,12 +54,7 @@ export const ENGINE_CONSTANTS = {
     MARGIN_THRESHOLD: 0.05,
     MAX_QUEUE_SIZE: 10000,
 } as const
-export const SYMBOL_DECIMALS = {
-    BTC: 8,   // Bitcoin: 1 BTC = 100,000,000 satoshis 
-    ETH: 18,  // Ethereum: 1 ETH = 1,000,000,000,000,000,000 wei
-    SOL: 9,   // Solana: 1 SOL = 1,000,000,000 lamports
-    USDC: 6,  // USDC: 1 USDC = 1,000,000 micro-units
-} as const;
+
 
 export const ORDER_PRECISION = {
     PRICE: 100,
@@ -134,17 +131,19 @@ function checkRisk(order:precisionEngineOrder ,currentPrice:bigint){
 
    
 }
-function getBalance(userId:string, symbol:string){
+function getBalance(userId:string, symbol:string):bigint{
     if(!balance.has(userId)){
         balance.set(userId, new Map())
     }
-    return balance.get(userId)?.get(symbol) || 0
+    return balance.get(userId)?.get(symbol) ?? 0n
 
 }
-function setBalance(amount:number, userId:string, symbol:string){
+function setBalance(amount:bigint, userId:string, symbol:string){
+    console.log('setting..Balance:',amount ,userId, symbol)
     //set the balance to the data structure
      if(!balance.has(userId)) balance.set(userId,new Map())
         balance.get(userId)?.set(symbol,amount)
+    console.log(' set to the in memory')
     //push it to dbQueue to do to the db(slowly)
     queueDbAction({
         type:'update_balance',
@@ -154,8 +153,27 @@ function setBalance(amount:number, userId:string, symbol:string){
             symbol
         }
     })
+    console.log(' send it to the db queue')
+    //send a use callback
+    sendBalanceCallBack({amount},userId,symbol)
 }
-
+async function sendBalanceCallBack(payload:any,userId:string,symbol:string){
+    try{
+        console.log('sending a call back...')
+     //crating an message for the queue 
+        await redis.xadd(
+            "callback_queue",
+            "*",
+            "id",userId,
+            "symbol",symbol,
+            "payload", JSON.stringify(payload)
+        )
+        return console.log(' done and dusted')
+        //adding that message in the queue with there expected kind
+    }catch(err){
+        console.error(err)
+   }
+}
 function queueDbAction(action:any){
     // check the length and put it into the array
     if(dbArray.length >=100){
@@ -418,19 +436,19 @@ async function handleCreateOrder(payload:payloadType){
 //    executeClose(order, closePrice, "manual", pnl);
 
 // }
-export type Symbol = keyof typeof SYMBOL_DECIMALS;
-async function handleBalanceUpdate(payload:payloadType){
+async function handleBalanceUpdate(payload:balanceType){
+    console.log(payload)
     const {userId, symbol, balanceRaw, balanceDecimal} = payload
     if(!userId || !symbol || !balanceRaw || !balanceDecimal){
         console.error("didn't get the excate data")
         return
     }
     //convert
-    const rawValue = Number(balanceRaw)
-    const decimals = Number(balanceDecimal) ?? SYMBOL_DECIMALS[symbol as Symbol] ?? 8;
-    const actualValue = rawValue / Math.pow(10, decimals);
-
-    setBalance(actualValue,userId,symbol)
+    const rawValue = balanceRaw //bigint
+    // const decimals = balanceDecimal ?? SYMBOL_DECIMALS[symbol as Symbol] ?? 8;
+    // const actualValue = rawValue / Math.pow(10, decimals);
+    console.log('got the value:',rawValue)
+    setBalance(rawValue,userId,symbol)
 }
 
 
@@ -478,11 +496,11 @@ async function loadState(){
     if(!balance.has(wallet.userId)) balance.set(wallet.userId,new Map())
     //get the value engine can use
         const decimals = wallet.balanceDecimal ?? SYMBOL_DECIMALS[wallet.symbol as Symbol] ?? 8;
-        const rawVal = wallet.balanceRaw ? Number(wallet.balanceRaw) : 0;
-        const actualValue = rawVal / Math.pow(10, decimals);
-        const engineScaledValue = actualValue;
+        const rawVal = wallet.balanceRaw ?? 0;
+        // const actualValue = rawVal / Math.pow(10, decimals);
+        // const engineScaledValue = actualValue;
     //put that value in the user's wallet with the symbol
-        balance.get(wallet.userId)!.set(wallet.symbol,engineScaledValue)
+        balance.get(wallet.userId)!.set(wallet.symbol,rawVal)
  })
  console.log('store the value in the db')
 

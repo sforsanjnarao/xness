@@ -35,7 +35,7 @@ let isListening:Boolean=false
 async function listeningToStream(){
     if(isListening) return
     isListening=true
-
+    console.log('lalala')
 
     let lastId="$"
 
@@ -45,10 +45,10 @@ async function listeningToStream(){
                         "BLOCK",
                         0,
                         "STREAMS",
-                        "callback-queue",
+                        "callback_queue",
                         lastId
                     )
-
+                console.log('got the stream')
             if(!stream || stream?.length==0){
                 return setImmediate(()=>listenForNewMessage())
             }
@@ -59,12 +59,14 @@ async function listeningToStream(){
             }
 
             const message= streamData[1]
+            console.log('message',message)
             for(const [streamMsgId, rawBody] of message){
 
 
                 lastId=streamMsgId as string
 
                 let responseData=parseStreamData(rawBody)
+                console.log('responseData:',responseData)
 
                 const trackId= responseData.id
 
@@ -88,14 +90,15 @@ async function listeningToStream(){
                 }
                 
             }
-            console.log(message)
+            console.log('baaaaaa..',message)
+            setImmediate(listenForNewMessage)
+
         }catch(err){
             console.error("[Redis:Listener] 🔴 Polling error. Retrying in 2s...", err);
                 setTimeout(listenForNewMessage, 5000)
         }
-        setImmediate(listenForNewMessage)
        }
-        setImmediate(listenForNewMessage)  
+        listenForNewMessage()  
 }
 
 export function engineDispatcher(requestId:string, payload:Record<string,any>, timeoutMS:number):Promise<Record<string,any>>{
@@ -103,7 +106,7 @@ export function engineDispatcher(requestId:string, payload:Record<string,any>, t
     if(!isListening){
         listeningToStream()
     }
-
+    console.log('baba')
 
     return new Promise((resolve, reject)=>{
         const timeout=setTimeout(()=>{

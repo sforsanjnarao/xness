@@ -25,7 +25,7 @@ export type Symbol = keyof typeof SYMBOL_DECIMALS;
 //redis constant
 
 export const REDIS_ENGINE_CONSTANTS = {
-    CALLBACK_QUEUE: "callback-queue",
+    CALLBACK_QUEUE: "callback_queue",
     REQUEST_STREAM_KEY: "trading-engine",
     RETRY_DELAY_MS: 5000,
     POLLING_TIMEOUT: 0

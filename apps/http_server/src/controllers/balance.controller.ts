@@ -75,72 +75,7 @@ export const getBalanceBySymbol=(req:Request, res:Response)=>{
 }
 
 
-export const depositToWallet=(req:Request, res:Response)=>{
-   try{
-       //1: add to the db 
-      //2: send it to the engine from stream
 
-      //1.1: get data from the user 
-      const userId= req.user?.id
-
-      const {amount, symbol}= req.body
-
-
-      //validate the input 
-      if(amount<=0){
-         return res.status(409).json({error:'need a positive value'})
-      }
-      
-      //1.2: find the wallet
-      const walletIndex=balance.findIndex(w=>w.userId===userId && w.symbol==symbol)
-      if(walletIndex==-1){
-         return res.status(404).json({error:'index not found'})
-      }
-      let depositWallet=balance[walletIndex]
-      if(!depositWallet){
-         return res.status(404).json({error:'wallet not found'})
-      }
-      //we are not taking symbol from the users
-      const walletDecimal=SYMBOL_DECIMALS[symbol as Symbol]
-      let calRawBalance=BigInt(Math.round(amount*Math.pow(10,walletDecimal)))
-      //we want update specific part of that exist object 
-      //find index -> build new object -> replace only that index
-      const updateWallet={
-         ...depositWallet,
-         balanceRaw:depositWallet.balanceRaw+calRawBalance,
-         updatedAt: new Date()
-      }
-
-      balance[walletIndex]= updateWallet
-      try{
-            publishToRedis.xadd(
-               'trading-engine',
-               "*",
-               "data",
-               JSON.stringify({
-                  kind:'update-balance',
-                  payload:{
-                     id:depositWallet.id,
-                     userId:depositWallet.userId,
-                     symbol:symbol,
-                     balanceRaw:updateWallet.balanceRaw,
-                     balanceDecimal:walletDecimal,
-                     updatedAt: updateWallet.updatedAt
-                  }
-               })
-            )
-      }catch(err){
-         console.error(err)
-         return res.status(500).json({error:'internal server error'})
-      }
-      return res.status(201).json({message:'deposit successfully created'})
-   }catch(err){
-         console.error(err)
-         return res.status(500).json({error:'internal server error'})
-      }
-
-    
-}
 
 
 
@@ -184,7 +119,7 @@ export const depositWallet = async (req: Request, res: Response) => {
             create: {
                 userId,
                 symbol,
-                balanceRaw: baseUnitAmount,
+                balanceRaw: baseUnitAmount, //store as bigInt
                 balanceDecimal: decimalPlaces 
             },
             update: {
@@ -206,8 +141,8 @@ export const depositWallet = async (req: Request, res: Response) => {
             payload: {
                userId,
                symbol: updatedWallet.symbol,
-               newBalanceRaw: updatedWallet.balanceRaw.toString(),
-               newBalanceDecimals: updatedWallet.balanceDecimal
+               balanceRaw: updatedWallet.balanceRaw, 
+               balanceDecimal: updatedWallet.balanceDecimal
             }
          }
          //3. SEND TO ENGINE AND AWAIT RESPONSE
@@ -223,3 +158,73 @@ export const depositWallet = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "Failed to process deposit" })
     }
 }
+
+
+
+
+// export const depositToWallet=(req:Request, res:Response)=>{
+//    try{
+//        //1: add to the db 
+//       //2: send it to the engine from stream
+
+//       //1.1: get data from the user 
+//       const userId= req.user?.id
+
+//       const {amount, symbol}= req.body
+
+
+//       //validate the input 
+//       if(amount<=0){
+//          return res.status(409).json({error:'need a positive value'})
+//       }
+      
+//       //1.2: find the wallet
+//       const walletIndex=balance.findIndex(w=>w.userId===userId && w.symbol==symbol)
+//       if(walletIndex==-1){
+//          return res.status(404).json({error:'index not found'})
+//       }
+//       let depositWallet=balance[walletIndex]
+//       if(!depositWallet){
+//          return res.status(404).json({error:'wallet not found'})
+//       }
+//       //we are not taking symbol from the users
+//       const walletDecimal=SYMBOL_DECIMALS[symbol as Symbol]
+//       let calRawBalance=BigInt(Math.round(amount*Math.pow(10,walletDecimal)))
+//       //we want update specific part of that exist object 
+//       //find index -> build new object -> replace only that index
+//       const updateWallet={
+//          ...depositWallet,
+//          balanceRaw:depositWallet.balanceRaw+calRawBalance,
+//          updatedAt: new Date()
+//       }
+
+//       balance[walletIndex]= updateWallet
+//       try{
+//             publishToRedis.xadd(
+//                'trading-engine',
+//                "*",
+//                "data",
+//                JSON.stringify({
+//                   kind:'update-balance',
+//                   payload:{
+//                      id:depositWallet.id,
+//                      userId:depositWallet.userId,
+//                      symbol:symbol,
+//                      balanceRaw:updateWallet.balanceRaw,
+//                      balanceDecimal:walletDecimal,
+//                      updatedAt: updateWallet.updatedAt
+//                   }
+//                })
+//             )
+//       }catch(err){
+//          console.error(err)
+//          return res.status(500).json({error:'internal server error'})
+//       }
+//       return res.status(201).json({message:'deposit successfully created'})
+//    }catch(err){
+//          console.error(err)
+//          return res.status(500).json({error:'internal server error'})
+//       }
+
+    
+// }

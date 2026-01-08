@@ -26,6 +26,9 @@ importers:
       '@repo/redis-client':
         specifier: workspace:*
         version: link:../../packages/redisClient
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config

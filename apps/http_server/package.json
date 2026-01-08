@@ -15,14 +15,15 @@
     "@repo/db": "workspace:*",
     "@repo/redis-client": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@repo/types":"workspace:*",
     "@types/express": "^5.0.6",
     "@types/uuid": "^11.0.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "uuid": "^13.0.0",
-    "@repo/types":"workspace:*"
+    "uuid": "^13.0.0"
+    
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
