@@ -124,7 +124,8 @@ function checkRisk(order:precisionEngineOrder ,currentPrice:bigint){
     //cal pnl, margin, liquidation and closing the order
     let pnl=calPnL(currentPrice, order.openingPrice, order.side, order.qty)
     let remainingMargin= order.initialMargin + pnl //equity = credit
-    let mainMargin=order.initialMargin * toEnginePrecision(marginThreshold)
+    // let mainMargin=order.initialMargin * toEnginePrecision(marginThreshold)
+    const mainMargin = order.initialMargin * BigInt(Math.floor(marginThreshold * 100)) / 100n;
     
     let reason=null;
     if(remainingMargin<=mainMargin){
@@ -435,7 +436,7 @@ async function handleCreateOrder(payload:payloadType){
             leverage: Number(lev),
             openPrice: Math.round(fromEnginePrecision(openingPrice) * ORDER_PRECISION.PRICE),
             priceDecimals: 2,
-            margin: Math.round(fromEnginePrecision(marginRequired) * ORDER_PRECISION.PRICE),
+            margin: Number(marginRequired * 100n / 100_000_000n),
             status: "OPEN",
             createdAt: new Date()
         }
