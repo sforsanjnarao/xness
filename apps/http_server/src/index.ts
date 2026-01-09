@@ -3,6 +3,8 @@ import  cookieParser from 'cookie-parser'
 import authRoute from './routes/user.routes'
 import orderRoute from './routes/order.routes'
 import balanceRoute from './routes/balance.route'
+import candleRoute from './routes/candles.route'
+
 
 import "../utils/biginit-json";
 const app=express()
@@ -17,6 +19,7 @@ app.use(cookieParser())
 app.use('/v1/auth',authRoute)
 app.use('/v1/orders',orderRoute)
 app.use('/v1/balance', balanceRoute)
+app.use('/v1/candles',candleRoute)
 
 
 
