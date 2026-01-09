@@ -52,23 +52,23 @@ export interface SignInRequest {
 
 export const userApi = {
   signUp: (data: SignUpRequest) =>
-    request<User>('/v1/user/signup', {
+    request<User>('/v1/auth/signup', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   signIn: (data: SignInRequest) =>
-    request<User>('/v1/user/signin', {
+    request<User>('/v1/auth/signin', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   signOut: () =>
-    request<void>('/v1/user/signout', {
+    request<void>('/v1/auth/signout', {
       method: 'POST',
     }),
 
-  getUser: () => request<User>('/v1/user'),
+  getUser: () => request<User>('/v1/auth'),
 };
 
 // Order API
@@ -122,19 +122,27 @@ export const orderApi = {
 
 // Candles API
 export interface Candle {
-  time: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume?: number;
+    time: number | string; // Use string if your JSON sends "2026-01-08...", number if Unix timestamp
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume?: number;
+    symbol?: string; // Optional: based on your backend response
+    bucket?: string; // Optional: based on your backend response
 }
+
+// 2. Define the structure of the API Response (The wrapper)
+export interface CandlesResponse {
+  data: Candle[];
+}
+
 
 export type CandleInterval = '1m' | '5m' | '15m' | '1h' | '4h' | '1d';
 
 export const candlesApi = {
   getCandles: (symbol: string, interval: CandleInterval = '1h') =>
-    request<Candle[]>(`/v1/candles/${symbol}?interval=${interval}`),
+    request<CandlesResponse>(`/v1/candles/${symbol}?interval=${interval}`),
 };
 
 // Balance API

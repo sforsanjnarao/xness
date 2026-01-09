@@ -1,3 +1,4 @@
+'use client'
 import { CandleInterval } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';

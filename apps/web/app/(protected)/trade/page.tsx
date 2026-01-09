@@ -36,15 +36,18 @@ export default function Trade() {
   });
 
   // Fetch candles
-  const { data: candlesData, isLoading: isCandlesLoading } = useQuery({
+    const { data: candlesData = [], isLoading: isCandlesLoading } = useQuery({
     queryKey: ['candles', selectedPair, selectedTimeframe],
     queryFn: async () => {
       const { data, error } = await candlesApi.getCandles(selectedPair, selectedTimeframe);
-      if (error) throw new Error(error);
-      return data;
+      if (error || !data) throw new Error(error);
+      
+
+      return data.data; 
     },
     refetchInterval: 10000,
   });
+
 
   // Fetch open orders
   const { data: openOrdersData } = useQuery({
@@ -121,15 +124,17 @@ export default function Trade() {
   });
  
   // Get current price from latest candle
-const currentPrice = candlesData && candlesData.length > 0 
-    ? candlesData[candlesData.length - 1].close 
+const lastCandle = candlesData[candlesData.length - 1];
+  const firstCandle = candlesData[0];
+
+  const currentPrice = lastCandle ? lastCandle.close : 0;
+
+  const priceChange24h = (lastCandle && firstCandle)
+    ? ((lastCandle.close - firstCandle.open) / firstCandle.open) * 100
     : 0;
 
 
-  // Calculate 24h change (simplified - comparing first and last candle)
-  const priceChange24h = candlesData && candlesData.length > 1
-    ? ((candlesData[candlesData.length - 1].close - candlesData[0].open) / candlesData[0].open) * 100
-    : 0;
+
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

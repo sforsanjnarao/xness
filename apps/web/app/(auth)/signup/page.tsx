@@ -1,5 +1,7 @@
+'use client'
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +14,7 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +53,7 @@ export default function SignUp() {
         title: 'Account Created',
         description: 'Welcome to Xness!',
       });
-      navigate('/trade');
+      navigate.push('/trade');
     }
   };
 
@@ -112,7 +114,7 @@ export default function SignUp() {
 
           <div className="mt-6 text-center text-sm">
             <span className="text-muted-foreground">Already have an account? </span>
-            <Link to="/signin" className="text-primary hover:underline">
+            <Link href="/signin" className="text-primary hover:underline">
               Sign in
             </Link>
           </div>

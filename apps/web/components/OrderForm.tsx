@@ -18,7 +18,7 @@ interface OrderFormProps {
 export function OrderForm({ symbol, currentPrice, balance, onSubmit, isSubmitting }: OrderFormProps) {
   const [side, setSide] = useState<OrderSide>('LONG');
   const [quantity, setQuantity] = useState('');
-  const [leverage, setLeverage] = useState(1);
+  const [leverage, setLeverage] = useState<number>(1);
   const [takeProfit, setTakeProfit] = useState('');
   const [stopLoss, setStopLoss] = useState('');
 
@@ -105,7 +105,7 @@ export function OrderForm({ symbol, currentPrice, balance, onSubmit, isSubmittin
         </div>
         <Slider
           value={[leverage]}
-          onValueChange={(value) => setLeverage(value[0])}
+          onValueChange={(value) => setLeverage(value[0] ?? 1)}
           min={1}
           max={10}
           step={1}

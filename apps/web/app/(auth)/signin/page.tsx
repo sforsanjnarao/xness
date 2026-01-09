@@ -1,5 +1,7 @@
+'use client'
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +13,7 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +39,7 @@ export default function SignIn() {
         variant: 'destructive',
       });
     } else {
-      navigate('/trade');
+      navigate.push('/trade');
     }
   };
 
@@ -85,8 +87,8 @@ export default function SignIn() {
           </form>
 
           <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Don't have an account? </span>
-            <Link to="/signup" className="text-primary hover:underline">
+            <span className="text-muted-foreground">Don&apos;t have an account? </span>
+            <Link href="/signup" className="text-primary hover:underline">
               Sign up
             </Link>
           </div>
