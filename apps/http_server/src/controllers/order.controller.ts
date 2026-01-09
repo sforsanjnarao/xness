@@ -1,6 +1,8 @@
 import { Request, Response } from "express"
 import { engineDispatcher } from "../redis.client.engine"
 import { prisma } from "@repo/db"
+        import crypto from "crypto";
+
 
 enum orderSides{
     LONG= "long",
@@ -102,11 +104,17 @@ export const createOrder=async (req:Request, res:Response)=>{
         //zod verification required
         const {side, quantity,symbol, leverage, takeProfit, stopLoss } =req.body
 
-        //check the requireMargin
-        
+        // i made this function because of a glitch 
+        //i need resolve in orderId
+        function createEngineId(prefix: string) {
+        const uuid = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+        const time = Date.now().toString(36);
+
+        return `${prefix}_${time}_${uuid}`;
+}
 
         //create an order id
-        const orderId=crypto.randomUUID()
+        const orderId=createEngineId("ORDER_Id:")
 
         //wrap all in the payload
         const payload={
