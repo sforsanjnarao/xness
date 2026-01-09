@@ -148,7 +148,9 @@ export const depositWallet = async (req: Request, res: Response) => {
          }
          //3. SEND TO ENGINE AND AWAIT RESPONSE
            let engineResponse= await engineDispatcher(depositId,payload,5000)
-               if(engineResponse.status==='created'){
+
+           console.log('engineResponse',engineResponse)
+               if(engineResponse.status==='balance_updated'){
                return res.status(201).json({message:'your order is created', engineResponse, depositId})
              }
         } catch (error) {

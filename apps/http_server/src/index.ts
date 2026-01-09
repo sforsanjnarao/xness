@@ -6,7 +6,9 @@ import balanceRoute from './routes/balance.route'
 
 import "../utils/biginit-json";
 const app=express()
+// import { startRedisListener } from "./redis.client.engine";
 
+// startRedisListener();
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 

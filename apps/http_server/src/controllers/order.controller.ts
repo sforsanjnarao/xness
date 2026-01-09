@@ -101,6 +101,7 @@ export const createOrder=async (req:Request, res:Response)=>{
         if(!userId) return res.status(401).json({error:'unauthorize'})
         //zod verification required
         const {side, quantity,symbol, leverage, takeProfit, stopLoss } =req.body
+
         //check the requireMargin
         
 
@@ -115,7 +116,7 @@ export const createOrder=async (req:Request, res:Response)=>{
                 userId,
                 symbol,
                 side,
-                status: "open",
+                status: "OPEN",
                 qty: Number(quantity),
                 leverage: Number(leverage),
 
@@ -124,13 +125,13 @@ export const createOrder=async (req:Request, res:Response)=>{
                 enqueuedAt: Date.now(),
             },
         }
+        console.log("PAYLOAD:",payload)
         //need to send all of this to the engine to process
         let engineResponse= await engineDispatcher(orderId,payload,5000)
-        const parseEngineResponse=JSON.parse(engineResponse.data)
-        if(parseEngineResponse.status=='created'){
+         console.log("engineResponse:",engineResponse)
+        if(engineResponse.status=='open'){
             return res.status(201).json({message:'your order is created', engineResponse, orderId})
         }
-        console.log("engineResponse:",parseEngineResponse)
         mapEngineResponse(res,engineResponse.status,orderId)
         // res.status(409).json({error:'failed to create order or timeout',engineResponse, orderId})
         
@@ -189,7 +190,7 @@ export const closeOrder=async (req:Request, res:Response)=>{
         })
 
         if(!closeOrderId){
-            res.status(404).json({error:"order not found"})
+            return res.status(404).json({error:"order not found"})
         }
         const payload={
             kind:'close-order',
@@ -200,11 +201,16 @@ export const closeOrder=async (req:Request, res:Response)=>{
                 closedAt: Date.now()
             }
         }
-
+        // engineResponse: {
+        //     id: 'da584058-431d-4173-81e2-949339658cb3',
+        //     status: 'no_price',
+        //     payload: '{"reason":"Price data not available for asset"}',
+        //     reason: 'Price data not available for asset'
+        // }
         const engineResponse=await engineDispatcher(orderId, payload, 5000)
-        const parseEngineResponse=JSON.parse(engineResponse.data)
+        // const parseEngineResponse=JSON.parse(engineResponse.data)
         
-        if(parseEngineResponse.status=="closed"){
+        if(engineResponse.status=="closed"){
             return res.status(200).json({
                 message:'order closed successfully',
                 orderId,

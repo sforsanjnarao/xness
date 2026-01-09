@@ -43,7 +43,7 @@ model Order{
   closePrice      Int?
   priceDecimals   Int
 
-  leverage        Int
+  leverage        Int         @default(1)
   margin          Int
   takeProfitPrice Int?                              @map("take_profit")
   stopLossPrice   Int?                              @map("stop_loss")

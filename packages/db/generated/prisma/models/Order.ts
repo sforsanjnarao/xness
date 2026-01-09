@@ -478,7 +478,7 @@ export type OrderCreateInput = {
   openPrice: number
   closePrice?: number | null
   priceDecimals: number
-  leverage: number
+  leverage?: number
   margin: number
   takeProfitPrice?: number | null
   stopLossPrice?: number | null
@@ -501,7 +501,7 @@ export type OrderUncheckedCreateInput = {
   openPrice: number
   closePrice?: number | null
   priceDecimals: number
-  leverage: number
+  leverage?: number
   margin: number
   takeProfitPrice?: number | null
   stopLossPrice?: number | null
@@ -567,7 +567,7 @@ export type OrderCreateManyInput = {
   openPrice: number
   closePrice?: number | null
   priceDecimals: number
-  leverage: number
+  leverage?: number
   margin: number
   takeProfitPrice?: number | null
   stopLossPrice?: number | null
@@ -823,7 +823,7 @@ export type OrderCreateWithoutUserInput = {
   openPrice: number
   closePrice?: number | null
   priceDecimals: number
-  leverage: number
+  leverage?: number
   margin: number
   takeProfitPrice?: number | null
   stopLossPrice?: number | null
@@ -844,7 +844,7 @@ export type OrderUncheckedCreateWithoutUserInput = {
   openPrice: number
   closePrice?: number | null
   priceDecimals: number
-  leverage: number
+  leverage?: number
   margin: number
   takeProfitPrice?: number | null
   stopLossPrice?: number | null
@@ -916,7 +916,7 @@ export type OrderCreateManyUserInput = {
   openPrice: number
   closePrice?: number | null
   priceDecimals: number
-  leverage: number
+  leverage?: number
   margin: number
   takeProfitPrice?: number | null
   stopLossPrice?: number | null

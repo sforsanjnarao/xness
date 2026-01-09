@@ -33,9 +33,9 @@ import Redis from 'ioredis'
 
 
 export enum MarketSymbol{
-    BTC_USDC = "BTC_USDC",
-    SOL_USDC = "SOL_USDC",
-    ETH_USDC = "ETH_USDC"
+    BTC_USDC = "BTC",
+    SOL_USDC = "SOL",
+    ETH_USDC = "ETH"
 }
 
 export type message={

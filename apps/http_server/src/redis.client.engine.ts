@@ -1,7 +1,7 @@
 import {redisClient} from '@repo/redis-client'
 
 
-type EngineResponse = Record<string, string>;
+type EngineResponse = Record<string, any>;
 type ResolveFunction = (data: EngineResponse) => void;
 
 interface engineDispatcherInputType{
@@ -12,13 +12,15 @@ interface engineDispatcherInputType{
 const publishClient= redisClient()
 const subscriberClient= redisClient()
 
+
+console.log("PUB === SUB:", publishClient === subscriberClient);
 const pendingRequest= new Map<string,ResolveFunction>()
 const ActiveTimeout=new Map<string,NodeJS.Timeout>()
 
-const STREAMS = {
-    INPUT: "trading-engine",
-    OUTPUT: "callback_queue"
-};
+// const STREAMS = {
+//     INPUT: "trading-engine",
+//     OUTPUT: "callback_queue"
+// };
 
 
 
@@ -35,11 +37,13 @@ const parseStreamData = (rawFields: string[]): EngineResponse => {
     }
     return data
 }
-
-let isListening:Boolean=false
+// export function startRedisListener() {
+//     if (!isListening) listeningToStream();
+// }
+let isListening:Boolean=true
 async function listeningToStream() {
-    if (isListening) return;
-    isListening = true;
+    if (!isListening) return;
+    isListening = false;
     console.log('[Redis:Listener] 🎧 Started listening...');
 
     let lastId = "$";
@@ -48,7 +52,7 @@ async function listeningToStream() {
         try {
             const stream = await subscriberClient.xread(
                 "BLOCK", 0,
-                "STREAMS", STREAMS.OUTPUT, lastId
+                "STREAMS", "callback_queue", lastId
             );
             console.log('STREAM:',stream)
 
@@ -65,6 +69,7 @@ async function listeningToStream() {
                 console.log('REDIS_OBJ:',redisObj)
 
                 //  Parse JSON Payload inside if it exists
+                //cloning
                 let finalData: any = { ...redisObj };
                 if (redisObj.payload && typeof redisObj.payload=="string") {
                     try {
@@ -77,7 +82,7 @@ async function listeningToStream() {
                     }
                 }
 
-                //  Find Request ID
+                //  get the request id
                 // engine sends id or orderId inside the payload
                 const requestId = finalData.id || finalData.orderId; 
                 console.log('requestId:', requestId)
@@ -98,11 +103,14 @@ async function listeningToStream() {
                     ActiveTimeout.delete(requestId);
 
                     // delete from Correct Stream
-                    subscriberClient.xdel(STREAMS.OUTPUT, streamMsgId).catch(console.error);
 
                     if (resolve){
+                        console.log("BLEH", finalData)
                        resolve(finalData);
-                    } 
+                        subscriberClient.xdel("callback_queue", streamMsgId).catch(console.error);   
+                    }
+                    isListening = true 
+                    return finalData
                 }
             }
         } catch (err) {
@@ -112,13 +120,11 @@ async function listeningToStream() {
     }
 }
 
-export function engineDispatcher(requestId:string, payload:Record<string,any>, timeoutMS:number):Promise<Record<string,any>>{
-
-    if(!isListening){
-        listeningToStream()
-    }
-
-
+//TODO:??
+export async function engineDispatcher(requestId:string, payload:Record<string,any>, timeoutMS:number):Promise<Record<string,any>>{
+    // if (!isListening) listeningToStream();
+    let res = listeningToStream();
+    console.log(res)
     return new Promise((resolve, reject)=>{
         const timeout=setTimeout(()=>{
             if(pendingRequest.has(requestId)){
@@ -127,7 +133,7 @@ export function engineDispatcher(requestId:string, payload:Record<string,any>, t
                 return reject(new Error("can't process the payment"))
             }
 
-        },5000)
+        },timeoutMS)
 
 
         pendingRequest.set(requestId,resolve)
@@ -136,6 +142,7 @@ export function engineDispatcher(requestId:string, payload:Record<string,any>, t
         publishClient.xadd(
             "trading-engine",
             "*",
+            "id",requestId,
             "payload", JSON.stringify(payload)
         ).catch(()=>{
             clearTimeout(timeout);
