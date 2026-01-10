@@ -52,7 +52,7 @@ export function Header({ balance }: HeaderProps) {
           <div className="flex items-center gap-2 text-sm">
             <Wallet className="h-4 w-4 text-muted-foreground" />
             <span className="text-foreground font-medium">
-              {balance.USDC.toLocaleString()} USDC
+              {(balance.USDC ?? 0).toLocaleString()} USDC
             </span>
           </div>
         )}

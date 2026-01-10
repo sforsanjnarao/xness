@@ -4,10 +4,19 @@ import authRoute from './routes/user.routes'
 import orderRoute from './routes/order.routes'
 import balanceRoute from './routes/balance.route'
 import candleRoute from './routes/candles.route'
+import cros from 'cors'
 
 
 import "../utils/biginit-json";
+import { protectMiddleware } from './middleware/protected'
 const app=express()
+app.use(cros({
+    origin:'http://localhost:3001',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true 
+}))
+// console.log(app.use(protectMiddleware))
 // import { startRedisListener } from "./redis.client.engine";
 
 // startRedisListener();
@@ -23,6 +32,6 @@ app.use('/v1/candles',candleRoute)
 
 
 
-app.listen(3000,()=>{
-    console.log('port is listening on 3000')
+app.listen(8001,()=>{
+    console.log('port is listening on 8080')
 })

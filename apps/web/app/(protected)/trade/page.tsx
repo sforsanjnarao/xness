@@ -15,11 +15,12 @@ import {
   candlesApi, 
   orderApi, 
   CreateOrderRequest, 
-  CandleInterval 
+  CandleInterval, 
+  Balance
 } from '@/lib/api';
 
 export default function Trade() {
-  const [selectedPair, setSelectedPair] = useState('BTC_USDC');
+  const [selectedPair, setSelectedPair] = useState('BTCUSDC');
   const [selectedTimeframe, setSelectedTimeframe] = useState<CandleInterval>('1h');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -28,12 +29,45 @@ export default function Trade() {
   const { data: balanceData } = useQuery({
     queryKey: ['balance'],
     queryFn: async () => {
-      const { data, error } = await balanceApi.getBalance();
-      if (error) throw new Error(error);
-      return data;
+      const response = await balanceApi.getBalance();
+      
+      // 1. Check for errors
+      if (response.error) throw new Error(response.error);
+      
+      // 2. Transform the Backend Data (Array) -> Frontend Data (Object)
+      // The backend returns: { userAllWallet: [...] }
+      // We need: { USDC: 100, BTC: 0.5, ... }
+      
+      const rawData = response.data as any; // Cast to any because backend shape differs from interface
+      const wallets = rawData?.userAllWallet || [];
+
+      // Default empty balance
+      const formattedBalance: Balance = {
+        USDC: 0,
+        BTC: 0,
+        ETH: 0,
+        SOL: 0
+      };
+
+      // Loop through the array and fill the object
+      if (Array.isArray(wallets)) {
+        wallets.forEach((w: any) => {
+          // Calculation: Raw Balance / 10^Decimals
+          const amount = Number(w.balanceRaw) / Math.pow(10, w.balanceDecimal);
+          
+          // Map backend symbol (e.g., "USDC") to our object key
+          if (w.symbol in formattedBalance) {
+            // @ts-ignore
+            formattedBalance[w.symbol] = amount;
+          }
+        });
+      }
+
+      return formattedBalance;
     },
     refetchInterval: 5000,
   });
+
 
   // Fetch candles
     const { data: candlesData = [], isLoading: isCandlesLoading } = useQuery({
@@ -50,12 +84,18 @@ export default function Trade() {
 
 
   // Fetch open orders
+  //order by Id
   const { data: openOrdersData } = useQuery({
     queryKey: ['openOrders'],
     queryFn: async () => {
-      const { data, error } = await orderApi.getOpenOrders();
-      if (error) throw new Error(error);
-      return data;
+      const response = await orderApi.getOpenOrders();
+      if (response.error) throw new Error(response.error);
+      
+      // FIX IS HERE: Extract 'allOrder' from the backend response object
+      // Backend sends: { message: "success", allOrder: [...] }
+      const rawData = response.data as any;
+      return rawData?.allOrder || []; 
+
     },
     refetchInterval: 5000,
   });
@@ -64,9 +104,12 @@ export default function Trade() {
   const { data: allOrdersData } = useQuery({
     queryKey: ['allOrders'],
     queryFn: async () => {
-      const { data, error } = await orderApi.getAllOrders();
-      if (error) throw new Error(error);
-      return data;
+      const response = await orderApi.getAllOrders();
+      if (response.error) throw new Error(response.error);
+
+      // FIX IS HERE: Extract 'allOrder' here too
+      const rawData = response.data as any;
+      return rawData?.allOrder || [];
     },
   });
 
@@ -152,7 +195,7 @@ const lastCandle = candlesData[candlesData.length - 1];
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Chart Section */}
-          <div className="lg:col-span-3 h-[500px]">
+          <div className="lg:col-span-3 h-[535px]">
             <TradingChart 
               candles={candlesData ?? []} 
               isLoading={isCandlesLoading} 

@@ -174,7 +174,23 @@ export const getOrderById=async (req:Request, res:Response)=>{
     }
     
 }
-
+export const getOpenOrders = async (req: Request, res: Response) => {
+    try{
+        const userId=req.user?.id
+        if(!userId) return res.status(401).json({error:'unauthorize'}) //401 = unauthorized
+        // let allOrder=futureMarketOrder.filter(order=>order.userId===userId)
+        console.log('auth')
+        let allOrder=await prisma.order.findMany({
+            where:{
+                userId: userId
+            }
+        })
+            return res.status(200).json({message:'success', allOrder})
+    }catch(err){
+        console.error(err)
+        res.status(500).json({error:'Internal server error'})
+    }
+}   
 
 export const closeOrder=async (req:Request, res:Response)=>{
     try{

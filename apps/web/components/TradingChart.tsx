@@ -70,16 +70,32 @@ export function TradingChart({ candles, isLoading }: TradingChartProps) {
 
     // Update data when candles change
     if (candles.length > 0) {
-      const chartData: CandlestickData<Time>[] = candles.map((candle) => ({
-        time: candle.time as Time,
-        open: candle.open,
-        high: candle.high,
-        low: candle.low,
-        close: candle.close,
-      }));
+      const chartData: CandlestickData<Time>[] = candles
+        .map((candle) => {
+          // 1. Convert the Backend Date String to a Javascript Date Object
+          const date = new Date(candle.time);
+          
+          // 2. Convert to Unix Timestamp in SECONDS (Lightweight charts needs seconds, JS gives milliseconds)
+          // If the date is invalid (NaN), fallback to 0 to prevent crash
+          const unixTime = Math.floor(date.getTime() / 1000);
+
+          return {
+            time: unixTime as Time, // Cast as Time type
+            open: candle.open,
+            high: candle.high,
+            low: candle.low,
+            close: candle.close,
+          };
+        })
+        // 3. Lightweight Charts requires data to be sorted by time (Ascending)
+        // This prevents errors if backend sends data out of order
+        .sort((a, b) => (a.time as number) - (b.time as number));
+
+      // 4. Set the data
       candlestickSeries.setData(chartData);
       chart.timeScale().fitContent();
     }
+
 
     return () => {
       window.removeEventListener('resize', handleResize);

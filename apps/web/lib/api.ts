@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://localhost:8001';
 
 
 interface ApiResponse<T> {
@@ -68,7 +68,7 @@ export const userApi = {
       method: 'POST',
     }),
 
-  getUser: () => request<User>('/v1/auth'),
+  getUser: () => request<User>('/v1/auth/profile'),
 };
 
 // Order API
@@ -105,7 +105,7 @@ export interface CreateOrderRequest {
 
 export const orderApi = {
   create: (data: CreateOrderRequest) =>
-    request<Order>('/v1/order/create', {
+    request<Order>('/v1/orders/', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -115,9 +115,9 @@ export const orderApi = {
       method: 'POST',
     }),
 
-  getOpenOrders: () => request<Order[]>('/v1/order/open-orders'),
+  getOpenOrders: () => request<Order[]>('/v1/orders/open-orders'),
 
-  getAllOrders: () => request<Order[]>('/v1/order/orders'),
+  getAllOrders: () => request<Order[]>('/v1/orders/'),
 };
 
 // Candles API
@@ -141,8 +141,8 @@ export interface CandlesResponse {
 export type CandleInterval = '1m' | '5m' | '15m' | '1h' | '4h' | '1d';
 
 export const candlesApi = {
-  getCandles: (symbol: string, interval: CandleInterval = '1h') =>
-    request<CandlesResponse>(`/v1/candles/${symbol}?interval=${interval}`),
+  getCandles: (symbol: string, interval: CandleInterval = '1m') =>
+    request<CandlesResponse>(`/v1/candles?asset=${symbol}&timeFrame=${interval}`),
 };
 
 // Balance API

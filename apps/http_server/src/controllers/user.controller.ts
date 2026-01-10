@@ -46,8 +46,10 @@ export const signupController=async (req:Request, res:Response)=>{
             // });
         const token= jwt.sign({userId:user.id},'sanjana')     //payload must be an object
         res.cookie('token', token,{  
-            httpOnly:true,       //need more security
-            secure:true
+                secure: process.env.NODE_ENV === "false", 
+                sameSite: 'lax', // Helps with localhost cookie behavior
+                maxAge: 24 * 60 * 60 * 1000 // Optional: 1 day expiry
+
         })
 
         res.status(200).json({message:'welcome in', user:{userId:user.id, name:user.name, email:user.email}})  //can't send token in the response
@@ -80,8 +82,10 @@ export const signinController=async (req:Request, res:Response)=>{
             }
         const token=jwt.sign({userId:existingUser.id},'sanjana')
         res.cookie('token',token,{
-            httpOnly:true,
-            secure:true
+                secure: process.env.NODE_ENV === 'false', 
+                sameSite: 'lax', // Helps with localhost cookie behavior
+                maxAge: 24 * 60 * 60 * 1000 // Optional: 1 day expiry
+
         })
         return res.status(200).json({message:'u r success full signedUp', user:{userId:existingUser.id, email: existingUser.email}})
     }catch(err){
