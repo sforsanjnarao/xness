@@ -30,6 +30,7 @@ export default function Trade() {
     queryKey: ['balance'],
     queryFn: async () => {
       const response = await balanceApi.getBalance();
+      console.log()
       
       // 1. Check for errors
       if (response.error) throw new Error(response.error);
