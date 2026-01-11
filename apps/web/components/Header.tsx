@@ -11,13 +11,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { User, LogOut, Wallet } from 'lucide-react';
-import { Balance } from '@/lib/api';
 
 interface HeaderProps {
-  balance?: Balance;
+  quoteSymbol?: string;
+  quoteBalance?: number;
 }
 
-export function Header({ balance }: HeaderProps) {
+export function Header({ quoteSymbol,quoteBalance }: HeaderProps) {
   const { user, signOut } = useAuth();
   const navigate = useRouter();
 
@@ -25,6 +25,7 @@ export function Header({ balance }: HeaderProps) {
     await signOut();
     navigate.push('/signin');
   };
+  
 
   return (
     <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between">
@@ -48,11 +49,11 @@ export function Header({ balance }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        {balance && (
+        {quoteSymbol && (
           <div className="flex items-center gap-2 text-sm">
             <Wallet className="h-4 w-4 text-muted-foreground" />
             <span className="text-foreground font-medium">
-              {(balance.BTC?? 0).toLocaleString()} USDC
+              {quoteBalance?.toFixed(4)} {quoteSymbol}
             </span>
           </div>
         )}

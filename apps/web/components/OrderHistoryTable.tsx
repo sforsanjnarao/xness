@@ -1,4 +1,3 @@
-
 import { Order } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -7,8 +6,17 @@ interface OrderHistoryTableProps {
   orders: Order[];
 }
 
+const formatQty = (qty: string, decimals: number) =>
+  Number(qty) / Math.pow(10, decimals);
+
+const formatPrice = (raw: number | null, decimals: number) =>
+  raw == null ? '-' : (raw / Math.pow(10, decimals)).toLocaleString();
+
+const normalizeSymbol = (symbol: string) =>
+  symbol.includes('_') ? symbol.split('_')[0] : symbol.replace('USDC', '');
+
 export function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
-  const closedOrders = orders.filter((order) => order.status === 'CLOSED');
+  const closedOrders = orders.filter(order => order.status === 'CLOSED');
 
   if (closedOrders.length === 0) {
     return (
@@ -18,17 +26,11 @@ export function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
     );
   }
 
-  const getCloseReasonBadge = (reason?: string) => {
-    switch (reason) {
-      case 'TP':
-        return <Badge variant="outline" className="border-success text-success text-xs">Take Profit</Badge>;
-      case 'SL':
-        return <Badge variant="outline" className="border-destructive text-destructive text-xs">Stop Loss</Badge>;
-      case 'LIQUIDATION':
-        return <Badge variant="destructive" className="text-xs">Liquidated</Badge>;
-      default:
-        return <Badge variant="outline" className="text-xs">Manual</Badge>;
-    }
+  const reasonBadge = (reason: string | null) => {
+    if (reason === 'TP') return <Badge className="border-success text-success text-xs" variant="outline">TP</Badge>;
+    if (reason === 'SL') return <Badge className="border-destructive text-destructive text-xs" variant="outline">SL</Badge>;
+    if (reason === 'LIQUIDATION') return <Badge variant="destructive" className="text-xs">Liquidated</Badge>;
+    return <Badge variant="outline" className="text-xs">Manual</Badge>;
   };
 
   return (
@@ -41,18 +43,22 @@ export function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
             <th className="text-right py-3 px-2 font-medium">Size</th>
             <th className="text-right py-3 px-2 font-medium">Entry</th>
             <th className="text-right py-3 px-2 font-medium">PnL</th>
-            <th className="text-right py-3 px-2 font-medium">Close Reason</th>
-            <th className="text-right py-3 px-2 font-medium">Closed At</th>
+            <th className="text-right py-3 px-2 font-medium">Reason</th>
+            <th className="text-right py-3 px-2 font-medium">Closed</th>
           </tr>
         </thead>
+
         <tbody>
-          {closedOrders.map((order) => {
-            const pnl = order.pnl ?? 0;
-            const isProfitable = pnl >= 0;
+          {closedOrders.map(order => {
+            const pnl = order.Pnl ?? 0;
+            const isProfit = pnl >= 0;
 
             return (
               <tr key={order.id} className="border-b border-border hover:bg-secondary/50">
-                <td className="py-3 px-2 font-medium">{order.symbol}</td>
+                <td className="py-3 px-2 font-medium">
+                  {normalizeSymbol(order.symbol)}
+                </td>
+
                 <td className="py-3 px-2">
                   <Badge
                     variant="outline"
@@ -66,16 +72,33 @@ export function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
                     {order.side}
                   </Badge>
                 </td>
-                <td className="py-3 px-2 text-right">{order.quantity}</td>
-                <td className="py-3 px-2 text-right">${order.entryPrice.toLocaleString()}</td>
-                <td className={cn('py-3 px-2 text-right font-medium', isProfitable ? 'text-long' : 'text-short')}>
-                  {isProfitable ? '+' : ''}{pnl.toFixed(2)} USDC
-                </td>
+
                 <td className="py-3 px-2 text-right">
-                  {getCloseReasonBadge(order.closeReason)}
+                  {formatQty(order.quantity, order.quantityDecimal)}
                 </td>
+
+                <td className="py-3 px-2 text-right">
+                  ${formatPrice(order.openPrice, order.priceDecimals)}
+                </td>
+
+                <td
+                  className={cn(
+                    'py-3 px-2 text-right font-medium',
+                    isProfit ? 'text-long' : 'text-short'
+                  )}
+                >
+                  {isProfit ? '+' : ''}
+                  {pnl.toFixed(4)}
+                </td>
+
+                <td className="py-3 px-2 text-right">
+                  {reasonBadge(order.reason)}
+                </td>
+
                 <td className="py-3 px-2 text-right text-muted-foreground">
-                  {order.closedAt ? new Date(order.closedAt).toLocaleDateString() : '-'}
+                  {order.closedAt
+                    ? new Date(order.closedAt).toLocaleString()
+                    : '-'}
                 </td>
               </tr>
             );

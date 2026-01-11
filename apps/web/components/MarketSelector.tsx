@@ -2,6 +2,8 @@
 import { CandleInterval } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+// import { Ticker } from '@/hooks/useBackpackTicker';
+import { Ticker } from '@/hooks/useMarketFeed';
 
 interface TradingPair {
   symbol: string;
@@ -26,8 +28,9 @@ const TIMEFRAMES: { value: CandleInterval; label: string }[] = [
 interface MarketSelectorProps {
   selectedPair: string;
   selectedTimeframe: CandleInterval;
+  ticker: Ticker ; 
   currentPrice?: number;
-  priceChange24h?: number;
+  // priceChange24h?: number;
   onPairChange: (symbol: string) => void;
   onTimeframeChange: (timeframe: CandleInterval) => void;
 }
@@ -35,18 +38,22 @@ interface MarketSelectorProps {
 export function MarketSelector({
   selectedPair,
   selectedTimeframe,
-  currentPrice,
-  priceChange24h,
+  ticker,
+  // priceChange24h,
   onPairChange,
   onTimeframeChange,
 }: MarketSelectorProps) {
-  const isPositiveChange = (priceChange24h ?? 0) >= 0;
+
+
+  // const { base, quote } = getMarketDetails(selectedPair);
+  // const isPositiveChange = (priceChange24h ?? 0) >= 0;
 
   return (
     <div className="bg-card border border-border rounded-lg p-3">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {/* Trading Pairs */}
+
           <div className="flex gap-1">
             {TRADING_PAIRS.map((pair) => (
               <Button
@@ -65,21 +72,18 @@ export function MarketSelector({
           </div>
 
           {/* Price Display */}
-          {currentPrice && (
-            <div className="flex items-center gap-3 pl-4 border-l border-border">
-              <span className="text-xl font-bold">${currentPrice.toLocaleString()}</span>
-              {priceChange24h !== undefined && (
-                <span
-                  className={cn(
-                    'text-sm font-medium',
-                    isPositiveChange ? 'text-long' : 'text-short'
-                  )}
-                >
-                  {isPositiveChange ? '+' : ''}{priceChange24h.toFixed(2)}%
-                </span>
-              )}
+          {/* Live Price */}
+          <div>           
+            <div className="flex flex-col">
+            <span className="text-2xl font-bold font-mono tracking-tight">
+              ${(ticker?.lastPrice || 0).toLocaleString(undefined)}
+            </span>
+            <div className="flex gap-3 text-xs font-mono text-muted-foreground">
+               <span className="text-green-500">B: {ticker?.bestBid}</span>
+               <span className="text-red-500">A: {ticker?.bestAsk}</span>
             </div>
-          )}
+         </div>
+       </div>
         </div>
 
         {/* Timeframes */}
@@ -100,3 +104,82 @@ export function MarketSelector({
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+// 'use client'
+// import { CandleInterval } from '@/lib/api';
+// import { cn, getMarketDetails } from '@/lib/utils';
+// import { Button } from '@/components/ui/button';
+// import { Ticker } from '@/hooks/useBackpackTicker';
+
+// interface MarketSelectorProps {
+//   selectedPair: string; // "BTC_USDC"
+//   selectedTimeframe: CandleInterval;
+//   ticker: Ticker | null; // Live WebSocket Data
+//   onPairChange: (symbol: string) => void;
+//   onTimeframeChange: (timeframe: CandleInterval) => void;
+// }
+
+// const MARKETS = ["BTC_USDC", "ETH_USDC", "SOL_USDC"];
+
+// export function MarketSelector({
+//   selectedPair,
+//   selectedTimeframe,
+//   ticker,
+//   onPairChange,
+//   onTimeframeChange,
+// }: MarketSelectorProps) {
+  
+//   const { base, quote } = getMarketDetails(selectedPair);
+
+//   return (
+//     <div className="bg-card border border-border rounded-lg p-3 mb-4">
+//       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        
+//         {/* Left: Ticker Info */}
+//         <div className="flex items-center gap-6 w-full md:w-auto">
+//           {/* Pair Selector */}
+//           <div className="flex gap-1 bg-secondary/20 p-1 rounded-lg">
+//             {MARKETS.map((m) => (
+//               <button
+//                 key={m}
+//                 onClick={() => onPairChange(m)}
+//                 className={cn(
+//                   "px-3 py-1.5 text-sm font-medium rounded-md transition-all",
+//                   selectedPair === m 
+//                     ? "bg-background shadow text-foreground" 
+//                     : "text-muted-foreground hover:text-foreground"
+//                 )}
+//               >
+//                 {getMarketDetails(m).base}
+//               </button>
+//             ))}
+//           </div>
+
+//           {/* Live Price */}
+//           <div className="flex flex-col">
+//             <span className="text-2xl font-bold font-mono tracking-tight">
+//               ${(ticker?.lastPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+//             </span>
+//             <div className="flex gap-3 text-xs font-mono text-muted-foreground">
+//                <span className="text-green-500">B: {ticker?.bestBid}</span>
+//                <span className="text-red-500">A: {ticker?.bestAsk}</span>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Right: Timeframes (Optional, keeping your existing logic) */}
+//         <div className="flex gap-1">
+//            {/* ... existing timeframe buttons ... */}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }

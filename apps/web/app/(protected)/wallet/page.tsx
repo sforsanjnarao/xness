@@ -77,10 +77,11 @@ export default function WalletPage() {
     }
     depositMutation.mutate();
   };
-
+  const formatBalance = (value?: number) =>
+  typeof value === "number" ? value.toFixed(4) : "0.0000";
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header balance={balanceData} />
+      <Header />
 
       <main className="flex-1 p-4 max-w-4xl mx-auto w-full space-y-6">
         <h1 className="text-2xl font-bold">Wallet</h1>
@@ -97,9 +98,9 @@ export default function WalletPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{asset.name}</p>
-                <p className="text-lg font-bold">
-                  {isLoading ? '...' : (balanceData?.[asset.symbol] ?? 0).toLocaleString()}
-                </p>
+                  <p className="text-lg font-bold">
+                    {isLoading ? "..." : formatBalance(balanceData?.[asset.symbol])}
+                  </p>
               </div>
             </div>
           ))}
@@ -143,7 +144,7 @@ export default function WalletPage() {
             <Button
               onClick={handleDeposit}
               disabled={depositMutation.isPending}
-              className="w-full bg-primary hover:bg-primary/90"
+              className="w-full bg-primary hover:bg-destructive/90"
             >
               {depositMutation.isPending ? 'Processing...' : 'Deposit'}
             </Button>

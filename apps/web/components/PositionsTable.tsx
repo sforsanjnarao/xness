@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import { Order } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,8 +12,20 @@ interface PositionsTableProps {
   isClosing?: string;
 }
 
+// Helpers
+const formatQty = (qty: string, decimals: number) =>
+  Number(qty) / Math.pow(10, decimals);
+
+const formatPrice = (raw: number | null, decimals: number) =>
+  raw == null ? '-' : (raw / Math.pow(10, decimals)).toLocaleString();
+
+const normalizeSymbol = (symbol: string) =>
+  symbol.includes('_') ? symbol.split('_')[0] : symbol.replace('USDC', '');
+
 export function PositionsTable({ orders, onClose, isClosing }: PositionsTableProps) {
-  if (orders.length === 0) {
+  const openOrders = orders.filter(o => o.status === 'OPEN');
+
+  if (openOrders.length === 0) {
     return (
       <div className="flex items-center justify-center h-32 text-muted-foreground">
         No open positions
@@ -29,20 +42,23 @@ export function PositionsTable({ orders, onClose, isClosing }: PositionsTablePro
             <th className="text-left py-3 px-2 font-medium">Side</th>
             <th className="text-right py-3 px-2 font-medium">Size</th>
             <th className="text-right py-3 px-2 font-medium">Entry</th>
-            <th className="text-right py-3 px-2 font-medium">Mark</th>
             <th className="text-right py-3 px-2 font-medium">PnL</th>
-            <th className="text-right py-3 px-2 font-medium">TP/SL</th>
+            <th className="text-right py-3 px-2 font-medium">TP / SL</th>
             <th className="text-right py-3 px-2 font-medium">Action</th>
           </tr>
         </thead>
+
         <tbody>
-          {orders.map((order) => {
-            const pnl = order.pnl ?? 0;
-            const isProfitable = pnl >= 0;
+          {openOrders.map(order => {
+            const pnl = order.Pnl ?? 0;
+            const isProfit = pnl >= 0;
 
             return (
               <tr key={order.id} className="border-b border-border hover:bg-secondary/50">
-                <td className="py-3 px-2 font-medium">{order.symbol}</td>
+                <td className="py-3 px-2 font-medium">
+                  {normalizeSymbol(order.symbol)}
+                </td>
+
                 <td className="py-3 px-2">
                   <Badge
                     variant="outline"
@@ -56,17 +72,35 @@ export function PositionsTable({ orders, onClose, isClosing }: PositionsTablePro
                     {order.side}
                   </Badge>
                 </td>
-                <td className="py-3 px-2 text-right">{order.quantity}</td>
-                <td className="py-3 px-2 text-right">${order.entryPrice.toLocaleString()}</td>
+
                 <td className="py-3 px-2 text-right">
-                  ${order.markPrice?.toLocaleString() ?? '-'}
+                  {formatQty(order.quantity, order.quantityDecimal)}
                 </td>
-                <td className={cn('py-3 px-2 text-right font-medium', isProfitable ? 'text-long' : 'text-short')}>
-                  {isProfitable ? '+' : ''}{pnl.toFixed(2)} USDC
+
+                <td className="py-3 px-2 text-right">
+                  ${formatPrice(order.openPrice, order.priceDecimals)}
                 </td>
-                <td className="py-3 px-2 text-right text-muted-foreground text-xs">
-                  {order.takeProfit ? `TP: $${order.takeProfit}` : '-'} / {order.stopLoss ? `SL: $${order.stopLoss}` : '-'}
+
+                <td
+                  className={cn(
+                    'py-3 px-2 text-right font-medium',
+                    isProfit ? 'text-long' : 'text-short'
+                  )}
+                >
+                  {isProfit ? '+' : ''}
+                  {pnl.toFixed(4)}
                 </td>
+
+                <td className="py-3 px-2 text-right text-xs text-muted-foreground">
+                  {order.takeProfitPrice
+                    ? `TP: $${formatPrice(order.takeProfitPrice, order.priceDecimals)}`
+                    : '-'}
+                  {' / '}
+                  {order.stopLossPrice
+                    ? `SL: $${formatPrice(order.stopLossPrice, order.priceDecimals)}`
+                    : '-'}
+                </td>
+
                 <td className="py-3 px-2 text-right">
                   <Button
                     variant="ghost"

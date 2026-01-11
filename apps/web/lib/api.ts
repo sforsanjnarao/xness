@@ -76,48 +76,82 @@ export type OrderSide = 'LONG' | 'SHORT';
 export type OrderStatus = 'OPEN' | 'CLOSED';
 export type CloseReason = 'MANUAL' | 'TP' | 'SL' | 'LIQUIDATION';
 
-export interface Order {
+// export interface Order {
+//   id: string;
+//   userId: string;
+//   symbol: string;
+//   side: OrderSide;
+//   quantity: number;
+//   entryPrice: number;
+//   markPrice?: number;
+//   leverage: number;
+//   takeProfit?: number;
+//   stopLoss?: number;
+//   status: OrderStatus;
+//   closeReason?: CloseReason;
+//   pnl?: number;
+//   createdAt: string;
+//   closedAt?: string;
+// }
+export type Order = {
   id: string;
   userId: string;
+  side: "LONG" | "SHORT";
   symbol: string;
-  side: OrderSide;
-  quantity: number;
-  entryPrice: number;
-  markPrice?: number;
+  status: "OPEN" | "CLOSED" | "LIQUIDATED";
+  quantity: string;
+  quantityDecimal: number;
+  openPrice: number;
+  closePrice: number | null;
+  priceDecimals: number;
   leverage: number;
-  takeProfit?: number;
-  stopLoss?: number;
-  status: OrderStatus;
-  closeReason?: CloseReason;
-  pnl?: number;
+  margin: number;
+  takeProfitPrice: number | null;
+  stopLossPrice: number | null;
+  Pnl: number | null;
+  reason: CloseReason;
   createdAt: string;
-  closedAt?: string;
-}
-
+  updatedAt: string;
+  closedAt: string | null;
+};
 export interface CreateOrderRequest {
+  side: "LONG" | "SHORT";
   symbol: string;
-  side: OrderSide;
   quantity: number;
   leverage: number;
-  takeProfit?: number;
-  stopLoss?: number;
+  takeProfit?: number | null;
+  stopLoss?: number | null;
 }
+// export interface CreateOrderRequest {
+//   symbol: string;
+//   side: OrderSide;
+//   quantity: number;
+//   leverage: number;
+//   takeProfit?: number;
+//   stopLoss?: number;
+// }
 
 export const orderApi = {
   create: (data: CreateOrderRequest) =>
-    request<Order>('/v1/orders/', {
+    request<{ message: string; orderId: string }>('/v1/orders', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  close: (orderId: string) =>
-    request<Order>(`/v1/order/${orderId}/close`, {
-      method: 'POST',
-    }),
+   close: (orderId: string, reason = "manual") =>
+    request<{ message: string; orderId: string; finalPnl: number }>(
+      `/v1/orders/${orderId}/close`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ closeReason: reason }),
+      }
+    ),
 
   getOpenOrders: () => request<Order[]>('/v1/orders/open-orders'),
 
   getAllOrders: () => request<Order[]>('/v1/orders/'),
+  getById: (orderId: string) =>
+    request<{ message: string; order: Order }>(`/v1/orders/${orderId}`)
 };
 
 // Candles API
@@ -142,7 +176,11 @@ export type CandleInterval = '1m' | '5m' | '15m' | '1h' | '4h' | '1d';
 
 export const candlesApi = {
   getCandles: (symbol: string, interval: CandleInterval = '1m') =>
-    request<CandlesResponse>(`/v1/candles?asset=${symbol}&timeFrame=${interval}`),
+    request<CandlesResponse>(`/v1/candles?asset=${symbol}&timeFrame=${interval}`,
+      // {
+      //   cache: 'no-store',
+      // }
+    ),
 };
 
 // Balance API
@@ -157,9 +195,48 @@ export interface DepositRequest {
   symbol: keyof Balance;
   amount: number;
 }
+export interface RawWallet {
+  symbol: string;
+  balanceRaw: string;
+  balanceDecimal: number;
+}
+export interface SymbolWallet {
+  symbol: string;
+  balanceRaw: string;
+  balanceDecimal: number;
+}
+
+
+export interface RawBalanceResponse {
+  userAllWallet: RawWallet[];
+}
+const fromRaw = (raw: string, decimals: number) => {
+  return Number(raw) / 10 ** decimals;
+};
 
 export const balanceApi = {
-  getBalance: () => request<Balance>('/v1/balance'),
+  getBalance: async () => {
+    const { data, error } = await request<RawBalanceResponse>("/v1/balance");
+    if (error) return { error };
+
+    const wallet: Balance = {
+      USDC: 0,
+      BTC: 0,
+      ETH: 0,
+      SOL: 0,
+    };
+
+    data?.userAllWallet.forEach(w => {
+      wallet[w.symbol as keyof Balance] = fromRaw(
+        w.balanceRaw,
+        w.balanceDecimal
+      );
+    });
+
+    return { data: wallet };
+  },
+  getBalanceBySymbol: (symbol: string) =>
+    request<{ wallet: SymbolWallet }>(`/v1/balance/${symbol}`),
 
   deposit: (data: DepositRequest) =>
     request<Balance>('/v1/balance/deposit', {

@@ -182,7 +182,8 @@ export const getOpenOrders = async (req: Request, res: Response) => {
         console.log('auth')
         let allOrder=await prisma.order.findMany({
             where:{
-                userId: userId
+                userId: userId,
+                status:"OPEN"
             }
         })
             return res.status(200).json({message:'success', allOrder})

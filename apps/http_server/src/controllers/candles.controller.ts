@@ -54,7 +54,31 @@ export const TIME_WINDOW_MAP: TimeWindowType = {
 //Default fallback time range: 7 days
 export const DEFAULT_TIME_RANGE_SECONDS = 7*24*60*60
 
+//-----
+type CacheKey = `${string}:${string}`;
 
+interface CacheEntry {
+  data: CandleResponse[];
+  fetchedAt: number;
+}
+
+const candleCache = new Map<CacheKey, CacheEntry>();
+const TTL = 4000; // 4 seconds
+
+export function getCachedCandles(symbol: string, tf: string) {
+  const key: CacheKey = `${symbol}:${tf}`;
+  const entry = candleCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.fetchedAt > TTL) return null;
+  return entry.data;
+}
+
+export function setCachedCandles(symbol: string, tf: string, data: CandleResponse[]) {
+  const key: CacheKey = `${symbol}:${tf}`;
+  candleCache.set(key, { data, fetchedAt: Date.now() });
+}
+
+//----
 export async function getCandles(req: Request, res: Response): Promise<void> {
     const validatedResult = GetCandlesQuerySchema.safeParse(req.query)
 
@@ -94,6 +118,11 @@ export async function getCandles(req: Request, res: Response): Promise<void> {
         url.searchParams.set("startTime", startTime.toString())
         url.searchParams.set("endTime", endTime.toString())
 
+        const cached = getCachedCandles(assetKey, timeFrame);
+            if (cached) {
+            res.json({ data: cached });
+            return;
+            }
         const upstream = await fetch(url.toString())
         
         if (!upstream.ok) {
@@ -109,7 +138,7 @@ export async function getCandles(req: Request, res: Response): Promise<void> {
         };
 
         const json = (await upstream.json()) as UpstreamCandle[];
-
+        console.log(json)
         const transformed: CandleResponse[] = json.map((candle: UpstreamCandle) => ({
             bucket: candle.start,
             symbol: assetKey,
@@ -120,7 +149,11 @@ export async function getCandles(req: Request, res: Response): Promise<void> {
             volume: Number(candle.volume),
             time: candle.start
         }))
+        setCachedCandles(assetKey, timeFrame, transformed);
 
+        // res.setHeader('Cache-Control', 'no-store');
+        // res.setHeader('Pragma', 'no-cache');
+        // res.setHeader('Expires', '0');
         res.json({ data: transformed })
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error"
