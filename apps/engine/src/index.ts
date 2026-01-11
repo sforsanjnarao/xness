@@ -1,5 +1,4 @@
-//what basically engine 
-//a engine is A DETERMINISTIC CALCULATION SERVICE
+
 import {prisma} from "@repo/db"
 import {Symbol, SYMBOL_DECIMALS} from "@repo/types"
 

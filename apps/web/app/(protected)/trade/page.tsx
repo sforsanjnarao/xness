@@ -21,10 +21,9 @@ import {
 // import { useBackpackTicker } from '@/hooks/useBackpackTicker';
 
 import {
-  formatTokenAmount,
   getMarketDetails,
   normalizeSymbol,
-  toCamalCaseSymbol,
+  toCamelCaseSymbol,
 } from "@/lib/utils";
 import { useMarketFeed } from "@/hooks/useMarketFeed";
 
@@ -36,13 +35,13 @@ export default function Trade() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { ticker } = useMarketFeed(selectedPair);
-  let currentPrice = ticker?.lastPrice ?? null;
+  const currentPrice = ticker?.lastPrice ?? null;
 
   // Fetch candles
   const { data: candlesData = [], isLoading: isCandlesLoading } = useQuery({
     queryKey: ["candles", selectedPair, selectedTimeframe],
     queryFn: async () => {
-      const apiSymbol = toCamalCaseSymbol(selectedPair);
+      const apiSymbol = toCamelCaseSymbol(selectedPair);
       const { data, error } = await candlesApi.getCandles(
         apiSymbol,
         selectedTimeframe

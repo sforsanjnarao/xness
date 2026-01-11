@@ -27,7 +27,7 @@ export const getMarketDetails = (symbol: string) => {
   return { base: symbol, quote: 'USDC' };
 };
 
-export const toCamalCaseSymbol = (symbol: string) => {
+export const toCamelCaseSymbol = (symbol: string) => {
   return symbol.replace('_', '');
 }
 export function normalizeSymbol(symbol: string):string {
