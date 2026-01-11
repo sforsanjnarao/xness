@@ -98,7 +98,6 @@ export const useMarketFeed = (symbol: string) => {
             id: Date.now(),
             }));
         }
-        
         ws.close();
         bidsRef.current.clear();
         asksRef.current.clear();

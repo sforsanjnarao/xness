@@ -28,7 +28,7 @@ const TIMEFRAMES: { value: CandleInterval; label: string }[] = [
 interface MarketSelectorProps {
   selectedPair: string;
   selectedTimeframe: CandleInterval;
-  ticker: Ticker ; 
+  ticker?: Ticker | null; 
   currentPrice?: number;
   // priceChange24h?: number;
   onPairChange: (symbol: string) => void;
