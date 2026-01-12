@@ -5,27 +5,13 @@ import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { balanceApi, Balance } from '@/lib/api';
-import { Wallet, Bitcoin, CircleDollarSign } from 'lucide-react';
-
-const ASSETS: { symbol: keyof Balance; name: string; icon: React.ReactNode }[] = [
-  { symbol: 'USDC', name: 'USDC', icon: <CircleDollarSign className="h-6 w-6" /> },
-  { symbol: 'BTC', name: 'Bitcoin', icon: <Bitcoin className="h-6 w-6" /> },
-  { symbol: 'ETH', name: 'Ethereum', icon: <Wallet className="h-6 w-6" /> },
-  { symbol: 'SOL', name: 'Solana', icon: <Wallet className="h-6 w-6" /> },
-];
+import { balanceApi } from '@/lib/api';
+import { CircleDollarSign, ArrowUpRight } from 'lucide-react';
 
 export default function WalletPage() {
-  const [depositSymbol, setDepositSymbol] = useState<keyof Balance>('USDC');
   const [depositAmount, setDepositAmount] = useState('');
+  const [justNumber, setJustNumber]=useState('')
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -35,17 +21,18 @@ export default function WalletPage() {
     queryFn: async () => {
       const { data, error } = await balanceApi.getBalance();
       if (error) throw new Error(error);
-      return data;
+      return data; // Returns { USDC: 100.50 }
     },
   });
 
   // Deposit mutation
   const depositMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await balanceApi.deposit({
-        symbol: depositSymbol,
-        amount: parseFloat(depositAmount),
-      });
+      const amount = parseFloat(depositAmount);
+      // We only allow depositing numbers
+      if(isNaN(amount) || amount <= 0) throw new Error("Invalid amount");
+
+      const { data, error } = await balanceApi.deposit(amount);
       if (error) throw new Error(error);
       return data;
     },
@@ -53,7 +40,7 @@ export default function WalletPage() {
       queryClient.invalidateQueries({ queryKey: ['balance'] });
       toast({
         title: 'Deposit Successful',
-        description: `${depositAmount} ${depositSymbol} has been deposited.`,
+        description: `${depositAmount} USDC has been deposited.`,
       });
       setDepositAmount('');
     },
@@ -65,90 +52,82 @@ export default function WalletPage() {
       });
     },
   });
+   const handleInputChange = (value: string, setter: (v: string) => void) => {
+    // Regex: Allow empty or valid decimal numbers
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setter(value);
+    }
+  };
 
   const handleDeposit = () => {
-    if (!depositAmount || parseFloat(depositAmount) <= 0) {
-      toast({
-        title: 'Invalid Amount',
-        description: 'Please enter a valid deposit amount.',
-        variant: 'destructive',
-      });
-      return;
-    }
     depositMutation.mutate();
   };
+
   const formatBalance = (value?: number) =>
-  typeof value === "number" ? value.toFixed(4) : "0.0000";
+    typeof value === "number" 
+      ? new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(value) 
+      : "0.00";
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="flex-1 p-4 max-w-4xl mx-auto w-full space-y-6">
-        <h1 className="text-2xl font-bold">Wallet</h1>
-
-        {/* Balance Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {ASSETS.map((asset) => (
-            <div
-              key={asset.symbol}
-              className="bg-card border border-border rounded-lg p-4 flex items-center gap-4"
-            >
-              <div className="p-2 bg-secondary rounded-lg text-primary">
-                {asset.icon}
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{asset.name}</p>
-                  <p className="text-lg font-bold">
-                    {isLoading ? "..." : formatBalance(balanceData?.[asset.symbol])}
-                  </p>
-              </div>
-            </div>
-          ))}
+      <main className="flex-1 p-6 max-w-4xl mx-auto w-full space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Wallet</h1>
+          <p className="text-muted-foreground mt-1">Manage your USDC collateral</p>
         </div>
 
-        {/* Deposit Form */}
-        <div className="bg-card border border-border rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Deposit</h2>
-          
-          <div className="space-y-4 max-w-md">
-            <div className="space-y-2">
-              <Label>Asset</Label>
-              <Select
-                value={depositSymbol}
-                onValueChange={(value) => setDepositSymbol(value as keyof Balance)}
-              >
-                <SelectTrigger className="bg-secondary border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ASSETS.map((asset) => (
-                    <SelectItem key={asset.symbol} value={asset.symbol}>
-                      {asset.name} ({asset.symbol})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        {/* Main Balance Card */}
+        <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="p-3 bg-blue-500/10 rounded-full text-green-500">
+              <CircleDollarSign className="h-8 w-8" />
             </div>
+            <span className="text-lg font-medium text-muted-foreground">Available Balance</span>
+          </div>
+          
+          <div className="flex items-baseline gap-2 mt-4">
+            <span className="text-5xl font-bold tracking-tight">
+              {isLoading ? "..." : formatBalance(balanceData?.USDC)}
+            </span>
+            <span className="text-xl text-muted-foreground font-medium">USDC</span>
+          </div>
+        </div>
 
-            <div className="space-y-2">
-              <Label>Amount</Label>
+        {/* Deposit Section */}
+        <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
+          <div className="flex items-center gap-2 mb-6">
+            <ArrowUpRight className="h-5 w-5 text-green-500" />
+            <h2 className="text-xl font-semibold">Deposit Funds</h2>
+          </div>
+          
+          <div className="flex gap-4 max-w-lg items-end">
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="amount">Amount (USDC)</Label>
               <Input
-                type="number"
-                placeholder="Enter amount"
+                id="amount"
+                type="text"
+                inputMode='decimal'
+                placeholder="100.00"
                 value={depositAmount}
-                onChange={(e) => setDepositAmount(e.target.value)}
-                className="bg-secondary border-border"
+                // onChange={(e) => setDepositAmount(e.target.value)}
+                onChange={(e)=>handleInputChange(e.target.value,setDepositAmount)}
+                className="bg-background text-lg h-12"
               />
             </div>
 
             <Button
               onClick={handleDeposit}
-              disabled={depositMutation.isPending}
-              className="w-full bg-primary hover:bg-destructive/90"
+              disabled={depositMutation.isPending || !depositAmount}
+              className="h-12 px-8 bg-green-600 hover:bg-green-700 text-white font-semibold"
             >
-              {depositMutation.isPending ? 'Processing...' : 'Deposit'}
+              {depositMutation.isPending ? 'Processing...' : 'Deposit USDC'}
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground mt-4">
+            * This is a simulated environment. Deposits are instant for testing.
+          </p>
         </div>
       </main>
     </div>

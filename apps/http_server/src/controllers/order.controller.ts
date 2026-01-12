@@ -75,7 +75,7 @@ export const createOrder=async (req:Request, res:Response)=>{
         const userId= req.user?.id
         if(!userId) return res.status(401).json({error:'unauthorize'})
         //zod verification required
-        const {side, quantity, leverage, takeProfit, stopLoss } =req.body
+        const {side, quantity, leverage,market, takeProfit, stopLoss } =req.body
 
         // i made this function because of a glitch 
         //i need resolve in orderId
@@ -95,7 +95,7 @@ export const createOrder=async (req:Request, res:Response)=>{
             payload: {
                 id: orderId,
                 userId,
-                asset:'USDC',
+                market,
                 side,
                 status: "OPEN",
                 qty: Number(quantity),

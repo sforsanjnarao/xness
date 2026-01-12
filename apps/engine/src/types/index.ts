@@ -1,3 +1,4 @@
+
 export interface engineOrder {
     id: string;
     userId: string;
@@ -22,7 +23,9 @@ export type CloseReason =
   | "manual"
   | "Manual";
 
-
+export enum Asset{
+    USDT='USDC'
+}
 export interface precisionEngineOrder {
     id: string;
     userId: string;

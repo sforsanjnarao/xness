@@ -75,29 +75,14 @@ export const userApi = {
 export type OrderSide = 'LONG' | 'SHORT';
 export type OrderStatus = 'OPEN' | 'CLOSED';
 export type CloseReason = 'MANUAL' | 'TP' | 'SL' | 'LIQUIDATION';
+export type Market="BTC_USDC" | "SOL_USDC" | "ETH_USDC"
 
-// export interface Order {
-//   id: string;
-//   userId: string;
-//   symbol: string;
-//   side: OrderSide;
-//   quantity: number;
-//   entryPrice: number;
-//   markPrice?: number;
-//   leverage: number;
-//   takeProfit?: number;
-//   stopLoss?: number;
-//   status: OrderStatus;
-//   closeReason?: CloseReason;
-//   pnl?: number;
-//   createdAt: string;
-//   closedAt?: string;
-// }
 export type Order = {
   id: string;
   userId: string;
   side: "LONG" | "SHORT";
-  symbol: string;
+  // symbol: string;
+  market: Market
   status: "OPEN" | "CLOSED" | "LIQUIDATED";
   quantity: string;
   quantityDecimal: number;
@@ -117,6 +102,7 @@ export type Order = {
 export interface CreateOrderRequest {
   side: "LONG" | "SHORT";
   symbol: string;
+  // market: Market
   quantity: number;
   leverage: number;
   takeProfit?: number | null;
@@ -235,8 +221,8 @@ export const balanceApi = {
 
     return { data: wallet };
   },
-  getBalanceBySymbol: (symbol: string) =>
-    request<{ wallet: SymbolWallet }>(`/v1/balance/${symbol}`),
+  // getBalanceBySymbol: (symbol: string) =>
+  //   request<{ wallet: SymbolWallet }>(`/v1/balance/${symbol}`),
 
   deposit: (data: DepositRequest) =>
     request<Balance>('/v1/balance/deposit', {

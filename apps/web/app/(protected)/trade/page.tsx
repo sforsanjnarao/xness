@@ -79,18 +79,18 @@ export default function Trade() {
 
   // const quoteBalance = getBalanceForSymbol(base??"USDC") // This is usually USDC
 
-  const { data: symbolWallet } = useQuery({
-    queryKey: ["symbolBalance", base],
-    queryFn: async () => {
-      const { data } = await balanceApi.getBalanceBySymbol(base?? "USDC");
-      return data?.wallet;
-    },
-    enabled: !!base,
-    refetchInterval: 5000,
-  });
-  const quoteBalance = symbolWallet
-    ? Number(symbolWallet.balanceRaw) / 10 ** symbolWallet.balanceDecimal
-    : 0;
+  // const { data: symbolWallet } = useQuery({
+  //   queryKey: ["symbolBalance", base],
+  //   queryFn: async () => {
+  //     const { data } = await balanceApi.getBalanceBySymbol(base?? "USDC");
+  //     return data?.wallet;
+  //   },
+  //   enabled: !!base,
+  //   refetchInterval: 5000,
+  // });
+  // const quoteBalance = symbolWallet
+  //   ? Number(symbolWallet.balanceRaw) / 10 ** symbolWallet.balanceDecimal
+  //   : 0;
 
   // Fetch open orders
   //order by Id
@@ -212,7 +212,7 @@ export default function Trade() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header quoteSymbol={base?? "BTC"} quoteBalance={quoteBalance} />
+      <Header quoteSymbol={base?? "BTC"} quoteBalance={rawBalanceData} />
 
       <main className="flex-1 p-2 space-y-4">
         <MarketSelector
@@ -242,7 +242,7 @@ export default function Trade() {
               <OrderForm
                 symbol={orderSymbol}
                 currentPrice={currentPrice}
-                relevantBalance={quoteBalance}
+                relevantBalance={rawBalanceData}
                 onSubmit={async (order) => {
                   await createOrderMutation.mutateAsync(order);
                 }}

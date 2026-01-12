@@ -135,7 +135,6 @@ export const depositWallet = async (req: Request, res: Response) => {
                 userId,
                 asset:'USDC',
                 balanceRaw: updatedWallet.balanceRaw, 
-                balanceDecimal: updatedWallet.balanceDecimal
             }
          }
          //3. SEND TO ENGINE AND AWAIT RESPONSE
