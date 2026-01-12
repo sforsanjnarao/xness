@@ -4,11 +4,6 @@ import {redisClient} from '@repo/redis-client'
 type EngineResponse = Record<string, any>;
 type ResolveFunction = (data: EngineResponse) => void;
 
-interface engineDispatcherInputType{
- requestId:string,
- payload:Record<string,string>
- timeoutMS: 5000
-}
 const publishClient= redisClient()
 const subscriberClient= redisClient()
 

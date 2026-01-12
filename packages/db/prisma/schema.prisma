@@ -17,54 +17,87 @@ datasource db {
 }
 
 
-model User{
-  id String                    @id                 @default(uuid())
-  name String                   
-  email String                  @unique
+model User {
+  id       String  @id @default(uuid())
+  name     String
+  email    String  @unique
   password String
-  order Order[]
-  wallet Wallet[]
+  orders   Order[] // Renamed from 'order' to 'orders' (Prisma convention)
+  wallet   Wallet?
+
   @@map("user")
 }
 
+model Wallet {
+  id         String   @id @default(uuid())
+  
+  // 1-to-1 Relation
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id])
+  
+  // Default to USDC so you don't have to specify it
+  asset      Asset    @default(USDC) 
+  
+  balanceRaw BigInt
+  
+  createdAt  DateTime @default(now()) @map("create_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-model Order{
-  id              String        @id                 @default(uuid())
-  userId          String                            @map("user_id")
-  user            User          @relation(fields: [userId], references: [id])
-  side            orderSide 
-  symbol          Symbol
+  @@map("wallet")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          String      @map("user_id")
+  user            User        @relation(fields: [userId], references: [id])
+  
+  market          Market
+  side            orderSide
   status          orderStatus
 
+  // QUANTITY
   quantity        BigInt
-  quantityDecimal Int
+  // Removed quantityDecimal (Handle this in your TS Config/Constants)
 
-  openPrice       Int
-  closePrice      Int?
-  priceDecimals   Int
+  // PRICES - Changed to BigInt to prevent overflow
+  openPrice       BigInt      @map("open_price")
+  closePrice      BigInt?     @map("close_price") 
+  // Removed priceDecimals (Handle this in your TS Config/Constants)
 
+  // MARGIN & LEVERAGE
   leverage        Int         @default(1)
-  margin          Int
-  takeProfitPrice Int?                              @map("take_profit")
-  stopLossPrice   Int?                              @map("stop_loss")
+  initialMargin   BigInt      @map("initial_margin")
+  
+  // PNL - Made optional. Only exists when Closed.
+  Pnl             BigInt?     @map("profit_and_loss")
 
-  Pnl             Int?                              @map("profit_and_loss")
-
+  // TRIGGERS - Changed to BigInt
+  takeProfitPrice BigInt?     @map("take_profit")
+  stopLossPrice   BigInt?     @map("stop_loss")
 
   reason          CloseReason?
 
-  createdAt       DateTime      @default(now())     @map("created_at")
-  updatedAt       DateTime?     @updatedAt          @map("updated_at")
-  closedAt        DateTime?                         @map("closed_at")
-   
-   @@map("order")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime?   @updatedAt @map("updated_at")
+  closedAt        DateTime?   @map("closed_at")
+
+  @@map("order")
+}
+
+enum Asset {
+  USDC
+}
+
+enum Market {
+  BTC_USDC
+  SOL_USDC
+  ETH_USDC
 }
 
 enum orderSide {
   LONG
   SHORT
 }
-
 
 enum orderStatus {
   OPEN
@@ -73,39 +106,10 @@ enum orderStatus {
   @@map("order_status")
 }
 
-
 enum CloseReason {
   take_profit
   stop_loss
   manual
   liquidation
-
   @@map("close_reason")
 }
-
-
-//balance 
-model Wallet{
-  id                String      @id @unique @default(uuid())
-  userId            String
-  user              User        @relation(fields: [userId], references: [id])
-  symbol            Symbol
-  balanceRaw        BigInt
-  balanceDecimal    Int
-  createdAt         DateTime    @default(now())          @map("create_at")
-  updatedAt         DateTime    @updatedAt               @map("updated_at")
-
-  @@unique([userId, symbol], name: "userId_symbol")
-
-}
-
-
-enum Symbol {
-  USDC
-  BTC
-  SOL
-  ETH 
-
-}
-
-//will add candles later

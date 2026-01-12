@@ -174,8 +174,8 @@ export type UserWhereInput = {
   name?: Prisma.StringFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
-  order?: Prisma.OrderListRelationFilter
-  wallet?: Prisma.WalletListRelationFilter
+  orders?: Prisma.OrderListRelationFilter
+  wallet?: Prisma.XOR<Prisma.WalletNullableScalarRelationFilter, Prisma.WalletWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -183,8 +183,8 @@ export type UserOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
-  order?: Prisma.OrderOrderByRelationAggregateInput
-  wallet?: Prisma.WalletOrderByRelationAggregateInput
+  orders?: Prisma.OrderOrderByRelationAggregateInput
+  wallet?: Prisma.WalletOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -195,8 +195,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   name?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
-  order?: Prisma.OrderListRelationFilter
-  wallet?: Prisma.WalletListRelationFilter
+  orders?: Prisma.OrderListRelationFilter
+  wallet?: Prisma.XOR<Prisma.WalletNullableScalarRelationFilter, Prisma.WalletWhereInput> | null
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -224,8 +224,8 @@ export type UserCreateInput = {
   name: string
   email: string
   password: string
-  order?: Prisma.OrderCreateNestedManyWithoutUserInput
-  wallet?: Prisma.WalletCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  wallet?: Prisma.WalletCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -233,8 +233,8 @@ export type UserUncheckedCreateInput = {
   name: string
   email: string
   password: string
-  order?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
-  wallet?: Prisma.WalletUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  wallet?: Prisma.WalletUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -242,8 +242,8 @@ export type UserUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
-  order?: Prisma.OrderUpdateManyWithoutUserNestedInput
-  wallet?: Prisma.WalletUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  wallet?: Prisma.WalletUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -251,8 +251,8 @@ export type UserUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
-  order?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
-  wallet?: Prisma.WalletUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  wallet?: Prisma.WalletUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -306,20 +306,6 @@ export type StringFieldUpdateOperationsInput = {
   set?: string
 }
 
-export type UserCreateNestedOneWithoutOrderInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutOrderInput, Prisma.UserUncheckedCreateWithoutOrderInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrderInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutOrderNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutOrderInput, Prisma.UserUncheckedCreateWithoutOrderInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrderInput
-  upsert?: Prisma.UserUpsertWithoutOrderInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOrderInput, Prisma.UserUpdateWithoutOrderInput>, Prisma.UserUncheckedUpdateWithoutOrderInput>
-}
-
 export type UserCreateNestedOneWithoutWalletInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutWalletInput, Prisma.UserUncheckedCreateWithoutWalletInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutWalletInput
@@ -334,52 +320,18 @@ export type UserUpdateOneRequiredWithoutWalletNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWalletInput, Prisma.UserUpdateWithoutWalletInput>, Prisma.UserUncheckedUpdateWithoutWalletInput>
 }
 
-export type UserCreateWithoutOrderInput = {
-  id?: string
-  name: string
-  email: string
-  password: string
-  wallet?: Prisma.WalletCreateNestedManyWithoutUserInput
+export type UserCreateNestedOneWithoutOrdersInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOrdersInput, Prisma.UserUncheckedCreateWithoutOrdersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrdersInput
+  connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUncheckedCreateWithoutOrderInput = {
-  id?: string
-  name: string
-  email: string
-  password: string
-  wallet?: Prisma.WalletUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutOrderInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutOrderInput, Prisma.UserUncheckedCreateWithoutOrderInput>
-}
-
-export type UserUpsertWithoutOrderInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutOrderInput, Prisma.UserUncheckedUpdateWithoutOrderInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutOrderInput, Prisma.UserUncheckedCreateWithoutOrderInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutOrderInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutOrderInput, Prisma.UserUncheckedUpdateWithoutOrderInput>
-}
-
-export type UserUpdateWithoutOrderInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  wallet?: Prisma.WalletUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutOrderInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  wallet?: Prisma.WalletUncheckedUpdateManyWithoutUserNestedInput
+export type UserUpdateOneRequiredWithoutOrdersNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOrdersInput, Prisma.UserUncheckedCreateWithoutOrdersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrdersInput
+  upsert?: Prisma.UserUpsertWithoutOrdersInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOrdersInput, Prisma.UserUpdateWithoutOrdersInput>, Prisma.UserUncheckedUpdateWithoutOrdersInput>
 }
 
 export type UserCreateWithoutWalletInput = {
@@ -387,7 +339,7 @@ export type UserCreateWithoutWalletInput = {
   name: string
   email: string
   password: string
-  order?: Prisma.OrderCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWalletInput = {
@@ -395,7 +347,7 @@ export type UserUncheckedCreateWithoutWalletInput = {
   name: string
   email: string
   password: string
-  order?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWalletInput = {
@@ -419,7 +371,7 @@ export type UserUpdateWithoutWalletInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
-  order?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWalletInput = {
@@ -427,7 +379,55 @@ export type UserUncheckedUpdateWithoutWalletInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
-  order?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutOrdersInput = {
+  id?: string
+  name: string
+  email: string
+  password: string
+  wallet?: Prisma.WalletCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutOrdersInput = {
+  id?: string
+  name: string
+  email: string
+  password: string
+  wallet?: Prisma.WalletUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutOrdersInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOrdersInput, Prisma.UserUncheckedCreateWithoutOrdersInput>
+}
+
+export type UserUpsertWithoutOrdersInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOrdersInput, Prisma.UserUncheckedUpdateWithoutOrdersInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOrdersInput, Prisma.UserUncheckedCreateWithoutOrdersInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOrdersInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOrdersInput, Prisma.UserUncheckedUpdateWithoutOrdersInput>
+}
+
+export type UserUpdateWithoutOrdersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  wallet?: Prisma.WalletUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOrdersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  wallet?: Prisma.WalletUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -436,13 +436,11 @@ export type UserUncheckedUpdateWithoutWalletInput = {
  */
 
 export type UserCountOutputType = {
-  order: number
-  wallet: number
+  orders: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  order?: boolean | UserCountOutputTypeCountOrderArgs
-  wallet?: boolean | UserCountOutputTypeCountWalletArgs
+  orders?: boolean | UserCountOutputTypeCountOrdersArgs
 }
 
 /**
@@ -458,15 +456,8 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountOrderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type UserCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.OrderWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountWalletArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.WalletWhereInput
 }
 
 
@@ -475,7 +466,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   name?: boolean
   email?: boolean
   password?: boolean
-  order?: boolean | Prisma.User$orderArgs<ExtArgs>
+  orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
   wallet?: boolean | Prisma.User$walletArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -503,7 +494,7 @@ export type UserSelectScalar = {
 
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  order?: boolean | Prisma.User$orderArgs<ExtArgs>
+  orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
   wallet?: boolean | Prisma.User$walletArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -513,8 +504,8 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    order: Prisma.$OrderPayload<ExtArgs>[]
-    wallet: Prisma.$WalletPayload<ExtArgs>[]
+    orders: Prisma.$OrderPayload<ExtArgs>[]
+    wallet: Prisma.$WalletPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -915,8 +906,8 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  order<T extends Prisma.User$orderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$orderArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  wallet<T extends Prisma.User$walletArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$walletArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WalletPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orders<T extends Prisma.User$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  wallet<T extends Prisma.User$walletArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$walletArgs<ExtArgs>>): Prisma.Prisma__WalletClient<runtime.Types.Result.GetResult<Prisma.$WalletPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1338,9 +1329,9 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.order
+ * User.orders
  */
-export type User$orderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Order
    */
@@ -1378,11 +1369,6 @@ export type User$walletArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   include?: Prisma.WalletInclude<ExtArgs> | null
   where?: Prisma.WalletWhereInput
-  orderBy?: Prisma.WalletOrderByWithRelationInput | Prisma.WalletOrderByWithRelationInput[]
-  cursor?: Prisma.WalletWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.WalletScalarFieldEnum | Prisma.WalletScalarFieldEnum[]
 }
 
 /**

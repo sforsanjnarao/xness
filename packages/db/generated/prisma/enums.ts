@@ -9,6 +9,22 @@
 * 🟢 You can import this file directly.
 */
 
+export const Asset = {
+  USDC: 'USDC'
+} as const
+
+export type Asset = (typeof Asset)[keyof typeof Asset]
+
+
+export const Market = {
+  BTC_USDC: 'BTC_USDC',
+  SOL_USDC: 'SOL_USDC',
+  ETH_USDC: 'ETH_USDC'
+} as const
+
+export type Market = (typeof Market)[keyof typeof Market]
+
+
 export const orderSide = {
   LONG: 'LONG',
   SHORT: 'SHORT'
@@ -34,13 +50,3 @@ export const CloseReason = {
 } as const
 
 export type CloseReason = (typeof CloseReason)[keyof typeof CloseReason]
-
-
-export const Symbol = {
-  USDC: 'USDC',
-  BTC: 'BTC',
-  SOL: 'SOL',
-  ETH: 'ETH'
-} as const
-
-export type Symbol = (typeof Symbol)[keyof typeof Symbol]

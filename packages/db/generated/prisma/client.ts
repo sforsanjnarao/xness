@@ -45,12 +45,12 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
- * Model Order
- * 
- */
-export type Order = Prisma.OrderModel
-/**
  * Model Wallet
  * 
  */
 export type Wallet = Prisma.WalletModel
+/**
+ * Model Order
+ * 
+ */
+export type Order = Prisma.OrderModel

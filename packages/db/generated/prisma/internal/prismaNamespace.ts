@@ -385,8 +385,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
-  Order: 'Order',
-  Wallet: 'Wallet'
+  Wallet: 'Wallet',
+  Order: 'Order'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -402,7 +402,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "order" | "wallet"
+    modelProps: "user" | "wallet" | "order"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -480,80 +480,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    Order: {
-      payload: Prisma.$OrderPayload<ExtArgs>
-      fields: Prisma.OrderFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.OrderFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.OrderFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
-        }
-        findFirst: {
-          args: Prisma.OrderFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.OrderFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
-        }
-        findMany: {
-          args: Prisma.OrderFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>[]
-        }
-        create: {
-          args: Prisma.OrderCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
-        }
-        createMany: {
-          args: Prisma.OrderCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.OrderCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>[]
-        }
-        delete: {
-          args: Prisma.OrderDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
-        }
-        update: {
-          args: Prisma.OrderUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
-        }
-        deleteMany: {
-          args: Prisma.OrderDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.OrderUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.OrderUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>[]
-        }
-        upsert: {
-          args: Prisma.OrderUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
-        }
-        aggregate: {
-          args: Prisma.OrderAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateOrder>
-        }
-        groupBy: {
-          args: Prisma.OrderGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.OrderGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.OrderCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.OrderCountAggregateOutputType> | number
-        }
-      }
-    }
     Wallet: {
       payload: Prisma.$WalletPayload<ExtArgs>
       fields: Prisma.WalletFieldRefs
@@ -628,6 +554,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Order: {
+      payload: Prisma.$OrderPayload<ExtArgs>
+      fields: Prisma.OrderFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrderFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrderFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
+        }
+        findFirst: {
+          args: Prisma.OrderFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrderFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
+        }
+        findMany: {
+          args: Prisma.OrderFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>[]
+        }
+        create: {
+          args: Prisma.OrderCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
+        }
+        createMany: {
+          args: Prisma.OrderCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrderCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>[]
+        }
+        delete: {
+          args: Prisma.OrderDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
+        }
+        update: {
+          args: Prisma.OrderUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
+        }
+        deleteMany: {
+          args: Prisma.OrderDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrderUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrderUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>[]
+        }
+        upsert: {
+          args: Prisma.OrderUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPayload>
+        }
+        aggregate: {
+          args: Prisma.OrderAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrder>
+        }
+        groupBy: {
+          args: Prisma.OrderGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrderCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -677,22 +677,32 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const WalletScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  asset: 'asset',
+  balanceRaw: 'balanceRaw',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WalletScalarFieldEnum = (typeof WalletScalarFieldEnum)[keyof typeof WalletScalarFieldEnum]
+
+
 export const OrderScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  market: 'market',
   side: 'side',
-  symbol: 'symbol',
   status: 'status',
   quantity: 'quantity',
-  quantityDecimal: 'quantityDecimal',
   openPrice: 'openPrice',
   closePrice: 'closePrice',
-  priceDecimals: 'priceDecimals',
   leverage: 'leverage',
-  margin: 'margin',
+  initialMargin: 'initialMargin',
+  Pnl: 'Pnl',
   takeProfitPrice: 'takeProfitPrice',
   stopLossPrice: 'stopLossPrice',
-  Pnl: 'Pnl',
   reason: 'reason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -700,19 +710,6 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
-
-
-export const WalletScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  symbol: 'symbol',
-  balanceRaw: 'balanceRaw',
-  balanceDecimal: 'balanceDecimal',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type WalletScalarFieldEnum = (typeof WalletScalarFieldEnum)[keyof typeof WalletScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -760,44 +757,16 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
- * Reference to a field of type 'orderSide'
+ * Reference to a field of type 'Asset'
  */
-export type EnumorderSideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'orderSide'>
+export type EnumAssetFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Asset'>
     
 
 
 /**
- * Reference to a field of type 'orderSide[]'
+ * Reference to a field of type 'Asset[]'
  */
-export type ListEnumorderSideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'orderSide[]'>
-    
-
-
-/**
- * Reference to a field of type 'Symbol'
- */
-export type EnumSymbolFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Symbol'>
-    
-
-
-/**
- * Reference to a field of type 'Symbol[]'
- */
-export type ListEnumSymbolFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Symbol[]'>
-    
-
-
-/**
- * Reference to a field of type 'orderStatus'
- */
-export type EnumorderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'orderStatus'>
-    
-
-
-/**
- * Reference to a field of type 'orderStatus[]'
- */
-export type ListEnumorderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'orderStatus[]'>
+export type ListEnumAssetFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Asset[]'>
     
 
 
@@ -812,6 +781,62 @@ export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  * Reference to a field of type 'BigInt[]'
  */
 export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Market'
+ */
+export type EnumMarketFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Market'>
+    
+
+
+/**
+ * Reference to a field of type 'Market[]'
+ */
+export type ListEnumMarketFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Market[]'>
+    
+
+
+/**
+ * Reference to a field of type 'orderSide'
+ */
+export type EnumorderSideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'orderSide'>
+    
+
+
+/**
+ * Reference to a field of type 'orderSide[]'
+ */
+export type ListEnumorderSideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'orderSide[]'>
+    
+
+
+/**
+ * Reference to a field of type 'orderStatus'
+ */
+export type EnumorderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'orderStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'orderStatus[]'
+ */
+export type ListEnumorderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'orderStatus[]'>
     
 
 
@@ -840,20 +865,6 @@ export type EnumCloseReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'CloseReason[]'
  */
 export type ListEnumCloseReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CloseReason[]'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime'
- */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime[]'
- */
-export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
     
 
 
@@ -966,8 +977,8 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
-  order?: Prisma.OrderOmit
   wallet?: Prisma.WalletOmit
+  order?: Prisma.OrderOmit
 }
 
 /* Types for Logging */

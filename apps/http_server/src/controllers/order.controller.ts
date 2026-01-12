@@ -4,34 +4,7 @@ import { prisma } from "@repo/db"
         import crypto from "crypto";
 
 
-enum orderSides{
-    LONG= "long",
-    SHORT="short"
-}
-enum orderStatus{
-    OPEN = "open",
-    CLOSED = "closed",
-    LIQUIDATED = "liquidated"
-}
-enum orderSymbol{
 
-}
- type futureMarketOrderTypes={
-    id:string
-    userId:string
-    side:orderSides
-    symbol:orderSymbol
-    status:orderStatus
-    quantity:number
-    entryPrice: number
-    closePrice: number
-    takeProfitPrice?:number
-    stopLossPrice?:number
-    Margin:number
-    leverage:number
-    pnl:number
-    createdAt: number
-}
 
 function mapEngineResponse(res: Response, status: any, orderId: string) {
     switch (status) {
@@ -102,7 +75,7 @@ export const createOrder=async (req:Request, res:Response)=>{
         const userId= req.user?.id
         if(!userId) return res.status(401).json({error:'unauthorize'})
         //zod verification required
-        const {side, quantity,symbol, leverage, takeProfit, stopLoss } =req.body
+        const {side, quantity, leverage, takeProfit, stopLoss } =req.body
 
         // i made this function because of a glitch 
         //i need resolve in orderId
@@ -122,7 +95,7 @@ export const createOrder=async (req:Request, res:Response)=>{
             payload: {
                 id: orderId,
                 userId,
-                symbol,
+                asset:'USDC',
                 side,
                 status: "OPEN",
                 qty: Number(quantity),

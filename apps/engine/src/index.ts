@@ -3,73 +3,10 @@ import {prisma} from "@repo/db"
 import {Symbol, SYMBOL_DECIMALS} from "@repo/types"
 
 
-export type Side = "long" | "short"
-export interface engineOrder {
-    id: string;
-    userId: string;
-    asset: string; //symbol
-    side: Side;
-    qty: number;
-    leverage: number;
-    openingPrice: number;
-    initialMargin: number;
-    takeProfit?: number;
-    stopLoss?: number;
-    createdAt: number;
-}
-
-export interface precisionEngineOrder {
-    id: string;
-    userId: string;
-    asset: string;
-    side: "long" | "short";
-    status: "OPEN" | "CLOSE"
-    qty: bigint;            // Stored as 100000000 (1.00 BTC)
-    leverage: number;       // Leverage is fine as a standard number (10x, 20x)
-    openingPrice: bigint;   // Stored as 6000000000000 (60k)
-    initialMargin: bigint;  // Calculated in BigInt
-    takeProfit?: bigint;
-    stopLoss?: bigint;
-    createdAt: number;
-}
-
-enum walletSymbol{
-    SOL_USDC="SOL_USDC",
-    ETH_USDC="ETH_USDC",
-    BTC_USDC="BTC_USDC"
-}
-type balanceType={
-    depositId: string
-    userId: string
-    symbol:Symbol
-    balanceRaw:bigint       //bigInt Means floating
-    balanceDecimal:number
-    createdAt:Date
-    updatedAt:Date
-}
-export const ENGINE_CONSTANTS = {
-    PRECISION_SCALE: 100_000_000,
-    DB_BATCH_SIZE: 100,
-    DB_FLUSH_INTERVAL_MS: 1000,
-    MARGIN_THRESHOLD: 0.05,
-    MAX_QUEUE_SIZE: 10000,   
-} as const
-
-
-export const ORDER_PRECISION = {
-    PRICE: 100,
-    QUANTITY: 100000000000
-} as const;
-
-export type CloseReason =
-  | "TAKE_PROFIT"
-  | "STOP_LOSS"
-  | "LIQUIDATION"
-  | "manual"
-  | "Manual";
 
 let isFlushingDB = false;
 import { redisClient } from "@repo/redis-client";
+import { balanceType, ENGINE_CONSTANTS, ORDER_PRECISION, precisionEngineOrder, Side } from "./types";
 //read data from the stream (needs a loop in Block)
 //process the data 
 //put everything in the db
@@ -154,7 +91,7 @@ async function getBalance(userId:string, symbol:string):Promise<bigint>{
 }
 function queueDbAction(action:any){
     // check the length and put it into the array
-    if(dbArray.length >=100){
+    if(dbArray.length >=1000){
         console.error(`[DB] Queue overflow! Size: ${dbArray.length}. Dropping oldest tasks.`)
         dbArray.shift()
     }
@@ -313,8 +250,8 @@ async function sendCallbackToRedis(id:string,status:string ,payload:any){
 }
 async function handlePriceUpdate(payload:payloadType){
     let {a,b,s}=payload
-    let ask=toEnginePrecision(a) //bigint
-    let bid=toEnginePrecision(b) //bigint
+    let ask=toEnginePrecision(Number(a)) //bigint
+    let bid=toEnginePrecision(Number(b)) //bigint
     let splitSymbol=s.split('_')
     let symbol=splitSymbol[0]
 
@@ -385,8 +322,9 @@ async function handleCreateOrder(payload:payloadType){
     const marginRequired = calcMargin(openingPrice, qtyInt, lev);
     console.log("marginRequired:",marginRequired)
     console.log('done_calculation')
+    const collateralAsset = "USDC"; 
 
-    let userBal = await getBalance(userId, symbol); //bigint
+    let userBal = await getBalance(userId, collateralAsset); //bigint
     
     console.log('user_balance:',userBal)
     if (userBal < marginRequired) {
@@ -405,7 +343,7 @@ async function handleCreateOrder(payload:payloadType){
     // console.log('margin:',margin)
 
     console.log('userBal - marginRequired:',userBal - marginRequired)
-    mutateBalance(userId, symbol, userBal - marginRequired);
+    mutateBalance(userId, collateralAsset, userBal - marginRequired);
     console.log('lalala')
     //need to make the order
     let order: precisionEngineOrder = {
@@ -591,7 +529,7 @@ async function engine(){
 
                         if (!rawData) continue
                         const msg=JSON.parse(rawData)
-                        // console.log("PARSED_MESSAGE:",msg)
+                        console.log("PARSED_MESSAGE:",msg)
                         const kind=msg.kind || msg.type
                         const payload= msg.payload || msg.data
 

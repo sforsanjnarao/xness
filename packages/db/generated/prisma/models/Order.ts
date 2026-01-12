@@ -28,46 +28,40 @@ export type AggregateOrder = {
 
 export type OrderAvgAggregateOutputType = {
   quantity: number | null
-  quantityDecimal: number | null
   openPrice: number | null
   closePrice: number | null
-  priceDecimals: number | null
   leverage: number | null
-  margin: number | null
+  initialMargin: number | null
+  Pnl: number | null
   takeProfitPrice: number | null
   stopLossPrice: number | null
-  Pnl: number | null
 }
 
 export type OrderSumAggregateOutputType = {
   quantity: bigint | null
-  quantityDecimal: number | null
-  openPrice: number | null
-  closePrice: number | null
-  priceDecimals: number | null
+  openPrice: bigint | null
+  closePrice: bigint | null
   leverage: number | null
-  margin: number | null
-  takeProfitPrice: number | null
-  stopLossPrice: number | null
-  Pnl: number | null
+  initialMargin: bigint | null
+  Pnl: bigint | null
+  takeProfitPrice: bigint | null
+  stopLossPrice: bigint | null
 }
 
 export type OrderMinAggregateOutputType = {
   id: string | null
   userId: string | null
+  market: $Enums.Market | null
   side: $Enums.orderSide | null
-  symbol: $Enums.Symbol | null
   status: $Enums.orderStatus | null
   quantity: bigint | null
-  quantityDecimal: number | null
-  openPrice: number | null
-  closePrice: number | null
-  priceDecimals: number | null
+  openPrice: bigint | null
+  closePrice: bigint | null
   leverage: number | null
-  margin: number | null
-  takeProfitPrice: number | null
-  stopLossPrice: number | null
-  Pnl: number | null
+  initialMargin: bigint | null
+  Pnl: bigint | null
+  takeProfitPrice: bigint | null
+  stopLossPrice: bigint | null
   reason: $Enums.CloseReason | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -77,19 +71,17 @@ export type OrderMinAggregateOutputType = {
 export type OrderMaxAggregateOutputType = {
   id: string | null
   userId: string | null
+  market: $Enums.Market | null
   side: $Enums.orderSide | null
-  symbol: $Enums.Symbol | null
   status: $Enums.orderStatus | null
   quantity: bigint | null
-  quantityDecimal: number | null
-  openPrice: number | null
-  closePrice: number | null
-  priceDecimals: number | null
+  openPrice: bigint | null
+  closePrice: bigint | null
   leverage: number | null
-  margin: number | null
-  takeProfitPrice: number | null
-  stopLossPrice: number | null
-  Pnl: number | null
+  initialMargin: bigint | null
+  Pnl: bigint | null
+  takeProfitPrice: bigint | null
+  stopLossPrice: bigint | null
   reason: $Enums.CloseReason | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -99,19 +91,17 @@ export type OrderMaxAggregateOutputType = {
 export type OrderCountAggregateOutputType = {
   id: number
   userId: number
+  market: number
   side: number
-  symbol: number
   status: number
   quantity: number
-  quantityDecimal: number
   openPrice: number
   closePrice: number
-  priceDecimals: number
   leverage: number
-  margin: number
+  initialMargin: number
+  Pnl: number
   takeProfitPrice: number
   stopLossPrice: number
-  Pnl: number
   reason: number
   createdAt: number
   updatedAt: number
@@ -122,46 +112,40 @@ export type OrderCountAggregateOutputType = {
 
 export type OrderAvgAggregateInputType = {
   quantity?: true
-  quantityDecimal?: true
   openPrice?: true
   closePrice?: true
-  priceDecimals?: true
   leverage?: true
-  margin?: true
+  initialMargin?: true
+  Pnl?: true
   takeProfitPrice?: true
   stopLossPrice?: true
-  Pnl?: true
 }
 
 export type OrderSumAggregateInputType = {
   quantity?: true
-  quantityDecimal?: true
   openPrice?: true
   closePrice?: true
-  priceDecimals?: true
   leverage?: true
-  margin?: true
+  initialMargin?: true
+  Pnl?: true
   takeProfitPrice?: true
   stopLossPrice?: true
-  Pnl?: true
 }
 
 export type OrderMinAggregateInputType = {
   id?: true
   userId?: true
+  market?: true
   side?: true
-  symbol?: true
   status?: true
   quantity?: true
-  quantityDecimal?: true
   openPrice?: true
   closePrice?: true
-  priceDecimals?: true
   leverage?: true
-  margin?: true
+  initialMargin?: true
+  Pnl?: true
   takeProfitPrice?: true
   stopLossPrice?: true
-  Pnl?: true
   reason?: true
   createdAt?: true
   updatedAt?: true
@@ -171,19 +155,17 @@ export type OrderMinAggregateInputType = {
 export type OrderMaxAggregateInputType = {
   id?: true
   userId?: true
+  market?: true
   side?: true
-  symbol?: true
   status?: true
   quantity?: true
-  quantityDecimal?: true
   openPrice?: true
   closePrice?: true
-  priceDecimals?: true
   leverage?: true
-  margin?: true
+  initialMargin?: true
+  Pnl?: true
   takeProfitPrice?: true
   stopLossPrice?: true
-  Pnl?: true
   reason?: true
   createdAt?: true
   updatedAt?: true
@@ -193,19 +175,17 @@ export type OrderMaxAggregateInputType = {
 export type OrderCountAggregateInputType = {
   id?: true
   userId?: true
+  market?: true
   side?: true
-  symbol?: true
   status?: true
   quantity?: true
-  quantityDecimal?: true
   openPrice?: true
   closePrice?: true
-  priceDecimals?: true
   leverage?: true
-  margin?: true
+  initialMargin?: true
+  Pnl?: true
   takeProfitPrice?: true
   stopLossPrice?: true
-  Pnl?: true
   reason?: true
   createdAt?: true
   updatedAt?: true
@@ -302,19 +282,17 @@ export type OrderGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type OrderGroupByOutputType = {
   id: string
   userId: string
+  market: $Enums.Market
   side: $Enums.orderSide
-  symbol: $Enums.Symbol
   status: $Enums.orderStatus
   quantity: bigint
-  quantityDecimal: number
-  openPrice: number
-  closePrice: number | null
-  priceDecimals: number
+  openPrice: bigint
+  closePrice: bigint | null
   leverage: number
-  margin: number
-  takeProfitPrice: number | null
-  stopLossPrice: number | null
-  Pnl: number | null
+  initialMargin: bigint
+  Pnl: bigint | null
+  takeProfitPrice: bigint | null
+  stopLossPrice: bigint | null
   reason: $Enums.CloseReason | null
   createdAt: Date
   updatedAt: Date | null
@@ -347,19 +325,17 @@ export type OrderWhereInput = {
   NOT?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
   id?: Prisma.StringFilter<"Order"> | string
   userId?: Prisma.StringFilter<"Order"> | string
+  market?: Prisma.EnumMarketFilter<"Order"> | $Enums.Market
   side?: Prisma.EnumorderSideFilter<"Order"> | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolFilter<"Order"> | $Enums.Symbol
   status?: Prisma.EnumorderStatusFilter<"Order"> | $Enums.orderStatus
   quantity?: Prisma.BigIntFilter<"Order"> | bigint | number
-  quantityDecimal?: Prisma.IntFilter<"Order"> | number
-  openPrice?: Prisma.IntFilter<"Order"> | number
-  closePrice?: Prisma.IntNullableFilter<"Order"> | number | null
-  priceDecimals?: Prisma.IntFilter<"Order"> | number
+  openPrice?: Prisma.BigIntFilter<"Order"> | bigint | number
+  closePrice?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
   leverage?: Prisma.IntFilter<"Order"> | number
-  margin?: Prisma.IntFilter<"Order"> | number
-  takeProfitPrice?: Prisma.IntNullableFilter<"Order"> | number | null
-  stopLossPrice?: Prisma.IntNullableFilter<"Order"> | number | null
-  Pnl?: Prisma.IntNullableFilter<"Order"> | number | null
+  initialMargin?: Prisma.BigIntFilter<"Order"> | bigint | number
+  Pnl?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
+  takeProfitPrice?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
+  stopLossPrice?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
   reason?: Prisma.EnumCloseReasonNullableFilter<"Order"> | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
@@ -370,19 +346,17 @@ export type OrderWhereInput = {
 export type OrderOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  market?: Prisma.SortOrder
   side?: Prisma.SortOrder
-  symbol?: Prisma.SortOrder
   status?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
-  quantityDecimal?: Prisma.SortOrder
   openPrice?: Prisma.SortOrder
   closePrice?: Prisma.SortOrderInput | Prisma.SortOrder
-  priceDecimals?: Prisma.SortOrder
   leverage?: Prisma.SortOrder
-  margin?: Prisma.SortOrder
+  initialMargin?: Prisma.SortOrder
+  Pnl?: Prisma.SortOrderInput | Prisma.SortOrder
   takeProfitPrice?: Prisma.SortOrderInput | Prisma.SortOrder
   stopLossPrice?: Prisma.SortOrderInput | Prisma.SortOrder
-  Pnl?: Prisma.SortOrderInput | Prisma.SortOrder
   reason?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -396,19 +370,17 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.OrderWhereInput[]
   NOT?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
   userId?: Prisma.StringFilter<"Order"> | string
+  market?: Prisma.EnumMarketFilter<"Order"> | $Enums.Market
   side?: Prisma.EnumorderSideFilter<"Order"> | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolFilter<"Order"> | $Enums.Symbol
   status?: Prisma.EnumorderStatusFilter<"Order"> | $Enums.orderStatus
   quantity?: Prisma.BigIntFilter<"Order"> | bigint | number
-  quantityDecimal?: Prisma.IntFilter<"Order"> | number
-  openPrice?: Prisma.IntFilter<"Order"> | number
-  closePrice?: Prisma.IntNullableFilter<"Order"> | number | null
-  priceDecimals?: Prisma.IntFilter<"Order"> | number
+  openPrice?: Prisma.BigIntFilter<"Order"> | bigint | number
+  closePrice?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
   leverage?: Prisma.IntFilter<"Order"> | number
-  margin?: Prisma.IntFilter<"Order"> | number
-  takeProfitPrice?: Prisma.IntNullableFilter<"Order"> | number | null
-  stopLossPrice?: Prisma.IntNullableFilter<"Order"> | number | null
-  Pnl?: Prisma.IntNullableFilter<"Order"> | number | null
+  initialMargin?: Prisma.BigIntFilter<"Order"> | bigint | number
+  Pnl?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
+  takeProfitPrice?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
+  stopLossPrice?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
   reason?: Prisma.EnumCloseReasonNullableFilter<"Order"> | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
@@ -419,19 +391,17 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
 export type OrderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  market?: Prisma.SortOrder
   side?: Prisma.SortOrder
-  symbol?: Prisma.SortOrder
   status?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
-  quantityDecimal?: Prisma.SortOrder
   openPrice?: Prisma.SortOrder
   closePrice?: Prisma.SortOrderInput | Prisma.SortOrder
-  priceDecimals?: Prisma.SortOrder
   leverage?: Prisma.SortOrder
-  margin?: Prisma.SortOrder
+  initialMargin?: Prisma.SortOrder
+  Pnl?: Prisma.SortOrderInput | Prisma.SortOrder
   takeProfitPrice?: Prisma.SortOrderInput | Prisma.SortOrder
   stopLossPrice?: Prisma.SortOrderInput | Prisma.SortOrder
-  Pnl?: Prisma.SortOrderInput | Prisma.SortOrder
   reason?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -449,19 +419,17 @@ export type OrderScalarWhereWithAggregatesInput = {
   NOT?: Prisma.OrderScalarWhereWithAggregatesInput | Prisma.OrderScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Order"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Order"> | string
+  market?: Prisma.EnumMarketWithAggregatesFilter<"Order"> | $Enums.Market
   side?: Prisma.EnumorderSideWithAggregatesFilter<"Order"> | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolWithAggregatesFilter<"Order"> | $Enums.Symbol
   status?: Prisma.EnumorderStatusWithAggregatesFilter<"Order"> | $Enums.orderStatus
   quantity?: Prisma.BigIntWithAggregatesFilter<"Order"> | bigint | number
-  quantityDecimal?: Prisma.IntWithAggregatesFilter<"Order"> | number
-  openPrice?: Prisma.IntWithAggregatesFilter<"Order"> | number
-  closePrice?: Prisma.IntNullableWithAggregatesFilter<"Order"> | number | null
-  priceDecimals?: Prisma.IntWithAggregatesFilter<"Order"> | number
+  openPrice?: Prisma.BigIntWithAggregatesFilter<"Order"> | bigint | number
+  closePrice?: Prisma.BigIntNullableWithAggregatesFilter<"Order"> | bigint | number | null
   leverage?: Prisma.IntWithAggregatesFilter<"Order"> | number
-  margin?: Prisma.IntWithAggregatesFilter<"Order"> | number
-  takeProfitPrice?: Prisma.IntNullableWithAggregatesFilter<"Order"> | number | null
-  stopLossPrice?: Prisma.IntNullableWithAggregatesFilter<"Order"> | number | null
-  Pnl?: Prisma.IntNullableWithAggregatesFilter<"Order"> | number | null
+  initialMargin?: Prisma.BigIntWithAggregatesFilter<"Order"> | bigint | number
+  Pnl?: Prisma.BigIntNullableWithAggregatesFilter<"Order"> | bigint | number | null
+  takeProfitPrice?: Prisma.BigIntNullableWithAggregatesFilter<"Order"> | bigint | number | null
+  stopLossPrice?: Prisma.BigIntNullableWithAggregatesFilter<"Order"> | bigint | number | null
   reason?: Prisma.EnumCloseReasonNullableWithAggregatesFilter<"Order"> | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
@@ -470,42 +438,38 @@ export type OrderScalarWhereWithAggregatesInput = {
 
 export type OrderCreateInput = {
   id?: string
+  market: $Enums.Market
   side: $Enums.orderSide
-  symbol: $Enums.Symbol
   status: $Enums.orderStatus
   quantity: bigint | number
-  quantityDecimal: number
-  openPrice: number
-  closePrice?: number | null
-  priceDecimals: number
+  openPrice: bigint | number
+  closePrice?: bigint | number | null
   leverage?: number
-  margin: number
-  takeProfitPrice?: number | null
-  stopLossPrice?: number | null
-  Pnl?: number | null
+  initialMargin: bigint | number
+  Pnl?: bigint | number | null
+  takeProfitPrice?: bigint | number | null
+  stopLossPrice?: bigint | number | null
   reason?: $Enums.CloseReason | null
   createdAt?: Date | string
   updatedAt?: Date | string | null
   closedAt?: Date | string | null
-  user: Prisma.UserCreateNestedOneWithoutOrderInput
+  user: Prisma.UserCreateNestedOneWithoutOrdersInput
 }
 
 export type OrderUncheckedCreateInput = {
   id?: string
   userId: string
+  market: $Enums.Market
   side: $Enums.orderSide
-  symbol: $Enums.Symbol
   status: $Enums.orderStatus
   quantity: bigint | number
-  quantityDecimal: number
-  openPrice: number
-  closePrice?: number | null
-  priceDecimals: number
+  openPrice: bigint | number
+  closePrice?: bigint | number | null
   leverage?: number
-  margin: number
-  takeProfitPrice?: number | null
-  stopLossPrice?: number | null
-  Pnl?: number | null
+  initialMargin: bigint | number
+  Pnl?: bigint | number | null
+  takeProfitPrice?: bigint | number | null
+  stopLossPrice?: bigint | number | null
   reason?: $Enums.CloseReason | null
   createdAt?: Date | string
   updatedAt?: Date | string | null
@@ -514,42 +478,38 @@ export type OrderUncheckedCreateInput = {
 
 export type OrderUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.EnumMarketFieldUpdateOperationsInput | $Enums.Market
   side?: Prisma.EnumorderSideFieldUpdateOperationsInput | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolFieldUpdateOperationsInput | $Enums.Symbol
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   quantity?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  quantityDecimal?: Prisma.IntFieldUpdateOperationsInput | number
-  openPrice?: Prisma.IntFieldUpdateOperationsInput | number
-  closePrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  priceDecimals?: Prisma.IntFieldUpdateOperationsInput | number
+  openPrice?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  closePrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   leverage?: Prisma.IntFieldUpdateOperationsInput | number
-  margin?: Prisma.IntFieldUpdateOperationsInput | number
-  takeProfitPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stopLossPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  Pnl?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  initialMargin?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  Pnl?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  takeProfitPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  stopLossPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   reason?: Prisma.NullableEnumCloseReasonFieldUpdateOperationsInput | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  user?: Prisma.UserUpdateOneRequiredWithoutOrderNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.EnumMarketFieldUpdateOperationsInput | $Enums.Market
   side?: Prisma.EnumorderSideFieldUpdateOperationsInput | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolFieldUpdateOperationsInput | $Enums.Symbol
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   quantity?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  quantityDecimal?: Prisma.IntFieldUpdateOperationsInput | number
-  openPrice?: Prisma.IntFieldUpdateOperationsInput | number
-  closePrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  priceDecimals?: Prisma.IntFieldUpdateOperationsInput | number
+  openPrice?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  closePrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   leverage?: Prisma.IntFieldUpdateOperationsInput | number
-  margin?: Prisma.IntFieldUpdateOperationsInput | number
-  takeProfitPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stopLossPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  Pnl?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  initialMargin?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  Pnl?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  takeProfitPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  stopLossPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   reason?: Prisma.NullableEnumCloseReasonFieldUpdateOperationsInput | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -559,19 +519,17 @@ export type OrderUncheckedUpdateInput = {
 export type OrderCreateManyInput = {
   id?: string
   userId: string
+  market: $Enums.Market
   side: $Enums.orderSide
-  symbol: $Enums.Symbol
   status: $Enums.orderStatus
   quantity: bigint | number
-  quantityDecimal: number
-  openPrice: number
-  closePrice?: number | null
-  priceDecimals: number
+  openPrice: bigint | number
+  closePrice?: bigint | number | null
   leverage?: number
-  margin: number
-  takeProfitPrice?: number | null
-  stopLossPrice?: number | null
-  Pnl?: number | null
+  initialMargin: bigint | number
+  Pnl?: bigint | number | null
+  takeProfitPrice?: bigint | number | null
+  stopLossPrice?: bigint | number | null
   reason?: $Enums.CloseReason | null
   createdAt?: Date | string
   updatedAt?: Date | string | null
@@ -580,19 +538,17 @@ export type OrderCreateManyInput = {
 
 export type OrderUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.EnumMarketFieldUpdateOperationsInput | $Enums.Market
   side?: Prisma.EnumorderSideFieldUpdateOperationsInput | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolFieldUpdateOperationsInput | $Enums.Symbol
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   quantity?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  quantityDecimal?: Prisma.IntFieldUpdateOperationsInput | number
-  openPrice?: Prisma.IntFieldUpdateOperationsInput | number
-  closePrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  priceDecimals?: Prisma.IntFieldUpdateOperationsInput | number
+  openPrice?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  closePrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   leverage?: Prisma.IntFieldUpdateOperationsInput | number
-  margin?: Prisma.IntFieldUpdateOperationsInput | number
-  takeProfitPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stopLossPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  Pnl?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  initialMargin?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  Pnl?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  takeProfitPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  stopLossPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   reason?: Prisma.NullableEnumCloseReasonFieldUpdateOperationsInput | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -602,19 +558,17 @@ export type OrderUpdateManyMutationInput = {
 export type OrderUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.EnumMarketFieldUpdateOperationsInput | $Enums.Market
   side?: Prisma.EnumorderSideFieldUpdateOperationsInput | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolFieldUpdateOperationsInput | $Enums.Symbol
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   quantity?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  quantityDecimal?: Prisma.IntFieldUpdateOperationsInput | number
-  openPrice?: Prisma.IntFieldUpdateOperationsInput | number
-  closePrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  priceDecimals?: Prisma.IntFieldUpdateOperationsInput | number
+  openPrice?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  closePrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   leverage?: Prisma.IntFieldUpdateOperationsInput | number
-  margin?: Prisma.IntFieldUpdateOperationsInput | number
-  takeProfitPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stopLossPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  Pnl?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  initialMargin?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  Pnl?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  takeProfitPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  stopLossPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   reason?: Prisma.NullableEnumCloseReasonFieldUpdateOperationsInput | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -634,19 +588,17 @@ export type OrderOrderByRelationAggregateInput = {
 export type OrderCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  market?: Prisma.SortOrder
   side?: Prisma.SortOrder
-  symbol?: Prisma.SortOrder
   status?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
-  quantityDecimal?: Prisma.SortOrder
   openPrice?: Prisma.SortOrder
   closePrice?: Prisma.SortOrder
-  priceDecimals?: Prisma.SortOrder
   leverage?: Prisma.SortOrder
-  margin?: Prisma.SortOrder
+  initialMargin?: Prisma.SortOrder
+  Pnl?: Prisma.SortOrder
   takeProfitPrice?: Prisma.SortOrder
   stopLossPrice?: Prisma.SortOrder
-  Pnl?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -655,33 +607,29 @@ export type OrderCountOrderByAggregateInput = {
 
 export type OrderAvgOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
-  quantityDecimal?: Prisma.SortOrder
   openPrice?: Prisma.SortOrder
   closePrice?: Prisma.SortOrder
-  priceDecimals?: Prisma.SortOrder
   leverage?: Prisma.SortOrder
-  margin?: Prisma.SortOrder
+  initialMargin?: Prisma.SortOrder
+  Pnl?: Prisma.SortOrder
   takeProfitPrice?: Prisma.SortOrder
   stopLossPrice?: Prisma.SortOrder
-  Pnl?: Prisma.SortOrder
 }
 
 export type OrderMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  market?: Prisma.SortOrder
   side?: Prisma.SortOrder
-  symbol?: Prisma.SortOrder
   status?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
-  quantityDecimal?: Prisma.SortOrder
   openPrice?: Prisma.SortOrder
   closePrice?: Prisma.SortOrder
-  priceDecimals?: Prisma.SortOrder
   leverage?: Prisma.SortOrder
-  margin?: Prisma.SortOrder
+  initialMargin?: Prisma.SortOrder
+  Pnl?: Prisma.SortOrder
   takeProfitPrice?: Prisma.SortOrder
   stopLossPrice?: Prisma.SortOrder
-  Pnl?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -691,19 +639,17 @@ export type OrderMaxOrderByAggregateInput = {
 export type OrderMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  market?: Prisma.SortOrder
   side?: Prisma.SortOrder
-  symbol?: Prisma.SortOrder
   status?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
-  quantityDecimal?: Prisma.SortOrder
   openPrice?: Prisma.SortOrder
   closePrice?: Prisma.SortOrder
-  priceDecimals?: Prisma.SortOrder
   leverage?: Prisma.SortOrder
-  margin?: Prisma.SortOrder
+  initialMargin?: Prisma.SortOrder
+  Pnl?: Prisma.SortOrder
   takeProfitPrice?: Prisma.SortOrder
   stopLossPrice?: Prisma.SortOrder
-  Pnl?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -712,15 +658,13 @@ export type OrderMinOrderByAggregateInput = {
 
 export type OrderSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
-  quantityDecimal?: Prisma.SortOrder
   openPrice?: Prisma.SortOrder
   closePrice?: Prisma.SortOrder
-  priceDecimals?: Prisma.SortOrder
   leverage?: Prisma.SortOrder
-  margin?: Prisma.SortOrder
+  initialMargin?: Prisma.SortOrder
+  Pnl?: Prisma.SortOrder
   takeProfitPrice?: Prisma.SortOrder
   stopLossPrice?: Prisma.SortOrder
-  Pnl?: Prisma.SortOrder
 }
 
 export type OrderCreateNestedManyWithoutUserInput = {
@@ -765,20 +709,20 @@ export type OrderUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
 }
 
-export type EnumorderSideFieldUpdateOperationsInput = {
-  set?: $Enums.orderSide
+export type EnumMarketFieldUpdateOperationsInput = {
+  set?: $Enums.Market
 }
 
-export type EnumSymbolFieldUpdateOperationsInput = {
-  set?: $Enums.Symbol
+export type EnumorderSideFieldUpdateOperationsInput = {
+  set?: $Enums.orderSide
 }
 
 export type EnumorderStatusFieldUpdateOperationsInput = {
   set?: $Enums.orderStatus
 }
 
-export type BigIntFieldUpdateOperationsInput = {
-  set?: bigint | number
+export type NullableBigIntFieldUpdateOperationsInput = {
+  set?: bigint | number | null
   increment?: bigint | number
   decrement?: bigint | number
   multiply?: bigint | number
@@ -793,20 +737,8 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type NullableEnumCloseReasonFieldUpdateOperationsInput = {
   set?: $Enums.CloseReason | null
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -815,19 +747,17 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type OrderCreateWithoutUserInput = {
   id?: string
+  market: $Enums.Market
   side: $Enums.orderSide
-  symbol: $Enums.Symbol
   status: $Enums.orderStatus
   quantity: bigint | number
-  quantityDecimal: number
-  openPrice: number
-  closePrice?: number | null
-  priceDecimals: number
+  openPrice: bigint | number
+  closePrice?: bigint | number | null
   leverage?: number
-  margin: number
-  takeProfitPrice?: number | null
-  stopLossPrice?: number | null
-  Pnl?: number | null
+  initialMargin: bigint | number
+  Pnl?: bigint | number | null
+  takeProfitPrice?: bigint | number | null
+  stopLossPrice?: bigint | number | null
   reason?: $Enums.CloseReason | null
   createdAt?: Date | string
   updatedAt?: Date | string | null
@@ -836,19 +766,17 @@ export type OrderCreateWithoutUserInput = {
 
 export type OrderUncheckedCreateWithoutUserInput = {
   id?: string
+  market: $Enums.Market
   side: $Enums.orderSide
-  symbol: $Enums.Symbol
   status: $Enums.orderStatus
   quantity: bigint | number
-  quantityDecimal: number
-  openPrice: number
-  closePrice?: number | null
-  priceDecimals: number
+  openPrice: bigint | number
+  closePrice?: bigint | number | null
   leverage?: number
-  margin: number
-  takeProfitPrice?: number | null
-  stopLossPrice?: number | null
-  Pnl?: number | null
+  initialMargin: bigint | number
+  Pnl?: bigint | number | null
+  takeProfitPrice?: bigint | number | null
+  stopLossPrice?: bigint | number | null
   reason?: $Enums.CloseReason | null
   createdAt?: Date | string
   updatedAt?: Date | string | null
@@ -887,19 +815,17 @@ export type OrderScalarWhereInput = {
   NOT?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
   id?: Prisma.StringFilter<"Order"> | string
   userId?: Prisma.StringFilter<"Order"> | string
+  market?: Prisma.EnumMarketFilter<"Order"> | $Enums.Market
   side?: Prisma.EnumorderSideFilter<"Order"> | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolFilter<"Order"> | $Enums.Symbol
   status?: Prisma.EnumorderStatusFilter<"Order"> | $Enums.orderStatus
   quantity?: Prisma.BigIntFilter<"Order"> | bigint | number
-  quantityDecimal?: Prisma.IntFilter<"Order"> | number
-  openPrice?: Prisma.IntFilter<"Order"> | number
-  closePrice?: Prisma.IntNullableFilter<"Order"> | number | null
-  priceDecimals?: Prisma.IntFilter<"Order"> | number
+  openPrice?: Prisma.BigIntFilter<"Order"> | bigint | number
+  closePrice?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
   leverage?: Prisma.IntFilter<"Order"> | number
-  margin?: Prisma.IntFilter<"Order"> | number
-  takeProfitPrice?: Prisma.IntNullableFilter<"Order"> | number | null
-  stopLossPrice?: Prisma.IntNullableFilter<"Order"> | number | null
-  Pnl?: Prisma.IntNullableFilter<"Order"> | number | null
+  initialMargin?: Prisma.BigIntFilter<"Order"> | bigint | number
+  Pnl?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
+  takeProfitPrice?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
+  stopLossPrice?: Prisma.BigIntNullableFilter<"Order"> | bigint | number | null
   reason?: Prisma.EnumCloseReasonNullableFilter<"Order"> | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
@@ -908,19 +834,17 @@ export type OrderScalarWhereInput = {
 
 export type OrderCreateManyUserInput = {
   id?: string
+  market: $Enums.Market
   side: $Enums.orderSide
-  symbol: $Enums.Symbol
   status: $Enums.orderStatus
   quantity: bigint | number
-  quantityDecimal: number
-  openPrice: number
-  closePrice?: number | null
-  priceDecimals: number
+  openPrice: bigint | number
+  closePrice?: bigint | number | null
   leverage?: number
-  margin: number
-  takeProfitPrice?: number | null
-  stopLossPrice?: number | null
-  Pnl?: number | null
+  initialMargin: bigint | number
+  Pnl?: bigint | number | null
+  takeProfitPrice?: bigint | number | null
+  stopLossPrice?: bigint | number | null
   reason?: $Enums.CloseReason | null
   createdAt?: Date | string
   updatedAt?: Date | string | null
@@ -929,19 +853,17 @@ export type OrderCreateManyUserInput = {
 
 export type OrderUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.EnumMarketFieldUpdateOperationsInput | $Enums.Market
   side?: Prisma.EnumorderSideFieldUpdateOperationsInput | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolFieldUpdateOperationsInput | $Enums.Symbol
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   quantity?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  quantityDecimal?: Prisma.IntFieldUpdateOperationsInput | number
-  openPrice?: Prisma.IntFieldUpdateOperationsInput | number
-  closePrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  priceDecimals?: Prisma.IntFieldUpdateOperationsInput | number
+  openPrice?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  closePrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   leverage?: Prisma.IntFieldUpdateOperationsInput | number
-  margin?: Prisma.IntFieldUpdateOperationsInput | number
-  takeProfitPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stopLossPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  Pnl?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  initialMargin?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  Pnl?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  takeProfitPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  stopLossPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   reason?: Prisma.NullableEnumCloseReasonFieldUpdateOperationsInput | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -950,19 +872,17 @@ export type OrderUpdateWithoutUserInput = {
 
 export type OrderUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.EnumMarketFieldUpdateOperationsInput | $Enums.Market
   side?: Prisma.EnumorderSideFieldUpdateOperationsInput | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolFieldUpdateOperationsInput | $Enums.Symbol
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   quantity?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  quantityDecimal?: Prisma.IntFieldUpdateOperationsInput | number
-  openPrice?: Prisma.IntFieldUpdateOperationsInput | number
-  closePrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  priceDecimals?: Prisma.IntFieldUpdateOperationsInput | number
+  openPrice?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  closePrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   leverage?: Prisma.IntFieldUpdateOperationsInput | number
-  margin?: Prisma.IntFieldUpdateOperationsInput | number
-  takeProfitPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stopLossPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  Pnl?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  initialMargin?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  Pnl?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  takeProfitPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  stopLossPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   reason?: Prisma.NullableEnumCloseReasonFieldUpdateOperationsInput | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -971,19 +891,17 @@ export type OrderUncheckedUpdateWithoutUserInput = {
 
 export type OrderUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  market?: Prisma.EnumMarketFieldUpdateOperationsInput | $Enums.Market
   side?: Prisma.EnumorderSideFieldUpdateOperationsInput | $Enums.orderSide
-  symbol?: Prisma.EnumSymbolFieldUpdateOperationsInput | $Enums.Symbol
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   quantity?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  quantityDecimal?: Prisma.IntFieldUpdateOperationsInput | number
-  openPrice?: Prisma.IntFieldUpdateOperationsInput | number
-  closePrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  priceDecimals?: Prisma.IntFieldUpdateOperationsInput | number
+  openPrice?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  closePrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   leverage?: Prisma.IntFieldUpdateOperationsInput | number
-  margin?: Prisma.IntFieldUpdateOperationsInput | number
-  takeProfitPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  stopLossPrice?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  Pnl?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  initialMargin?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  Pnl?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  takeProfitPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  stopLossPrice?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   reason?: Prisma.NullableEnumCloseReasonFieldUpdateOperationsInput | $Enums.CloseReason | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -995,19 +913,17 @@ export type OrderUncheckedUpdateManyWithoutUserInput = {
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  market?: boolean
   side?: boolean
-  symbol?: boolean
   status?: boolean
   quantity?: boolean
-  quantityDecimal?: boolean
   openPrice?: boolean
   closePrice?: boolean
-  priceDecimals?: boolean
   leverage?: boolean
-  margin?: boolean
+  initialMargin?: boolean
+  Pnl?: boolean
   takeProfitPrice?: boolean
   stopLossPrice?: boolean
-  Pnl?: boolean
   reason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1018,19 +934,17 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  market?: boolean
   side?: boolean
-  symbol?: boolean
   status?: boolean
   quantity?: boolean
-  quantityDecimal?: boolean
   openPrice?: boolean
   closePrice?: boolean
-  priceDecimals?: boolean
   leverage?: boolean
-  margin?: boolean
+  initialMargin?: boolean
+  Pnl?: boolean
   takeProfitPrice?: boolean
   stopLossPrice?: boolean
-  Pnl?: boolean
   reason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1041,19 +955,17 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  market?: boolean
   side?: boolean
-  symbol?: boolean
   status?: boolean
   quantity?: boolean
-  quantityDecimal?: boolean
   openPrice?: boolean
   closePrice?: boolean
-  priceDecimals?: boolean
   leverage?: boolean
-  margin?: boolean
+  initialMargin?: boolean
+  Pnl?: boolean
   takeProfitPrice?: boolean
   stopLossPrice?: boolean
-  Pnl?: boolean
   reason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1064,26 +976,24 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type OrderSelectScalar = {
   id?: boolean
   userId?: boolean
+  market?: boolean
   side?: boolean
-  symbol?: boolean
   status?: boolean
   quantity?: boolean
-  quantityDecimal?: boolean
   openPrice?: boolean
   closePrice?: boolean
-  priceDecimals?: boolean
   leverage?: boolean
-  margin?: boolean
+  initialMargin?: boolean
+  Pnl?: boolean
   takeProfitPrice?: boolean
   stopLossPrice?: boolean
-  Pnl?: boolean
   reason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   closedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "side" | "symbol" | "status" | "quantity" | "quantityDecimal" | "openPrice" | "closePrice" | "priceDecimals" | "leverage" | "margin" | "takeProfitPrice" | "stopLossPrice" | "Pnl" | "reason" | "createdAt" | "updatedAt" | "closedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "market" | "side" | "status" | "quantity" | "openPrice" | "closePrice" | "leverage" | "initialMargin" | "Pnl" | "takeProfitPrice" | "stopLossPrice" | "reason" | "createdAt" | "updatedAt" | "closedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -1102,19 +1012,17 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
+    market: $Enums.Market
     side: $Enums.orderSide
-    symbol: $Enums.Symbol
     status: $Enums.orderStatus
     quantity: bigint
-    quantityDecimal: number
-    openPrice: number
-    closePrice: number | null
-    priceDecimals: number
+    openPrice: bigint
+    closePrice: bigint | null
     leverage: number
-    margin: number
-    takeProfitPrice: number | null
-    stopLossPrice: number | null
-    Pnl: number | null
+    initialMargin: bigint
+    Pnl: bigint | null
+    takeProfitPrice: bigint | null
+    stopLossPrice: bigint | null
     reason: $Enums.CloseReason | null
     createdAt: Date
     updatedAt: Date | null
@@ -1545,19 +1453,17 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
 export interface OrderFieldRefs {
   readonly id: Prisma.FieldRef<"Order", 'String'>
   readonly userId: Prisma.FieldRef<"Order", 'String'>
+  readonly market: Prisma.FieldRef<"Order", 'Market'>
   readonly side: Prisma.FieldRef<"Order", 'orderSide'>
-  readonly symbol: Prisma.FieldRef<"Order", 'Symbol'>
   readonly status: Prisma.FieldRef<"Order", 'orderStatus'>
   readonly quantity: Prisma.FieldRef<"Order", 'BigInt'>
-  readonly quantityDecimal: Prisma.FieldRef<"Order", 'Int'>
-  readonly openPrice: Prisma.FieldRef<"Order", 'Int'>
-  readonly closePrice: Prisma.FieldRef<"Order", 'Int'>
-  readonly priceDecimals: Prisma.FieldRef<"Order", 'Int'>
+  readonly openPrice: Prisma.FieldRef<"Order", 'BigInt'>
+  readonly closePrice: Prisma.FieldRef<"Order", 'BigInt'>
   readonly leverage: Prisma.FieldRef<"Order", 'Int'>
-  readonly margin: Prisma.FieldRef<"Order", 'Int'>
-  readonly takeProfitPrice: Prisma.FieldRef<"Order", 'Int'>
-  readonly stopLossPrice: Prisma.FieldRef<"Order", 'Int'>
-  readonly Pnl: Prisma.FieldRef<"Order", 'Int'>
+  readonly initialMargin: Prisma.FieldRef<"Order", 'BigInt'>
+  readonly Pnl: Prisma.FieldRef<"Order", 'BigInt'>
+  readonly takeProfitPrice: Prisma.FieldRef<"Order", 'BigInt'>
+  readonly stopLossPrice: Prisma.FieldRef<"Order", 'BigInt'>
   readonly reason: Prisma.FieldRef<"Order", 'CloseReason'>
   readonly createdAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Order", 'DateTime'>

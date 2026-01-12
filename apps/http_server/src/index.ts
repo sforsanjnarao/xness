@@ -8,7 +8,6 @@ import cros from 'cors'
 
 
 import "../utils/biginit-json";
-import { protectMiddleware } from './middleware/protected'
 const app=express()
 app.use(cros({
     origin:'http://localhost:3001',
@@ -16,10 +15,7 @@ app.use(cros({
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true 
 }))
-// console.log(app.use(protectMiddleware))
-// import { startRedisListener } from "./redis.client.engine";
 
-// startRedisListener();
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
