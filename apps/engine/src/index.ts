@@ -39,7 +39,9 @@ const fromEnginePrecision = (val: bigint | number): number => {
 
 const calPnL = (currentPrice: bigint, openPrice: bigint, side: Side, quantity: bigint) => {
     const diff = side === "long" ? currentPrice - openPrice : openPrice - currentPrice;
-    return (diff * quantity) / SCALE;
+    let calculatedPnl=(diff * quantity) / SCALE;
+    // console.log('calculatedPnl:',calculatedPnl)
+    return calculatedPnl
 };
 
 // --- RISK ENGINE ---
@@ -168,6 +170,7 @@ async function pushQueueJobsToDb() {
                     });
 
                 } else if (task.type === "order_close") {
+                    console.log('close_order_getting_in_db')
                     await prisma.order.update({
                         where: { id: task.payload.id },
                         data: task.payload.update
@@ -189,7 +192,6 @@ setInterval(() => {
     pushQueueJobsToDb();
 }, ENGINE_CONSTANTS.DB_FLUSH_INTERVAL_MS);
 
-// --- HANDLERS ---
 
 async function executeClose(order: precisionEngineOrder, reason: string, currentPrice: bigint, pnl: bigint) {
     let credit = order.initialMargin + pnl;
@@ -351,7 +353,7 @@ async function handleCloseOrder(payload: any) {
 
     // 3. Get Live Price
     // We need the latest price to calculate final PnL
-
+    console.log('close_order_asset')
     const priceData = price.get(order.asset);
     console.log('price_map',price)
     console.log("is priceData exist", priceData)

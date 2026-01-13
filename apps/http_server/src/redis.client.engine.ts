@@ -118,7 +118,7 @@ async function listeningToStream() {
 //TODO:??
 export async function engineDispatcher(requestId:string, payload:Record<string,any>, timeoutMS:number):Promise<Record<string,any>>{
     // if (!isListening) listeningToStream();
-    let res = listeningToStream();
+     listeningToStream();
     // console.log(res)
     return new Promise((resolve, reject)=>{
         const timeout=setTimeout(()=>{

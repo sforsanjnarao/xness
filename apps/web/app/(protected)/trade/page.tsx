@@ -96,6 +96,7 @@ export default function Trade() {
       const rawData = response.data as any;
       return rawData?.allOrder || [];
     },
+    refetchInterval: 3000,
   });
 
 

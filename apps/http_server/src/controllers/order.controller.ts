@@ -152,7 +152,7 @@ export const getOpenOrders = async (req: Request, res: Response) => {
         const userId=req.user?.id
         if(!userId) return res.status(401).json({error:'unauthorize'}) //401 = unauthorized
         // let allOrder=futureMarketOrder.filter(order=>order.userId===userId)
-        console.log('auth')
+        // console.log('auth')
         let allOrder=await prisma.order.findMany({
             where:{
                 userId: userId,
@@ -206,6 +206,7 @@ export const closeOrder=async (req:Request, res:Response)=>{
         //     reason: 'Price data not available for asset'
         // }
         const engineResponse=await engineDispatcher(orderId, payload, 5000)
+        console.log("engineResponse:",engineResponse)
         // const parseEngineResponse=JSON.parse(engineResponse.data)
         
         if(engineResponse.status=="closed"){

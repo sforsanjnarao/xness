@@ -138,7 +138,7 @@ export async function getCandles(req: Request, res: Response): Promise<void> {
         };
 
         const json = (await upstream.json()) as UpstreamCandle[];
-        console.log(json)
+        // console.log(json)
         const transformed: CandleResponse[] = json.map((candle: UpstreamCandle) => ({
             bucket: candle.start,
             symbol: assetKey,

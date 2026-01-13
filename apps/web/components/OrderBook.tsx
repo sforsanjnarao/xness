@@ -2,7 +2,7 @@
 import { useMarketFeed } from '@/hooks/useMarketFeed';
 // import { useOrderBook } from '@/hooks/useOrderBook';
 
-import { cn } from '@/lib/utils';
+import { cn, normalizeSymbol } from '@/lib/utils';
 
 export function OrderBook({ symbol, }: { symbol: string; currentPrice: number }) {
   const { bids, asks,ticker } = useMarketFeed(symbol);
@@ -12,6 +12,7 @@ export function OrderBook({ symbol, }: { symbol: string; currentPrice: number })
     ...asks.map(a => a.total),
     1
   );
+  let firstSymbol=normalizeSymbol(symbol)
 
   return (
 
@@ -20,8 +21,8 @@ export function OrderBook({ symbol, }: { symbol: string; currentPrice: number })
       {/* Header */}
       <div className="grid grid-cols-3 px-3 py-2 text-muted-foreground border-b border-border">
         <div>Price (USDC)</div>
-        <div className="text-right">Size (BTC)</div>
-        <div className="text-right">Total (BTC)</div>
+        <div className="text-right">Size ({firstSymbol})</div>
+        <div className="text-right">Total ({firstSymbol})</div>
       </div>
 
       {/* Asks */}

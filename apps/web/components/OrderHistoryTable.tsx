@@ -25,7 +25,13 @@ const formatCurrency = (val: number) => {
 
 export function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
   // Filter only closed orders
-  const closedOrders = orders.filter(order => order.status === 'CLOSED');
+  const closedOrders = orders
+                        .filter(order => order.status === 'CLOSED')
+                        .sort((a,b)=>{
+                          const t1 = new Date(a.closedAt ?? 0).getTime();
+                          const t2 = new Date(b.closedAt ?? 0).getTime();
+                          return t2 - t1;
+                        })
 
   if (closedOrders.length === 0) {
     return (
@@ -77,9 +83,10 @@ export function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
               const isProfit = pnl >= 0;
               const marketName = order.market.split('_')[0]; // "BTC_USDC" -> "BTC"
 
-              return (
+              return (   
                 <tr key={order.id} className="border-b border-border hover:bg-secondary/20 transition-colors">
                   <td className="py-3 px-4 font-medium">
+                  
                     {marketName} <span className="text-muted-foreground text-xs">/USDC</span>
                   </td>
 
