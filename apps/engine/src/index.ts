@@ -38,7 +38,8 @@ const fromEnginePrecision = (val: bigint | number): number => {
 };
 
 const calPnL = (currentPrice: bigint, openPrice: bigint, side: Side, quantity: bigint) => {
-    const diff = side === "long" ? currentPrice - openPrice : openPrice - currentPrice;
+    const normalizedSide = side.toLowerCase(); 
+    const diff = normalizedSide === "long" ? currentPrice - openPrice : openPrice - currentPrice;
     let calculatedPnl=(diff * quantity) / SCALE;
     // console.log('calculatedPnl:',calculatedPnl)
     return calculatedPnl
@@ -195,6 +196,7 @@ setInterval(() => {
 
 async function executeClose(order: precisionEngineOrder, reason: string, currentPrice: bigint, pnl: bigint) {
     let credit = order.initialMargin + pnl;
+    console.log('Credit:',credit)
     if (credit < 0n) credit = 0n;
 
     let currentBalance = await getBalance(order.userId);

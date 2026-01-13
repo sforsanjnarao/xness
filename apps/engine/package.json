@@ -4,18 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build":"tsc -b",
-    "start":"pnpm run build && node dist/index.js"
+    "build": "tsc -b",
+    "start": "pnpm run build && node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@repo/typescript-config":"workspace:*",
-    "@repo/redis-client":"workspace:*",
-    "@repo/db":"workspace:*",
-    "@repo/types":"workspace:*"
-
+    "@repo/db": "workspace:*",
+    "@repo/redis-client": "workspace:*",
+    "@repo/types": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "framer-motion": "^12.26.2",
+    "motion": "^12.26.2"
   }
 }
