@@ -11,9 +11,9 @@ interface TradingPair {
 }
 
 const TRADING_PAIRS: TradingPair[] = [
-  { symbol: 'BTCUSDC', name: 'BTC-USDC' },
-  { symbol: 'ETHUSDC', name: 'ETH-USDC' },
-  { symbol: 'SOLUSDC', name: 'SOL-USDC' },
+  { symbol: 'BTC_USDC', name: 'BTC-USDC' },
+  { symbol: 'ETH_USDC', name: 'ETH-USDC' },
+  { symbol: 'SOL_USDC', name: 'SOL-USDC' },
 ];
 
 const TIMEFRAMES: { value: CandleInterval; label: string }[] = [

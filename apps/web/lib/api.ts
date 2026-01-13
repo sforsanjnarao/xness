@@ -1,4 +1,6 @@
 const API_BASE_URL = 'http://localhost:8001';
+const USDC_DECIMALS = 8; // Hardcoded to match Backend
+const ENGINE_SCALE = 8;  // Hardcoded to match Engine
 
 
 interface ApiResponse<T> {
@@ -80,34 +82,38 @@ export type Market="BTC_USDC" | "SOL_USDC" | "ETH_USDC"
 export type Order = {
   id: string;
   userId: string;
-  side: "LONG" | "SHORT";
-  // symbol: string;
-  market: Market
-  status: "OPEN" | "CLOSED" | "LIQUIDATED";
-  quantity: string;
-  quantityDecimal: number;
-  openPrice: number;
-  closePrice: number | null;
-  priceDecimals: number;
+  side: OrderSide;
+  market: Market;
+  status: OrderStatus;
+  
+  // These come as Strings from the backend (BigInt)
+  quantity: string;      
+  openPrice: string;     
+  closePrice: string | null;
+  initialMargin: string;
+  Pnl: string | null;
+  
   leverage: number;
-  margin: number;
-  takeProfitPrice: number | null;
-  stopLossPrice: number | null;
-  Pnl: number | null;
-  reason: CloseReason;
+  
+  // Triggers
+  takeProfitPrice: string | null;
+  stopLossPrice: string | null;
+  reason: CloseReason | null;
+  
   createdAt: string;
   updatedAt: string;
   closedAt: string | null;
 };
+
 export interface CreateOrderRequest {
-  side: "LONG" | "SHORT";
-  symbol: string;
-  // market: Market
-  quantity: number;
+  side: OrderSide;
+  market: Market;
+  quantity: number; // User inputs Human Number (e.g. 1.5 BTC)
   leverage: number;
   takeProfit?: number | null;
   stopLoss?: number | null;
 }
+
 // export interface CreateOrderRequest {
 //   symbol: string;
 //   side: OrderSide;
@@ -170,63 +176,53 @@ export const candlesApi = {
 };
 
 // Balance API
+export interface WalletResponse {
+  balance: string; // "1000000" (BigInt string)
+  symbol: string;  // "USDC"
+  formatted?: string; 
+}
+
 export interface Balance {
   USDC: number;
-  BTC: number;
-  ETH: number;
-  SOL: number;
 }
 
 export interface DepositRequest {
-  symbol: keyof Balance;
+  symbol: "USDC"; 
   amount: number;
 }
-export interface RawWallet {
-  symbol: string;
-  balanceRaw: string;
-  balanceDecimal: number;
-}
-export interface SymbolWallet {
-  symbol: string;
-  balanceRaw: string;
-  balanceDecimal: number;
-}
 
 
-export interface RawBalanceResponse {
-  userAllWallet: RawWallet[];
-}
-const fromRaw = (raw: string, decimals: number) => {
-  return Number(raw) / 10 ** decimals;
-};
+
+
+
+// const fromRaw = (raw: string, decimals: number) => {
+//   return Number(raw) / 10 ** decimals;
+// };
 
 export const balanceApi = {
   getBalance: async () => {
-    const { data, error } = await request<RawBalanceResponse>("/v1/balance");
+    const { data, error } = await request<WalletResponse>("/v1/balance");
     if (error) return { error };
+    const rawBalance = BigInt(data?.balance || "0");
 
-    const wallet: Balance = {
-      USDC: 0,
-      BTC: 0,
-      ETH: 0,
-      SOL: 0,
+
+    const humanBalance = Number(rawBalance) / Math.pow(10, USDC_DECIMALS);
+
+    return { 
+      data: { USDC: humanBalance } 
     };
-
-    data?.userAllWallet.forEach(w => {
-      wallet[w.symbol as keyof Balance] = fromRaw(
-        w.balanceRaw,
-        w.balanceDecimal
-      );
-    });
-
-    return { data: wallet };
   },
+
   // getBalanceBySymbol: (symbol: string) =>
   //   request<{ wallet: SymbolWallet }>(`/v1/balance/${symbol}`),
 
-  deposit: (data: DepositRequest) =>
-    request<Balance>('/v1/balance/deposit', {
+    deposit: (amount: number) =>
+      
+    request<WalletResponse>('/v1/balance/deposit', {
       method: 'POST',
-      body: JSON.stringify(data),
+      // We force symbol USDC here
+      body: JSON.stringify({ symbol: "USDC", amount }), 
+      // body: JSON.stringify({  amount }), 
     }),
 };
+

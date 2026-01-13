@@ -13,28 +13,23 @@ import {
     Side 
 } from "./types";
 
-// --- GLOBAL CONFIG ---
-const USDC_DECIMALS = 6;
 const GLOBAL_ASSET = "USDC"; // The only money we care about
 
-// --- STATE MANAGEMENT ---
 let isFlushingDB = false;
 let price = new Map<string, { bid: bigint, ask: bigint }>();
 let orders = new Map<string, precisionEngineOrder>();
 // Map<UserId, Map<Asset, Balance>> 
-// Even though it's 1-to-1, keeping the Map structure reduces refactoring pain
 let balance = new Map<string, Map<string, bigint>>(); 
 
 let dbArray: any[] = [];
 const redis = redisClient();
 let lastStreamId = "$";
 
-// --- MATH UTILS ---
-// Scaling factor (e.g., 8 decimals = 100,000,000)
+//MATH UTILS
+// Scaling 8 decimals = 100,000,000
 const SCALE = BigInt(Math.pow(10, 8)); 
 
 const toEnginePrecision = (num: number): bigint => {
-    // Safety: Handle weird JS floating point math
     return BigInt(Math.round(num * Number(SCALE)));
 };
 
@@ -59,7 +54,8 @@ function checkRisk(order: precisionEngineOrder, currentPrice: bigint) {
     const maintenanceMargin = (order.initialMargin * BigInt(Math.round(MARGIN_THRESHOLD * 100))) / 100n;
 
     let reason = null;
-    if (remainingMargin <= maintenanceMargin) {
+    //TODO:how much money i have left in my account
+    if (remainingMargin <= maintenanceMargin) { 
         reason = 'LIQUIDATION';
     } else if (order.takeProfit && (
         (order.side === 'long' && currentPrice >= order.takeProfit) ||
@@ -90,7 +86,7 @@ function mutateBalance(userId: string, amount: bigint) {
     
     // Update In-Memory
     balance.get(userId)!.set(GLOBAL_ASSET, amount);
-
+    console.log(balance.get(userId)!.set(GLOBAL_ASSET, amount))
     // Push to DB Queue
     queueDbAction({
         type: 'balance-update',
@@ -98,10 +94,26 @@ function mutateBalance(userId: string, amount: bigint) {
             userId, 
             asset: GLOBAL_ASSET, 
             balanceRaw: amount, 
-            updatedAt: new Date() 
+            updatedAt: Date.now() 
         }
     });
 }
+
+// queueDbAction({
+//         type: 'balance-update',
+//         payload: { 
+//             userId, 
+//             create:{
+//                 userId:userId,
+//                 balanceRaw:amount
+//             },
+//             update:{
+//                  balanceRaw:{
+//                     increment:amount
+//                  }
+//             }
+//         }
+//     });
 
 // --- DB BATCHER ---
 function queueDbAction(action: any) {
@@ -110,21 +122,26 @@ function queueDbAction(action: any) {
         console.warn(`[DB] Queue High Load! Size: ${dbArray.length}.`);
         // Ideally: Pause Redis reading here (Backpressure)
     }
+    console.log('pushing into ques')
     dbArray.push(action);
 }
 
 async function pushQueueJobsToDb() {
+    // console.log('lala')
     if (isFlushingDB || dbArray.length === 0) return;
     isFlushingDB = true;
 
     const batch = dbArray.splice(0, ENGINE_CONSTANTS.DB_BATCH_SIZE);
+    console.log('batch:',batch)
 
     try {
         for (let task of batch) {
             try {
-                if (task.type === "balance-updated") {
+                if (task.type == "balance-update") {
+                    console.log('i am getting in db')
                     // NEW SCHEMA LOGIC
                     let { userId, balanceRaw } = task.payload;
+                    console.log('with task.payload',task.payload)
                     
                     // We don't convert decimals here anymore. 
                     // We assume engine uses USDC precision logic or we store raw Engine Precision.
@@ -142,6 +159,7 @@ async function pushQueueJobsToDb() {
                 } else if (task.type === "create_order") {
                     // Map Payload to New DB Schema
                     const { market, ...rest } = task.payload;
+                    console.log('order-payload-inside_the_create_order:',task.payload)
                     await prisma.order.create({
                         data: {
                             ...rest,
@@ -237,8 +255,8 @@ async function handleCreateOrder(payload:any) {
 
     // symbol here comes from API as "BTC_USDC". This is our MARKET.
 
-    if (orders.has(id)) return;
-
+    if (orders.has(id)) return; 
+        
     let priceData = price.get(market);
     console.log(priceData)
     if (!priceData) {
@@ -247,25 +265,32 @@ async function handleCreateOrder(payload:any) {
 
     let openingPrice = side === "long" ? priceData.ask : priceData.bid;
     let qtyInt = toEnginePrecision(Number(qty));
-    console.log(qtyInt)
+    console.log("qtyInt:",qtyInt)
     let lev = BigInt(leverage);
-
+    
+    //10***
     // Margin Calc
-    const notionalValue = (openingPrice * qtyInt) / SCALE; // Value in Engine Precision
-    console.log(notionalValue)
-    const marginRequired = notionalValue / lev;
-    console.log(marginRequired) 
-
+    const positionValue = (openingPrice * qtyInt) / SCALE;  //position value
+    console.log('positionValue:',positionValue)
+    let marginRequired = positionValue / lev;  //
+    console.log('marginRequired',marginRequired) 
+    //TODO: how much free margin we have
+    console.log(userId)
     // FIX 3: Strict USDC Check
     let userBal = await getBalance(userId); 
-    console.log(userBal)
+    console.log('userBal',userBal)
 
-    if (userBal < marginRequired) {
+    if (BigInt(userBal) < marginRequired) {
         return sendCallbackToRedis(id, "insufficient_balance", { reason: "Not enough USDC" });
     }
+    console.log('is this the problem')
+    let freeMargin=BigInt(userBal) - marginRequired
+    console.log('free_margin', freeMargin)
 
     // Deduct Balance
-    mutateBalance(userId, userBal - marginRequired);
+    // mutateBalance(userId, userBal - marginRequired);
+    mutateBalance(userId, BigInt(freeMargin));
+
 
     let order: precisionEngineOrder = {
         id, userId, asset: market, side,
@@ -280,8 +305,7 @@ async function handleCreateOrder(payload:any) {
     };
     console.log('ORDER:',order)
 
-    orders.set(id, order);
-
+    orders.set(id, order);       
     queueDbAction({
         type: "create_order",
         payload: {
@@ -311,7 +335,6 @@ async function handleCreateOrder(payload:any) {
 async function handleCloseOrder(payload: any) {
     console.log("CLOSE_ORDER_PAYLOAD",payload)
     const { orderId, userId } = payload;
-
     let id=orderId
     // console.log("ORDERS MAP:",orders)
     // 1. Validation: Does order exist?
@@ -357,7 +380,11 @@ async function handleBalanceUpdate(payload: any) {
     const { depositId, userId, balanceRaw } = payload;
     
     // We implicitly trust that the API only sends this for USDC now
-    mutateBalance(userId, BigInt(balanceRaw));
+    // mutateBalance(userId, BigInt(balanceRaw));
+    if (!balance.has(userId)) balance.set(userId, new Map());
+    
+    // Update In-Memory
+    balance.get(userId)!.set(GLOBAL_ASSET, balanceRaw);
 
     // Acknowledge to API
     sendCallbackToRedis(depositId, 'balance_updated', {

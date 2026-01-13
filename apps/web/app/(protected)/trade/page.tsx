@@ -17,6 +17,7 @@ import {
   orderApi,
   CreateOrderRequest,
   CandleInterval,
+  Market,
 } from "@/lib/api";
 // import { useBackpackTicker } from '@/hooks/useBackpackTicker';
 
@@ -28,14 +29,15 @@ import {
 import { useMarketFeed } from "@/hooks/useMarketFeed";
 
 export default function Trade() {
-  const [selectedPair, setSelectedPair] = useState("BTC_USDC");
-  const [selectedTimeframe, setSelectedTimeframe] =
-    useState<CandleInterval>("1h");
-    const [closingOrderId, setClosingOrderId] = useState<string | undefined>();
+  const [selectedPair, setSelectedPair] = useState<Market>("BTC_USDC");
+  const [selectedTimeframe, setSelectedTimeframe] =useState<CandleInterval>("1h");
+  const [closingOrderId, setClosingOrderId] = useState<string | undefined>();
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
   const { ticker } = useMarketFeed(selectedPair);
-  const currentPrice = ticker?.lastPrice ?? null;
+  const currentPrice = ticker?.lastPrice ?? 0;
 
   // Fetch candles
   const { data: candlesData = [], isLoading: isCandlesLoading } = useQuery({
@@ -50,118 +52,83 @@ export default function Trade() {
 
       return data.data;
     },
-    refetchInterval: 1000,
+    refetchInterval: 60000,
   });
 
   // Fetch balance
-  const { data: rawBalanceData } = useQuery({
+  const { data: balanceData } = useQuery({
     queryKey: ["balance"],
     queryFn: async () => {
-      const response = await balanceApi.getBalance();
-      // Backend returns: { userAllWallet: [{ symbol: "USDC", balanceRaw: "...", ... }] }
-      return (response.data as any)?.userAllWallet || [];
-    },
-    refetchInterval: 10000,
-  });
-
-  // 3. Helper to get specific coin balance (USDC, BTC, etc)
-  // const getBalanceForSymbol = (symbol: string) => {
-  //   if (!Array.isArray(rawBalanceData)) return 0;
-
-  //   const wallet = rawBalanceData.find((w) => w.symbol === symbol);
-  //   if (!wallet) return 0;
-
-  //   return formatTokenAmount(wallet.balanceRaw, wallet.balanceDecimal);
-  // };
-
-  const { base} = getMarketDetails(selectedPair);
-  console.log(base);
-
-  // const quoteBalance = getBalanceForSymbol(base??"USDC") // This is usually USDC
-
-  // const { data: symbolWallet } = useQuery({
-  //   queryKey: ["symbolBalance", base],
-  //   queryFn: async () => {
-  //     const { data } = await balanceApi.getBalanceBySymbol(base?? "USDC");
-  //     return data?.wallet;
-  //   },
-  //   enabled: !!base,
-  //   refetchInterval: 5000,
-  // });
-  // const quoteBalance = symbolWallet
-  //   ? Number(symbolWallet.balanceRaw) / 10 ** symbolWallet.balanceDecimal
-  //   : 0;
-
-  // Fetch open orders
-  //order by Id
-  const { data: openOrdersData } = useQuery({
-    queryKey: ["openOrders"],
-    queryFn: async () => {
-      const response = await orderApi.getOpenOrders();
-      if (response.error) throw new Error(response.error);
-
-      // FIX IS HERE: Extract 'allOrder' from the backend response object
-      // Backend sends: { message: "success", allOrder: [...] }
-      const rawData = response.data as any;
-      return rawData?.allOrder || [];
-    },
-    refetchInterval: 10000,
-  });
-
-  // Fetch all orders
-  const { data: allOrdersData } = useQuery({
-    queryKey: ["allOrders"],
-    queryFn: async () => {
-      const response = await orderApi.getAllOrders();
-      if (response.error) throw new Error(response.error);
-
-      // FIX IS HERE: Extract 'allOrder' here too
-      const rawData = response.data as any;
-      return rawData?.allOrder || [];
-    },
-  });
-
-  //fetch all open orders
-  const { data: openOrders = [] } = useQuery({
-    queryKey: ['openOrders'],
-    queryFn: async () => {
-      const response = await orderApi.getOpenOrders();
-      const rawData = response.data as any;
-      return rawData?.allOrder || [];
+      const { data, error } = await balanceApi.getBalance();
+      if (error) throw new Error(error);
+      return data; 
     },
     refetchInterval: 5000,
   });
 
   
-  // Create order mutation
-  const createOrderMutation = useMutation({
-      mutationFn: async (order: CreateOrderRequest) => {
-        const res = await orderApi.create(order);
 
-        if (res.error || !res) {
-          throw new Error(res.error || 'Order creation failed');
-        }
+  // const { base} = getMarketDetails(selectedPair);
+  // console.log(base);
 
-        return res;
-      },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["openOrders"] });
-      queryClient.invalidateQueries({ queryKey: ['allOrders'] });
-      queryClient.invalidateQueries({ queryKey: ["balance"] });
-      toast({
-        title: "Order Placed",
-        description: "Your order has been successfully placed.",
-      });
+  const usdcBalance = balanceData?.USDC || 0;
+
+
+  // Fetch open orders
+    const { data: openOrders = [] } = useQuery({
+    queryKey: ["openOrders"],
+    queryFn: async () => {
+      const response = await orderApi.getOpenOrders();
+      if (response.error) throw new Error(response.error);
+      const rawData = response.data as any;
+      return rawData?.allOrder || [];
     },
-    onError: (error) => {
-      toast({
-        title: "Order Failed",
-        description: error.message,
-        variant: "destructive",
-      });
+    refetchInterval: 2000, // Faster refresh for open positions
+  });
+
+
+  // Fetch all orders
+  const { data: allOrders = [] } = useQuery({
+    queryKey: ["allOrders"],
+    queryFn: async () => {
+      const response = await orderApi.getAllOrders();
+      if (response.error) throw new Error(response.error);
+      const rawData = response.data as any;
+      return rawData?.allOrder || [];
     },
   });
-  let orderSymbol=normalizeSymbol(selectedPair)
+
+
+  // //fetch all open orders
+  // const { data: openOrders = [] } = useQuery({
+  //   queryKey: ['openOrders'],
+  //   queryFn: async () => {
+  //     const response = await orderApi.getOpenOrders();
+  //     const rawData = response.data as any;
+  //     return rawData?.allOrder || [];
+  //   },
+  //   refetchInterval: 5000,
+  // });
+
+  
+  // Create order mutation
+  const createOrderMutation = useMutation({
+    mutationFn: async (order: CreateOrderRequest) => {
+      const res = await orderApi.create(order);
+      if (res.error) throw new Error(res.error);
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["openOrders"] });
+      queryClient.invalidateQueries({ queryKey: ["balance"] }); // Update margin usage immediately
+      toast({ title: "Order Placed", description: "Successfully placed order" });
+    },
+    onError: (error) => {
+      toast({ title: "Order Failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // let orderSymbol=normalizeSymbol(selectedPair)
 
   // Close order mutation
   
@@ -174,23 +141,16 @@ export default function Trade() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["openOrders"] });
-      queryClient.invalidateQueries({ queryKey: ["allOrders"] });
-      queryClient.invalidateQueries({ queryKey: ["balance"] });
-      toast({
-        title: "Position Closed",
-        description: "Your position has been closed.",
-      });
+      queryClient.invalidateQueries({ queryKey: ["balance"] }); // PnL returns to balance
+      toast({ title: "Position Closed", description: "Position closed successfully" });
       setClosingOrderId(undefined);
     },
     onError: (error) => {
-      toast({
-        title: "Close Failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Close Failed", description: error.message, variant: "destructive" });
       setClosingOrderId(undefined);
     },
   });
+
 
   // export function formatPrice(raw: number, decimals: number) {
   //   return raw / Math.pow(10, decimals);
@@ -212,7 +172,7 @@ export default function Trade() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header quoteSymbol={base?? "BTC"} quoteBalance={rawBalanceData} />
+      <Header usdcBalance={usdcBalance} />
 
       <main className="flex-1 p-2 space-y-4">
         <MarketSelector
@@ -220,7 +180,7 @@ export default function Trade() {
           selectedTimeframe={selectedTimeframe}
           ticker={ticker}
           // priceChange24h={priceChange24h}
-          onPairChange={setSelectedPair}
+          onPairChange={(val)=>setSelectedPair(val as Market)}
           onTimeframeChange={setSelectedTimeframe}
         />
 
@@ -230,8 +190,9 @@ export default function Trade() {
             <TradingChart candles={candlesData} isLoading={isCandlesLoading} />
           </div>
 
+          {/* Order Book */}
           <div className="lg:col-span-3 h-[600px]">
-            {currentPrice !== null && (
+            {currentPrice > 0 && (
               <OrderBook symbol={selectedPair} currentPrice={currentPrice} />
             )}
           </div>
@@ -240,9 +201,9 @@ export default function Trade() {
           <div className="lg:col-span-3 h-[600px]">
             {currentPrice !== null && (
               <OrderForm
-                symbol={orderSymbol}
+                market={selectedPair}
                 currentPrice={currentPrice}
-                relevantBalance={rawBalanceData}
+                usdcBalance={usdcBalance} // Pass strict USDC balance
                 onSubmit={async (order) => {
                   await createOrderMutation.mutateAsync(order);
                 }}
@@ -261,7 +222,8 @@ export default function Trade() {
             </TabsList>
             <TabsContent value="positions" className="mt-4">
               <PositionsTable
-                orders={openOrdersData ?? []}
+                orders={openOrders}
+                currentPrices={{ [selectedPair]: currentPrice }} 
                 onClose={async (orderId) => {
                   await closeOrderMutation.mutateAsync(orderId);
                 }}
@@ -269,7 +231,7 @@ export default function Trade() {
               />
             </TabsContent>
             <TabsContent value="history" className="mt-4">
-              <OrderHistoryTable orders={allOrdersData ?? []} />
+              <OrderHistoryTable orders={allOrders} />
             </TabsContent>
           </Tabs>
         </div>

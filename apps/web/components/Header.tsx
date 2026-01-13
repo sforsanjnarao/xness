@@ -13,11 +13,10 @@ import {
 import { User, LogOut, Wallet } from 'lucide-react';
 
 interface HeaderProps {
-  quoteSymbol?: string;
-  quoteBalance?: number;
+  usdcBalance: number
 }
 
-export function Header({ quoteSymbol,quoteBalance }: HeaderProps) {
+export function Header({ usdcBalance }: HeaderProps) {
   const { user, signOut } = useAuth();
   const navigate = useRouter();
 
@@ -49,14 +48,14 @@ export function Header({ quoteSymbol,quoteBalance }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        {quoteSymbol && (
+        {
           <div className="flex items-center gap-2 text-sm">
             <Wallet className="h-4 w-4 text-muted-foreground" />
             <span className="text-foreground font-medium">
-              {quoteBalance?.toFixed(4)} {quoteSymbol}
+              {usdcBalance?.toFixed(4)} {}
             </span>
           </div>
-        )}
+        }
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

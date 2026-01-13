@@ -101,7 +101,7 @@ export const depositWallet = async (req: Request, res: Response) => {
     if (amount <= 0) {
         return res.status(400).json({ error: "Amount must be positive" })
     }
-    let decimalPlaces=6
+    let decimalPlaces=8
     const baseUnitAmount = BigInt(Math.round(amount * Math.pow(10, decimalPlaces)))
 
     if (baseUnitAmount <= 0n) {
@@ -122,6 +122,7 @@ export const depositWallet = async (req: Request, res: Response) => {
                 balanceRaw: { increment: baseUnitAmount },
             },
         });
+        
 
 
         // 2. GENERATE TRACE ID
@@ -139,6 +140,7 @@ export const depositWallet = async (req: Request, res: Response) => {
          }
          //3. SEND TO ENGINE AND AWAIT RESPONSE
            let engineResponse= await engineDispatcher(depositId,payload,5000)
+           console.log('ENGINE_response',engineResponse)
 
            console.log('engineResponse',engineResponse)
                if(engineResponse.status==='balance_updated'){

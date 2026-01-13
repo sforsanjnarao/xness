@@ -13,21 +13,21 @@ export default function ProtectedLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  // useEffect(() => {
-  //   if (!isLoading && !user) {
-  //     router.replace("/signin");
-  //   }
-  // }, [user, isLoading, router, pathname]);
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace("/signin");
+    }
+  }, [user, isLoading, router, pathname]);
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="animate-spin h-8 w-8 border-t-2 border-primary rounded-full" />
-  //     </div>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-t-2 border-primary rounded-full" />
+      </div>
+    );
+  }
 
-  // if (!user) return null;
+  if (!user) return null;
 
   return <>{children}</>;
 }

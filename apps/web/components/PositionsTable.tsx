@@ -1,122 +1,107 @@
-'use client';
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Order } from "@/lib/api";
 
-import { Order } from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { X } from 'lucide-react';
+// Helper to convert Engine BigInt (string) to Number
+const fromEngine = (val: string | null | undefined) => {
+  if (!val) return 0;
+  return Number(val) / 100_000_000; // 10^8
+};
 
 interface PositionsTableProps {
   orders: Order[];
-  onClose: (orderId: string) => Promise<void>;
+  onClose: (id: string) => void;
   isClosing?: string;
+  currentPrices?: Record<string, number>;
 }
 
-// Helpers
-const formatQty = (qty: string, decimals: number) =>
-  Number(qty) / Math.pow(10, decimals);
+export function PositionsTable({ orders, onClose, isClosing, currentPrices }: PositionsTableProps) {
+  
+  // Frontend PnL Calculation (Smoother than waiting for backend)
+  const calculateUnrealizedPnL = (order: Order) => {
+    if(order.Pnl) return fromEngine(order.Pnl); // Use backend PnL if available
+    
+    // Otherwise estimate locally
+    const currentPrice = currentPrices?.[order.market];
+    if(!currentPrice) return 0;
 
-const formatPrice = (raw: number | null, decimals: number) =>
-  raw == null ? '-' : (raw / Math.pow(10, decimals)).toLocaleString();
-
-const normalizeSymbol = (symbol: string) =>
-  symbol.includes('_') ? symbol.split('_')[0] : symbol.replace('USDC', '');
-
-export function PositionsTable({ orders, onClose, isClosing }: PositionsTableProps) {
-  const openOrders = orders.filter(o => o.status === 'OPEN');
-
-  if (openOrders.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-32 text-muted-foreground">
-        No open positions
-      </div>
-    );
-  }
+    const openPrice = fromEngine(order.openPrice);
+    const qty = fromEngine(order.quantity);
+    
+    if (order.side === "LONG") {
+      return (currentPrice - openPrice) * qty;
+    } else {
+      return (openPrice - currentPrice) * qty;
+    }
+  };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-muted-foreground border-b border-border">
-            <th className="text-left py-3 px-2 font-medium">Symbol</th>
-            <th className="text-left py-3 px-2 font-medium">Side</th>
-            <th className="text-right py-3 px-2 font-medium">Size</th>
-            <th className="text-right py-3 px-2 font-medium">Entry</th>
-            <th className="text-right py-3 px-2 font-medium">PnL</th>
-            <th className="text-right py-3 px-2 font-medium">TP / SL</th>
-            <th className="text-right py-3 px-2 font-medium">Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {openOrders.map(order => {
-            const pnl = order.Pnl ?? 0;
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Market</TableHead>
+          <TableHead>Side</TableHead>
+          <TableHead className="text-right">Size</TableHead>
+          <TableHead className="text-right">Entry Price</TableHead>
+          <TableHead className="text-right">Leverage</TableHead>
+          <TableHead className="text-right">Margin</TableHead>
+          <TableHead className="text-right">PnL (u)</TableHead>
+          <TableHead className="text-right">Action</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {orders.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={8} className="text-center h-24 text-muted-foreground">
+              No open positions
+            </TableCell>
+          </TableRow>
+        ) : (
+          orders.map((order) => {
+            const pnl = calculateUnrealizedPnL(order);
             const isProfit = pnl >= 0;
 
             return (
-              <tr key={order.id} className="border-b border-border hover:bg-secondary/50">
-                <td className="py-3 px-2 font-medium">
-                  {normalizeSymbol(order.symbol)}
-                </td>
-
-                <td className="py-3 px-2">
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      'text-xs',
-                      order.side === 'LONG'
-                        ? 'border-success text-success'
-                        : 'border-destructive text-destructive'
-                    )}
-                  >
-                    {order.side}
-                  </Badge>
-                </td>
-
-                <td className="py-3 px-2 text-right">
-                  {formatQty(order.quantity, order.quantityDecimal)}
-                </td>
-
-                <td className="py-3 px-2 text-right">
-                  ${formatPrice(order.openPrice, order.priceDecimals)}
-                </td>
-
-                <td
-                  className={cn(
-                    'py-3 px-2 text-right font-medium',
-                    isProfit ? 'text-long' : 'text-short'
-                  )}
-                >
-                  {isProfit ? '+' : ''}
-                  {pnl.toFixed(4)}
-                </td>
-
-                <td className="py-3 px-2 text-right text-xs text-muted-foreground">
-                  {order.takeProfitPrice
-                    ? `TP: $${formatPrice(order.takeProfitPrice, order.priceDecimals)}`
-                    : '-'}
-                  {' / '}
-                  {order.stopLossPrice
-                    ? `SL: $${formatPrice(order.stopLossPrice, order.priceDecimals)}`
-                    : '-'}
-                </td>
-
-                <td className="py-3 px-2 text-right">
+              <TableRow key={order.id}>
+                <TableCell className="font-medium">{order.market}</TableCell>
+                <TableCell className={order.side === "LONG" ? "text-green-500" : "text-red-500"}>
+                  {order.side}
+                </TableCell>
+                <TableCell className="text-right font-mono">
+                  {fromEngine(order.quantity).toFixed(4)}
+                </TableCell>
+                <TableCell className="text-right font-mono">
+                  ${fromEngine(order.openPrice).toFixed(2)}
+                </TableCell>
+                <TableCell className="text-right">{order.leverage}x</TableCell>
+                <TableCell className="text-right font-mono">
+                  {fromEngine(order.initialMargin).toFixed(2)} USDC
+                </TableCell>
+                <TableCell className={`text-right font-mono ${isProfit ? "text-green-500" : "text-red-500"}`}>
+                  {pnl > 0 ? "+" : ""}{pnl.toFixed(2)} USDC
+                </TableCell>
+                <TableCell className="text-right">
                   <Button
-                    variant="ghost"
-                    size="icon"
+                    variant="destructive"
+                    size="sm"
                     onClick={() => onClose(order.id)}
                     disabled={isClosing === order.id}
-                    className="h-7 w-7 hover:bg-destructive/20 hover:text-destructive"
                   >
-                    <X className="h-4 w-4" />
+                    {isClosing === order.id ? "Closing..." : "Close"}
                   </Button>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
-          })}
-        </tbody>
-      </table>
-    </div>
+          })
+        )}
+      </TableBody>
+    </Table>
   );
 }

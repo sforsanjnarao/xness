@@ -11,7 +11,6 @@ import { CircleDollarSign, ArrowUpRight } from 'lucide-react';
 
 export default function WalletPage() {
   const [depositAmount, setDepositAmount] = useState('');
-  const [justNumber, setJustNumber]=useState('')
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -68,9 +67,11 @@ export default function WalletPage() {
       ? new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(value) 
       : "0.00";
 
+      const usdcBalance = balanceData?.USDC || 0;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+      <Header usdcBalance={usdcBalance}/>
 
       <main className="flex-1 p-6 max-w-4xl mx-auto w-full space-y-8">
         <div>
