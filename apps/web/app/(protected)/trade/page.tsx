@@ -52,7 +52,7 @@ export default function Trade() {
 
       return data.data;
     },
-    refetchInterval: 60000,
+    refetchInterval: 4000,
   });
 
   // Fetch balance

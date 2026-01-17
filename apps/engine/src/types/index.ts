@@ -13,7 +13,7 @@ export interface engineOrder {
     createdAt: number;
 }
 
-export type Side = "long" | "short"
+export type Side = "LONG" | "SHORT"
 
 
 export type CloseReason =
@@ -30,7 +30,7 @@ export interface precisionEngineOrder {
     id: string;
     userId: string;
     asset: string;
-    side: "long" | "short";
+    side: "LONG" | "SHORT";
     status: "OPEN" | "CLOSE"
     qty: bigint;            // Stored as 100000000 (1.00 BTC)
     leverage: number;       // Leverage is fine as a standard number (10x, 20x)

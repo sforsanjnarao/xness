@@ -93,7 +93,7 @@ export function TradingChart({ candles, isLoading }: TradingChartProps) {
 
       // 4. Set the data
       candlestickSeries.setData(chartData);
-      chart.timeScale().fitContent();
+      chart.timeScale();
     }
 
 

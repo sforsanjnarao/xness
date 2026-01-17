@@ -39,39 +39,40 @@ const fromEnginePrecision = (val: bigint | number): number => {
 
 const calPnL = (currentPrice: bigint, openPrice: bigint, side: Side, quantity: bigint) => {
     const normalizedSide = side.toLowerCase(); 
-    const diff = normalizedSide === "long" ? currentPrice - openPrice : openPrice - currentPrice;
+    const diff = normalizedSide === "LONG" ? currentPrice - openPrice : openPrice - currentPrice;
     let calculatedPnl=(diff * quantity) / SCALE;
     // console.log('calculatedPnl:',calculatedPnl)
     return calculatedPnl
 };
 
-// --- RISK ENGINE ---
 const MARGIN_THRESHOLD = 0.05; // 5%
 
 function checkRisk(order: precisionEngineOrder, currentPrice: bigint) {
     let pnl = calPnL(currentPrice, order.openingPrice, order.side, order.qty);
     let remainingMargin = order.initialMargin + pnl;
     
-    // Maintenance Margin (Simplified: 5% of Initial Margin)
-    // Production Grade: Should be % of Position Value
     const maintenanceMargin = (order.initialMargin * BigInt(Math.round(MARGIN_THRESHOLD * 100))) / 100n;
-
     let reason = null;
+    console.log('remainingMargin <= maintenanceMargin:',remainingMargin <= maintenanceMargin)
+    console.log('current price:', currentPrice)
+    console.log('what is order.takeProfit',order.takeProfit)
+    console.log('what is order.stopLoss',order.stopLoss)
+    console.log(order.side)
     //TODO:how much money i have left in my account
     if (remainingMargin <= maintenanceMargin) { 
         reason = 'LIQUIDATION';
     } else if (order.takeProfit && (
-        (order.side === 'long' && currentPrice >= order.takeProfit) ||
-        (order.side === 'short' && currentPrice <= order.takeProfit)
+        (order.side == 'LONG' && currentPrice >= order.takeProfit) ||
+        (order.side == 'SHORT' && currentPrice <= order.takeProfit)
     )) {
         reason = "TAKE_PROFIT";
     } else if (order.stopLoss && (
-        (order.side === 'long' && currentPrice <= order.stopLoss) ||
-        (order.side === 'short' && currentPrice >= order.stopLoss)
+        (order.side == 'LONG' && currentPrice <= order.stopLoss) ||
+        (order.side == 'SHORT' && currentPrice >= order.stopLoss)
     )) {
         reason = "STOP_LOSS";
     }
-
+    console.log('is their any reason',reason)
     if (reason) executeClose(order, reason, currentPrice, pnl);
 }
 
@@ -206,7 +207,7 @@ async function executeClose(order: precisionEngineOrder, reason: string, current
 
     // Map reason string to DB Enum if needed
     let dbCloseReason = reason.toLowerCase(); 
-    console.log('lla',dbCloseReason)
+    console.log('it should get close',dbCloseReason)
 
     queueDbAction({
         type: 'order_close',
@@ -247,7 +248,7 @@ async function handlePriceUpdate(payload:any) {
     for (let order of orders.values()) {
         if (order.asset !== symbol) continue;
         
-        let currentPrice = order.side === 'long' ? bid : ask;
+        let currentPrice = order.side === 'LONG' ? bid : ask;
         checkRisk(order, currentPrice);
     }
 }
@@ -267,7 +268,7 @@ async function handleCreateOrder(payload:any) {
         return sendCallbackToRedis(id, "no_price", { reason: `No price for ${market}` });
     }
 
-    let openingPrice = side === "long" ? priceData.ask : priceData.bid;
+    let openingPrice = side === "LONG" ? priceData.ask : priceData.bid;
     let qtyInt = toEnginePrecision(Number(qty));
     console.log("qtyInt:",qtyInt)
     let lev = BigInt(leverage);
@@ -319,13 +320,11 @@ async function handleCreateOrder(payload:any) {
             side: side.toUpperCase(), // DB Enum is UPPERCASE usually
             status: "OPEN",
             
-            // Storing RAW BigInts (matches new schema)
             quantity: qtyInt, 
             leverage: Number(lev),
             openPrice: openingPrice,
             initialMargin: marginRequired,
             
-            // Handle Optionals
             takeProfitPrice: order.takeProfit,
             stopLossPrice: order.stopLoss,
             
@@ -341,14 +340,12 @@ async function handleCloseOrder(payload: any) {
     const { orderId, userId } = payload;
     let id=orderId
     // console.log("ORDERS MAP:",orders)
-    // 1. Validation: Does order exist?
     const order = orders.get(id);
     console.log("is order exist", order)
     if (!order) {
         return sendCallbackToRedis(id, "error", { reason: "Order not found" });
     }
 
-    // 2. Validation: Is this the user's order?
     if (order.userId !== userId) {
         return sendCallbackToRedis(id, "error", { reason: "Unauthorized" });
     }
@@ -367,7 +364,7 @@ async function handleCloseOrder(payload: any) {
     // CRITICAL TRADING LOGIC:
     // If you are LONG, you sell to the BID (Lower price)
     // If you are SHORT, you buy from the ASK (Higher price)
-    const closePrice = order.side === "long" ? priceData.bid : priceData.ask;
+    const closePrice = order.side === "LONG" ? priceData.bid : priceData.ask;
     console.log('what the close price we get',closePrice)
 
     // 4. Calculate PnL
@@ -380,17 +377,14 @@ async function handleCloseOrder(payload: any) {
 
 
 async function handleBalanceUpdate(payload: any) {
-    // Logic handles by mutateBalance mostly, but if coming from Deposit:
     const { depositId, userId, balanceRaw } = payload;
     
     // We implicitly trust that the API only sends this for USDC now
     // mutateBalance(userId, BigInt(balanceRaw));
     if (!balance.has(userId)) balance.set(userId, new Map());
     
-    // Update In-Memory
     balance.get(userId)!.set(GLOBAL_ASSET, balanceRaw);
 
-    // Acknowledge to API
     sendCallbackToRedis(depositId, 'balance_updated', {
         id: depositId,
         userId,
@@ -398,7 +392,7 @@ async function handleBalanceUpdate(payload: any) {
     });
 }
 
-// --- INITIALIZATION ---
+// loading the state in the in memory
 async function loadState() {
     console.log('Restoring State from DB...');
 
@@ -406,20 +400,16 @@ async function loadState() {
     const dbOrders = await prisma.order.findMany({ where: { status: 'OPEN' } });
     
     for (let order of dbOrders) {
-        // Since we changed DB to store BigInt directly, 
-        // we don't need complex conversion if DB precision == Engine precision.
-        // Assuming DB stores 8 decimals (same as engine):
-        
         orders.set(order.id, {
             id: order.id,
             userId: order.userId,
             asset: order.market, // "BTC_USDC"
-            side: order.side === "LONG" ? "long" : "short",
-            qty: order.quantity, // Already BigInt
+            side: order.side === "LONG" ? "LONG" : "SHORT",
+            qty: order.quantity, // already BigInt
             status: "OPEN",
             leverage: order.leverage,
-            openingPrice: order.openPrice, // Already BigInt
-            initialMargin: order.initialMargin, // Already BigInt
+            openingPrice: order.openPrice, // alredy BigInt
+            initialMargin: order.initialMargin, // already BigInt
             takeProfit: order.takeProfitPrice ?? undefined,
             stopLoss: order.stopLossPrice ?? undefined,
             createdAt: order.createdAt.getTime()
@@ -445,7 +435,7 @@ async function sendCallbackToRedis(id: string, status: string, payload: any) {
     }
 }
 
-// --- MAIN LOOP ---
+// the main loop
 async function engine() {
     await loadState();
     console.log("Engine Started 🚀");
@@ -460,7 +450,7 @@ async function engine() {
                     lastStreamId = id;
                     let rawData = "";
                     
-                    // Parse Fields
+                    // parsing
                     for (let i = 0; i < fields.length; i += 2) {
                         if (fields[i] === "data" || fields[i] === "payload") {
                             rawData = fields[i + 1] ?? "";

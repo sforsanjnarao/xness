@@ -30,7 +30,7 @@ export function Header({ usdcBalance }: HeaderProps) {
     <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between">
       <div className="flex items-center gap-8">
         <Link href="/trade" className="text-xl font-bold text-primary">
-          Xness
+          Velocity
         </Link>
         
         <nav className="flex items-center gap-1">

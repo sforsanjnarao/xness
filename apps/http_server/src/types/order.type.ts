@@ -1,6 +1,6 @@
 enum orderSides{
-    LONG= "long",
-    SHORT="short"
+    LONG= "LONG",
+    SHORT="SHORT"
 }
 enum orderStatus{
     OPEN = "open",

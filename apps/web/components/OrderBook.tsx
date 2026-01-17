@@ -56,7 +56,7 @@ export function OrderBook({ symbol, }: { symbol: string; currentPrice: number })
 }
 
 function Row({ row, type, max }: any) {
-  const w = (row.total / max) * 100;
+  const w = (row.total / max) * 100;  {/* the percentage*/}
 
   return (
     <div className="relative grid grid-cols-3 px-3 py-0.5 text-xs">
@@ -67,12 +67,14 @@ function Row({ row, type, max }: any) {
         )}
         style={{ width: `${w}%` }}
       />
-
+      {/* the real price */}
       <div className={cn("z-10 font-mono", type === 'ask' ? "text-red-500" : "text-green-500")}>
         {row.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
       </div>
-      <div className="z-10 text-right">{row.quantity.toFixed(4)}</div>
-      <div className="z-10 text-right text-muted-foreground">{row.total.toFixed(2)}</div>
+      {/* the quantity */}
+      <div className="z-10 text-right">{row.quantity.toFixed(2)}</div>
+        {/* the total */}
+      <div className="z-10 text-right text-muted-foreground">{row.total.toFixed(4)}</div>
     </div>
   );
 }
