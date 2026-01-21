@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/Header";
 import { TradingChart } from "@/components/TradingChart";
@@ -28,7 +28,7 @@ import {
 } from "@/lib/utils";
 import { useMarketFeed } from "@/hooks/useMarketFeed";
 
-export default function Trade() {
+export default function Trade():JSX.Element {
   const [selectedPair, setSelectedPair] = useState<Market>("BTC_USDC");
   const [selectedTimeframe, setSelectedTimeframe] =useState<CandleInterval>("1h");
   const [closingOrderId, setClosingOrderId] = useState<string | undefined>();
@@ -129,7 +129,6 @@ export default function Trade() {
     },
   });
 
-  // let orderSymbol=normalizeSymbol(selectedPair)
 
   // Close order mutation
   

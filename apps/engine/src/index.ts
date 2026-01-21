@@ -53,11 +53,11 @@ function checkRisk(order: precisionEngineOrder, currentPrice: bigint) {
     
     const maintenanceMargin = (order.initialMargin * BigInt(Math.round(MARGIN_THRESHOLD * 100))) / 100n;
     let reason = null;
-    console.log('remainingMargin <= maintenanceMargin:',remainingMargin <= maintenanceMargin)
-    console.log('current price:', currentPrice)
-    console.log('what is order.takeProfit',order.takeProfit)
-    console.log('what is order.stopLoss',order.stopLoss)
-    console.log(order.side)
+    // console.log('remainingMargin <= maintenanceMargin:',remainingMargin <= maintenanceMargin)
+    // console.log('current price:', currentPrice)
+    // console.log('what is order.takeProfit',order.takeProfit)
+    // console.log('what is order.stopLoss',order.stopLoss)
+    // console.log(order.side)
     //TODO:how much money i have left in my account
     if (remainingMargin <= maintenanceMargin) { 
         reason = 'LIQUIDATION';
@@ -69,6 +69,7 @@ function checkRisk(order: precisionEngineOrder, currentPrice: bigint) {
     } else if (order.stopLoss && (
         (order.side == 'LONG' && currentPrice <= order.stopLoss) ||
         (order.side == 'SHORT' && currentPrice >= order.stopLoss)
+        
     )) {
         reason = "STOP_LOSS";
     }

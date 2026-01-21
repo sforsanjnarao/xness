@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 // import { Ticker } from '@/hooks/useBackpackTicker';
 import { Ticker } from '@/hooks/useMarketFeed';
+import { JSX } from 'react';
 
 interface TradingPair {
   symbol: string;
@@ -42,7 +43,7 @@ export function MarketSelector({
   // priceChange24h,
   onPairChange,
   onTimeframeChange,
-}: MarketSelectorProps) {
+}: MarketSelectorProps):JSX.Element {
 
 
   // const { base, quote } = getMarketDetails(selectedPair);

@@ -3,8 +3,8 @@ import { redisClient } from "@repo/redis-client"
 import { prisma } from "@repo/db"
 import { engineDispatcher } from "../redis.client.engine"
 import { v4 as uuidv4 } from 'uuid';
-import {type Symbol, SYMBOL_DECIMALS,} from "@repo/types"
-import { GetWalletBalanceBySymbol } from "../zod/balance.zod";
+// import {type Symbol, SYMBOL_DECIMALS,} from "@repo/types"
+// import { GetWalletBalanceBySymbol } from "../zod/balance.zod";
 
 
 

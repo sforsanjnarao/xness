@@ -18,5 +18,8 @@
     "@repo/typescript-config": "workspace:*",
     "framer-motion": "^12.26.2",
     "motion": "^12.26.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }

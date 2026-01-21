@@ -3,8 +3,9 @@ import { useMarketFeed } from '@/hooks/useMarketFeed';
 // import { useOrderBook } from '@/hooks/useOrderBook';
 
 import { cn, normalizeSymbol } from '@/lib/utils';
+import { JSX } from 'react';
 
-export function OrderBook({ symbol, }: { symbol: string; currentPrice: number }) {
+export function OrderBook({ symbol, }: { symbol: string; currentPrice: number }):JSX.Element {
   const { bids, asks,ticker } = useMarketFeed(symbol);
 
   const maxTotal = Math.max(

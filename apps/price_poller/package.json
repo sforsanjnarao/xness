@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build":"tsc -b",
-    "start":"pnpm run build && node ./dist/index.js"
+    "build": "tsc -b",
+    "start": "pnpm run build && node ./dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -13,11 +13,12 @@
   "type": "commonjs",
   "dependencies": {
     "@repo/typescript-config": "workspace:*",
-    "ioredis": "^5.8.2"
-  },
-  "devDependencies": {
     "@types/ws": "^8.18.1",
+    "ioredis": "^5.8.2",
     "redis": "^5.10.0",
     "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }

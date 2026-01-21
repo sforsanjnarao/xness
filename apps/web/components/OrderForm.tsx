@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, JSX } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ export function OrderForm({
   usdcBalance, 
   onSubmit, 
   isSubmitting 
-}: OrderFormProps) {
+}: OrderFormProps):JSX.Element {
   const [side, setSide] = useState<OrderSide>('LONG');
   
   // Inputs

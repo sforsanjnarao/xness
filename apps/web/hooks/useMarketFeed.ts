@@ -16,8 +16,12 @@ export interface Ticker {
   lastPrice: number;
   dir: "up" | "down" | null;
 }
-
-export const useMarketFeed = (symbol: string) => {
+export interface MarketFeed {
+  bids: OrderBookEntry[];
+  asks: OrderBookEntry[];
+  ticker: Ticker | null;
+}
+export const useMarketFeed = (symbol: string):MarketFeed => {
   const bidsRef = useRef<Map<number, number>>(new Map());
   const asksRef = useRef<Map<number, number>>(new Map());
   const lastPriceRef = useRef<number | null>(null);

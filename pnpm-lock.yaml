@@ -38,6 +38,10 @@ importers:
       motion:
         specifier: ^12.26.2
         version: 12.26.2(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   apps/http_server:
     dependencies:
@@ -93,25 +97,31 @@ importers:
       '@types/jsonwebtoken':
         specifier: ^9.0.10
         version: 9.0.10
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   apps/price_poller:
     dependencies:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      ioredis:
-        specifier: ^5.8.2
-        version: 5.8.2
-    devDependencies:
       '@types/ws':
         specifier: ^8.18.1
         version: 8.18.1
+      ioredis:
+        specifier: ^5.8.2
+        version: 5.8.2
       redis:
         specifier: ^5.10.0
         version: 5.10.0
       ws:
         specifier: ^8.18.3
         version: 8.18.3
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   apps/web:
     dependencies:
@@ -274,6 +284,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.19)
+      tsc:
+        specifier: ^2.0.4
+        version: 2.0.4
       vaul:
         specifier: ^0.9.9
         version: 0.9.9(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -339,6 +352,9 @@ importers:
       prisma:
         specifier: ^7.2.0
         version: 7.2.0(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/eslint-config:
     devDependencies:
@@ -384,6 +400,7 @@ importers:
       ioredis:
         specifier: ^5.8.2
         version: 5.8.2
+    devDependencies:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -3521,6 +3538,10 @@ packages:
 
   ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
+
+  tsc@2.0.4:
+    resolution: {integrity: sha512-fzoSieZI5KKJVBYGvwbVZs/J5za84f2lSTLPYf6AGiIf43tZ3GNrI1QzTLcjtyDDP4aLxd46RTZq1nQxe7+k5Q==}
+    hasBin: true
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
@@ -7128,6 +7149,8 @@ snapshots:
       typescript: 5.9.2
 
   ts-interface-checker@0.1.13: {}
+
+  tsc@2.0.4: {}
 
   tslib@2.8.1: {}
 

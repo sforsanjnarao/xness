@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef } from 'react';
+import { JSX, useEffect, useRef } from 'react';
 import { createChart, IChartApi, CandlestickData, Time, CandlestickSeries } from 'lightweight-charts';
 import { Candle } from '@/lib/api';
 
@@ -8,7 +8,7 @@ interface TradingChartProps {
   isLoading?: boolean;
 }
 
-export function TradingChart({ candles, isLoading }: TradingChartProps) {
+export function TradingChart({ candles, isLoading }: TradingChartProps):JSX.Element {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
 

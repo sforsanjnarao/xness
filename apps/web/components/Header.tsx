@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,20 +11,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { User, LogOut, Wallet } from 'lucide-react';
+import { JSX } from "react";
 
 interface HeaderProps {
   usdcBalance: number
 }
 
-export function Header({ usdcBalance }: HeaderProps) {
+export function Header({ usdcBalance }: HeaderProps):JSX.Element {
   const { user, signOut } = useAuth();
   const navigate = useRouter();
+  const pathname = usePathname(); 
 
   const handleSignOut = async () => {
     await signOut();
     navigate.push('/signin');
   };
-  
+  const isTrade = pathname === '/trade';
+  const isWallet = pathname === '/wallet';
 
   return (
     <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between">
@@ -35,12 +38,28 @@ export function Header({ usdcBalance }: HeaderProps) {
         
         <nav className="flex items-center gap-1">
           <Link href="/trade">
-            <Button variant="ghost" size="sm" className="text-foreground hover:text-primary">
+            <Button 
+            size="sm"
+              className={
+                isTrade
+                  ? "bg-red-600 text-white hover:bg-red-500"
+                  : "text-foreground hover:text-primary"
+              }
+              variant={isTrade ? "default" : "ghost"}
+            >
               Trade
             </Button>
           </Link>
           <Link href="/wallet">
-            <Button variant="ghost" size="sm" className="text-foreground hover:text-primary">
+            <Button 
+            size="sm"
+              className={
+                isWallet
+                  ? "bg-red-600 text-white hover:bg-red-500"
+                  : "text-foreground hover:text-primary"
+              }
+              variant={isWallet ? "default" : "ghost"}
+            >
               Wallet
             </Button>
           </Link>

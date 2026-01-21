@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "- running postgresql from docker steps:     - Creating the Docker Postgres instance         docker run -d -e POSTGRES_DB=mydb -e POSTGRES_PASSWORD=testpass123 -e POSTGRES_USER=postgres -p \"6500:5432\" postgres",
   "type": "module",
-  "main": "./dist/lib/prisma.js",      
-  "types": "./dist/lib/prisma.d.ts",   
+  "main": "./dist/lib/prisma.js",
+  "types": "./dist/lib/prisma.d.ts",
   "exports": {
     ".": {
       "types": "./dist/lib/prisma.d.ts",
@@ -13,19 +13,22 @@
     }
   },
   "scripts": {
-    "db:deploy": "npx prisma migrate deploy && npx prisma generate"
+    "build": "prisma generate && tsc -b",
+    "db:push": "prisma db push",
+    "db:deploy": "prisma migrate deploy "
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/pg": "^8.16.0",
-    "prisma": "^7.2.0"
+    "prisma": "^7.2.0",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@repo/typescript-config":"workspace:*",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
+    "@repo/typescript-config": "workspace:*",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "pg": "^8.16.3"

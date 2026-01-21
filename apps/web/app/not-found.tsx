@@ -1,4 +1,6 @@
-export default function NotFound() {
+import { JSX } from "react";
+
+export default function NotFound():JSX.Element {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
       <div className="text-center">

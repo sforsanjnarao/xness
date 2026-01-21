@@ -8,13 +8,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Order } from "@/lib/api";
+import { JSX } from "react";
 
 // Helper to convert Engine BigInt (string) to Number
 const fromEngine = (val: string | null | undefined) => {
   if (!val) return 0;
   return Number(val) / 100_000_000; // 10^8
 };
+const renderOptionalPrice = (val?: string | null) => {
+  if (val == null) {
+    return <span className="text-muted-foreground font-mono" title="Not set">--</span>;
+  }
 
+  return `$${fromEngine(val).toFixed(2)}`;
+};
 interface PositionsTableProps {
   orders: Order[];
   onClose: (id: string) => void;
@@ -22,7 +29,7 @@ interface PositionsTableProps {
   currentPrices?: Record<string, number>;
 }
 
-export function PositionsTable({ orders, onClose, isClosing, currentPrices }: PositionsTableProps) {
+export function PositionsTable({ orders, onClose, isClosing, currentPrices }: PositionsTableProps):JSX.Element {
   
   // Frontend PnL Calculation (Smoother than waiting for backend)
   const calculateUnrealizedPnL = (order: Order) => {
@@ -51,6 +58,8 @@ export function PositionsTable({ orders, onClose, isClosing, currentPrices }: Po
           <TableHead className="text-right">Size</TableHead>
           <TableHead className="text-right">Entry Price</TableHead>
           <TableHead className="text-right">Leverage</TableHead>
+          <TableHead className="text-right">TL</TableHead>
+          <TableHead className="text-right">SP</TableHead>
           <TableHead className="text-right">Margin</TableHead>
           <TableHead className="text-right">PnL (u)</TableHead>
           <TableHead className="text-right">Action</TableHead>
@@ -81,6 +90,12 @@ export function PositionsTable({ orders, onClose, isClosing, currentPrices }: Po
                   ${fromEngine(order.openPrice).toFixed(2)}
                 </TableCell>
                 <TableCell className="text-right">{order.leverage}x</TableCell>
+                <TableCell className="text-right font-mono">
+                  {renderOptionalPrice(order.takeProfitPrice)}
+                </TableCell>
+                <TableCell className="text-right font-mono">
+                  {renderOptionalPrice(order.stopLossPrice)}
+                </TableCell>
                 <TableCell className="text-right font-mono">
                   {fromEngine(order.initialMargin).toFixed(2)} USDC
                 </TableCell>

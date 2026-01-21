@@ -2,13 +2,13 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { JSX, useEffect } from "react";
 
 export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}):JSX.Element | null {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();

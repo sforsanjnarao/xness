@@ -1,6 +1,7 @@
 import { Order } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { JSX } from 'react';
 
 interface OrderHistoryTableProps {
   orders: Order[];
@@ -23,7 +24,7 @@ const formatCurrency = (val: number) => {
   }).format(val);
 };
 
-export function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
+export function OrderHistoryTable({ orders }: OrderHistoryTableProps):JSX.Element {
   // Filter only closed orders
   const closedOrders = orders
                         .filter(order => order.status === 'CLOSED')

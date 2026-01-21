@@ -1,0 +1,59 @@
+# ==========================================
+# 1. PRUNE STAGE
+# ==========================================
+FROM node:22-alpine AS pruner
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+RUN npm install -g turbo
+COPY . .
+RUN turbo prune --scope=http_server --docker
+
+# ==========================================
+# 2. INSTALL & BUILD STAGE
+# ==========================================
+FROM node:22-alpine AS builder
+WORKDIR /app
+# ⚠️ PRISMA FIX: Install OpenSSL for Prisma Client
+RUN apk add --no-cache libc6-compat openssl
+
+RUN npm install -g pnpm
+
+# Copy json files
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+
+# Install deps (This includes installing prisma CLI)
+RUN pnpm install --frozen-lockfile
+
+# Copy source code (Includes packages/db/prisma/schema.prisma)
+COPY --from=pruner /app/out/full/ .
+
+# ⚠️ GENERATE PRISMA CLIENT
+# We must do this before the build. 
+# Because we added "build": "prisma generate && tsc" in package.json,
+# the turbo command below will handle it automatically!
+# BUT, explicitly running it helps debug if things fail.
+RUN pnpm turbo run build --filter=http_server...
+
+# ==========================================
+# 3. RUNNER STAGE
+# ==========================================
+FROM node:22-alpine AS runner
+WORKDIR /app
+# ⚠️ PRISMA FIX: OpenSSL is needed in production too for the DB connection
+RUN apk add --no-cache openssl
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nodejs
+USER nodejs
+
+# Copy node_modules (Contains the generated Prisma Client)
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+
+# Copy the built app
+COPY --from=builder --chown=nodejs:nodejs /app/apps/http_server/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/apps/http_server/package.json ./package.json
+
+EXPOSE 8001
+
+CMD ["node", "dist/src/index.js"]
