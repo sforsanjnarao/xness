@@ -1,0 +1,93 @@
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: xness_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sanjana}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sura}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sanjana -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: xness_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  http_server:
+    container_name: xness_http
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.http
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-sanjana}:${POSTGRES_PASSWORD:-sura}@postgres:5432/${POSTGRES_DB:-postgres}?schema=public"
+      REDIS_HOST: "redis" 
+      REDIS_PORT: "6379"
+      CORS_ORIGIN: "https://${DOMAIN}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  web:
+    container_name: xness_web
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # This will be the public URL for API requests from browser
+      NEXT_PUBLIC_API_URL: "https://${DOMAIN}"
+      # This is for server-side requests within the docker network
+      INTERNAL_API_URL: "http://http_server:4000"
+    depends_on:
+      - http_server
+
+  engine:
+    container_name: xness_engine
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.engine
+    restart: always
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-sanjana}:${POSTGRES_PASSWORD:-sura}@postgres:5432/${POSTGRES_DB:-postgres}?schema=public"
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+
+  price_poller:
+    container_name: xness_poller
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.poller
+    restart: always
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+    depends_on:
+      redis:
+        condition: service_started
+
+volumes:
+  postgres_data_prod:

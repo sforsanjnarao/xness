@@ -1,55 +1,22 @@
-# ==========================================
-# 1. PRUNE STAGE
-# ==========================================
-FROM node:22-alpine AS pruner
-WORKDIR /app
-RUN apk add --no-cache libc6-compat
-RUN npm install -g turbo
-COPY . .
-# Scoping to "price_poller"
-RUN turbo prune --scope=price_poller --docker
+FROM node:20-alpine
 
-# ==========================================
-# 2. INSTALL & BUILD STAGE
-# ==========================================
-FROM node:22-alpine AS builder
 WORKDIR /app
-RUN apk add --no-cache libc6-compat
+
+# Install pnpm
 RUN npm install -g pnpm
 
-# Copy package files
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+# Copy the entire repository
+COPY . .
+
+# Remove local .env files to ensure we use Docker environment variables
+RUN rm -f .env apps/*/.env packages/*/.env
+
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
-# Copy source code
-COPY --from=pruner /app/out/full/ .
+# Build the specific app using Turbo to ensure dependencies are built
+RUN pnpm exec turbo run build --filter=price_poller...
 
-# Build the project
-RUN pnpm run build --filter=price_poller...
+WORKDIR /app/apps/price_poller
 
-# ==========================================
-# 3. RUNNER STAGE
-# ==========================================
-FROM node:22-alpine AS runner
-WORKDIR /app
-RUN apk add --no-cache openssl
-
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nodejs
-USER nodejs
-
-# 1. Copy node_modules
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-
-# 2. Copy the built artifact
-# ⚠️ CHECK PATH: Assuming 'apps/price_poller'. Change if it is in 'packages/'
-COPY --from=builder --chown=nodejs:nodejs /app/apps/price_poller/dist ./dist
-
-# 3. Copy package.json
-COPY --from=builder --chown=nodejs:nodejs /app/apps/price_poller/package.json ./package.json
-
-# Your start script logic: node ./dist/index.js
 CMD ["node", "dist/index.js"]

@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.DS_Store
+.git
+apps/*/node_modules
+apps/*/dist
+apps/*/.env
+packages/*/node_modules
+packages/*/dist
+packages/*/.env

@@ -59,7 +59,7 @@ export interface PriceEvent {
 }
 
 export const redisClient=new Redis({
-    host:"127.0.0.1",
+    host:"redis",
     port:6379
 })
 redisClient
@@ -105,7 +105,7 @@ function connect() {
 
   ws.on("message", (data) => {
     const msg = JSON.parse(data.toString());
-    console.log('lalala')
+    // console.log('lalala')
     structuredData(msg)
   });
 
@@ -162,7 +162,7 @@ async function sendItToRedisStream(msg: message) {
                 }
             })
         )
-        console.log("Written to Redis:", msg.data.s);
+        // console.log("Written to Redis:", msg.data.s);
     } catch (err) {
         console.error('err:', err)
     }

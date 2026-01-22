@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 const USDC_DECIMALS = 8; // Hardcoded to match Backend
 const ENGINE_SCALE = 8;  // Hardcoded to match Engine
 
@@ -77,7 +77,7 @@ export const userApi = {
 export type OrderSide = 'LONG' | 'SHORT';
 export type OrderStatus = 'OPEN' | 'CLOSED';
 export type CloseReason = 'MANUAL' | 'TP' | 'SL' | 'LIQUIDATION';
-export type Market="BTC_USDC" | "SOL_USDC" | "ETH_USDC"
+export type Market = "BTC_USDC" | "SOL_USDC" | "ETH_USDC"
 
 export type Order = {
   id: string;
@@ -85,21 +85,21 @@ export type Order = {
   side: OrderSide;
   market: Market;
   status: OrderStatus;
-  
+
   // These come as Strings from the backend (BigInt)
-  quantity: string;      
-  openPrice: string;     
+  quantity: string;
+  openPrice: string;
   closePrice: string | null;
   initialMargin: string;
   Pnl: string | null;
-  
+
   leverage: number;
-  
+
   // Triggers
   takeProfitPrice: string | null;
   stopLossPrice: string | null;
   reason: CloseReason | null;
-  
+
   createdAt: string;
   updatedAt: string;
   closedAt: string | null;
@@ -130,7 +130,7 @@ export const orderApi = {
       body: JSON.stringify(data),
     }),
 
-   close: (orderId: string, reason = "manual") =>
+  close: (orderId: string, reason = "manual") =>
     request<{ message: string; orderId: string; finalPnl: number }>(
       `/v1/orders/${orderId}/close`,
       {
@@ -148,14 +148,14 @@ export const orderApi = {
 
 // Candles API
 export interface Candle {
-    time: number | string; // Use string if your JSON sends "2026-01-08...", number if Unix timestamp
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-    volume?: number;
-    symbol?: string; // Optional: based on your backend response
-    bucket?: string; // Optional: based on your backend response
+  time: number | string; // Use string if your JSON sends "2026-01-08...", number if Unix timestamp
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume?: number;
+  symbol?: string; // Optional: based on your backend response
+  bucket?: string; // Optional: based on your backend response
 }
 
 // 2. Define the structure of the API Response (The wrapper)
@@ -179,7 +179,7 @@ export const candlesApi = {
 export interface WalletResponse {
   balance: string; // "1000000" (BigInt string)
   symbol: string;  // "USDC"
-  formatted?: string; 
+  formatted?: string;
 }
 
 export interface Balance {
@@ -187,7 +187,7 @@ export interface Balance {
 }
 
 export interface DepositRequest {
-  symbol: "USDC"; 
+  symbol: "USDC";
   amount: number;
 }
 
@@ -208,20 +208,20 @@ export const balanceApi = {
 
     const humanBalance = Number(rawBalance) / Math.pow(10, USDC_DECIMALS);
 
-    return { 
-      data: { USDC: humanBalance } 
+    return {
+      data: { USDC: humanBalance }
     };
   },
 
   // getBalanceBySymbol: (symbol: string) =>
   //   request<{ wallet: SymbolWallet }>(`/v1/balance/${symbol}`),
 
-    deposit: (amount: number) =>
-      
+  deposit: (amount: number) =>
+
     request<WalletResponse>('/v1/balance/deposit', {
       method: 'POST',
       // We force symbol USDC here
-      body: JSON.stringify({ symbol: "USDC", amount }), 
+      body: JSON.stringify({ symbol: "USDC", amount }),
       // body: JSON.stringify({  amount }), 
     }),
 };
