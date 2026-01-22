@@ -149,7 +149,7 @@ function ConceptDeconstructor() {
         <div className="text-center mb-10 md:mb-16">
           <p className="text-zinc-500 font-mono text-[10px] md:text-xs uppercase tracking-widest mb-3 md:mb-4">Core Architecture</p>
           <h2 className="text-2xl md:text-4xl font-bold text-white tracking-tight">
-            What exactly is <span className="text-[#ef4444]">xness</span>?
+            What exactly is <span className="text-[#ef4444]">velocity</span>?
           </h2>
         </div>
 
@@ -246,7 +246,7 @@ function CompactHeader() {
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
             <span className="font-extrabold text-lg md:text-xl tracking-tighter text-white">
-              xness<span className="text-[#ef4444]">.</span>
+              velocity<span className="text-[#ef4444]">.</span>
             </span>
           </Link>
         </div>
@@ -469,12 +469,12 @@ export default function LandingPage() {
                     <span className="text-xs font-bold uppercase tracking-widest">Educational Sandbox</span>
                 </div>
                 <p className="text-zinc-500 text-xs max-w-2xl mx-auto leading-relaxed">
-                    xness is a centralized perpetual futures exchange (CEX) simulator for educational purposes only. 
+                    velocity is a centralized perpetual futures exchange (CEX) simulator for educational purposes only. 
                     All assets and balances are virtual (fake USDC). No real trading, deposits, or withdrawals are supported. 
                     This platform is designed to teach mechanics without financial risk.
                 </p>
                 <div className="mt-8 text-zinc-700 text-[10px] font-mono">
-                    © 2024 XNESS PROTOCOL. SYSTEM ONLINE.
+                    © {new Date().getFullYear()} VELOCITY PROTOCOL. SYSTEM ONLINE.
                 </div>
             </div>
         </footer>
