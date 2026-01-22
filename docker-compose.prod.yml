@@ -47,7 +47,8 @@ services:
   web:
     container_name: xness_web
     build:
-      context: .\n      dockerfile: docker/Dockerfile.web
+      context: .
+      dockerfile: docker/Dockerfile.web
       args:
         NEXT_PUBLIC_API_URL: "https://${DOMAIN}"
     restart: always
