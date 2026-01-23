@@ -11,6 +11,7 @@ import { MarketSelector } from "@/components/MarketSelector";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { OrderBook } from "@/components/OrderBook";
+import { Button } from "@/components/ui/button";
 import {
   balanceApi,
   candlesApi,
@@ -18,17 +19,22 @@ import {
   CreateOrderRequest,
   CandleInterval,
   Market,
+  OrderSide,
 } from "@/lib/api";
 import {
   toCamelCaseSymbol,
 } from "@/lib/utils";
 import { useMarketFeed } from "@/hooks/useMarketFeed";
+import { X } from "lucide-react";
 
 export default function Trade(): JSX.Element {
   const [selectedPair, setSelectedPair] = useState<Market>("BTC_USDC");
   const [selectedTimeframe, setSelectedTimeframe] = useState<CandleInterval>("1h");
   const [closingOrderId, setClosingOrderId] = useState<string | undefined>();
   
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [drawerSide, setDrawerSide] = useState<OrderSide>('LONG');
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -124,13 +130,20 @@ export default function Trade(): JSX.Element {
     },
   });
 
-  return (
-    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+  const openMobileOrderForm = (side: OrderSide) => {
+    setDrawerSide(side);
+    setIsDrawerOpen(true);
+  };
+
+
+return (
+    <div className="min-h-screen bg-background flex flex-col pb-[80px] lg:pb-0"> 
+      {/* Added pb-[80px] to body so content isn't hidden behind sticky footer */}
+      
       <Header usdcBalance={usdcBalance} />
 
       <main className="flex-1 p-2 md:p-4 space-y-4 max-w-[1920px] mx-auto w-full">
         
-        {/* Market Selector - Full width */}
         <MarketSelector
           selectedPair={selectedPair}
           selectedTimeframe={selectedTimeframe}
@@ -139,35 +152,37 @@ export default function Trade(): JSX.Element {
           onTimeframeChange={setSelectedTimeframe}
         />
 
-        {/* Main Grid: Flex-col on mobile, Grid on desktop */}
         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-3 md:gap-4">
-          
-          {/* 1. Chart Section - Full width mobile, 6 cols desktop */}
-          <div className="order-1 lg:col-span-6 h-[400px] md:h-[500px] lg:h-[600px]">
+          {/* Chart Section */}
+          <div className="lg:col-span-6 h-[400px] md:h-[500px] lg:h-[600px]">
             <TradingChart candles={candlesData} isLoading={isCandlesLoading} />
           </div>
 
-          {/* 2. Order Form - Below chart on mobile, right side desktop */}
-          <div className="order-2 lg:order-3 lg:col-span-3 h-auto lg:h-[600px]">
+
+           {/* Order Book */}
+          <div className="lg:col-span-3 h-[400px] md:h-[500px] lg:h-[600px]">
+            {currentPrice > 0 && (
+              <OrderBook symbol={selectedPair} currentPrice={currentPrice} />
+            )}
+          </div>
+
+          {/* 
+            DESKTOP ONLY: Order Form 
+            Hidden on mobile (lg:block, hidden)
+          */}
+          <div className="hidden lg:block lg:col-span-3 h-[600px]">
             {currentPrice !== null && (
               <OrderForm
                 market={selectedPair}
                 currentPrice={currentPrice}
                 usdcBalance={usdcBalance}
-                onSubmit={async (order) => {
-                  await createOrderMutation.mutateAsync(order);
-                }}
+                onSubmit={async (order) => { await createOrderMutation.mutateAsync(order); }}
                 isSubmitting={createOrderMutation.isPending}
               />
             )}
           </div>
 
-          {/* 3. Order Book - Last on mobile (or middle desktop) */}
-          <div className="order-3 lg:order-2 lg:col-span-3 h-[400px] md:h-[500px] lg:h-[600px]">
-            {currentPrice > 0 && (
-              <OrderBook symbol={selectedPair} currentPrice={currentPrice} />
-            )}
-          </div>
+         
         </div>
 
         {/* Positions & History */}
@@ -181,9 +196,7 @@ export default function Trade(): JSX.Element {
               <PositionsTable
                 orders={openOrders}
                 currentPrices={{ [selectedPair]: currentPrice }} 
-                onClose={async (orderId) => {
-                  await closeOrderMutation.mutateAsync(orderId);
-                }}
+                onClose={async (orderId) => await closeOrderMutation.mutateAsync(orderId)}
                 isClosing={closingOrderId}
               />
             </TabsContent>
@@ -193,6 +206,62 @@ export default function Trade(): JSX.Element {
           </Tabs>
         </div>
       </main>
+
+      {/* 
+        -------------------------------
+        MOBILE STICKY FOOTER 
+        -------------------------------
+      */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-40 lg:hidden flex gap-3 pb-8 md:pb-4">
+        <Button 
+            className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold h-12 text-lg"
+            onClick={() => openMobileOrderForm('LONG')}
+        >
+            Buy
+        </Button>
+        <Button 
+            className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold h-12 text-lg"
+            onClick={() => openMobileOrderForm('SHORT')}
+        >
+            Sell
+        </Button>
+      </div>
+
+      {/* 
+        -------------------------------
+        MOBILE DRAWER (BOTTOM SHEET)
+        -------------------------------
+      */}
+      {isDrawerOpen && (
+        <>
+            {/* Backdrop */}
+            <div 
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden"
+                onClick={() => setIsDrawerOpen(false)}
+            />
+            
+            {/* Drawer Content */}
+            <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-[51] rounded-t-2xl p-4 lg:hidden animate-in slide-in-from-bottom duration-300 max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-lg">Place Order</h3>
+                    <Button variant="ghost" size="icon" onClick={() => setIsDrawerOpen(false)}>
+                        <X className="h-5 w-5" />
+                    </Button>
+                </div>
+                
+                {currentPrice !== null && (
+                    <OrderForm
+                        market={selectedPair}
+                        currentPrice={currentPrice}
+                        usdcBalance={usdcBalance}
+                        defaultSide={drawerSide} // Pass the side clicked
+                        onSubmit={async (order) => { await createOrderMutation.mutateAsync(order); }}
+                        isSubmitting={createOrderMutation.isPending}
+                    />
+                )}
+            </div>
+        </>
+      )}
     </div>
   );
 }

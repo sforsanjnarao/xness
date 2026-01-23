@@ -1,22 +1,22 @@
-# version: '3.8'
+version: '3.8'
 
-# services:
-#   postgres:
-#     image: postgres:15-alpine
-#     container_name: xness_postgres
-#     environment:
-#       POSTGRES_USER: sanjana
-#       POSTGRES_PASSWORD: sura
-#       POSTGRES_DB: postgres
-#     ports:
-#       - "5432:5432"
-#     volumes:
-#       - postgres_data:/var/lib/postgresql/data
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: xness_postgres
+    environment:
+      POSTGRES_USER: sanjana
+      POSTGRES_PASSWORD: sura
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-#   redis:
-#     image: redis:alpine
-#     container_name: xness_redis
-#     ports:
-#       - "6379:6379"
-# volumes:
-#   postgres_data:
+  redis:
+    image: redis:alpine
+    container_name: xness_redis
+    ports:
+      - "6379:6379"
+volumes:
+  postgres_data:

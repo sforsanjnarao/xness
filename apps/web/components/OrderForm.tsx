@@ -14,6 +14,7 @@ interface OrderFormProps {
   usdcBalance: number; // This is strictly USDC
   onSubmit: (order: CreateOrderRequest) => Promise<void>;
   isSubmitting?: boolean;
+  defaultSide?: OrderSide; // Optional: pre-select Long/Short (for mobile drawer)
 }
 
 export function OrderForm({ 
@@ -21,9 +22,10 @@ export function OrderForm({
   currentPrice, 
   usdcBalance, 
   onSubmit, 
-  isSubmitting 
+  isSubmitting,
+  defaultSide = 'LONG' 
 }: OrderFormProps):JSX.Element {
-  const [side, setSide] = useState<OrderSide>('LONG');
+  const [side, setSide] = useState<OrderSide>(defaultSide);
   
   // Inputs
   const [quantityStr, setQuantityStr] = useState('');
@@ -121,8 +123,8 @@ export function OrderForm({
 
         {/* 3. Quantity Input */}
         <div className="space-y-2">
-          {/* <Label className="text-s">Order Size ({base})</Label> */}
-          <Label className="text-s">Order Size</Label>
+          <Label className="text-s">Order Size ({base})</Label>
+          {/* <Label className="text-s">Order Size</Label> */}
 
           <div className="relative">
             <Input
@@ -137,7 +139,7 @@ export function OrderForm({
               {/* {base} */} lots
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          {/* <div className="grid grid-cols-4 gap-2"> */}
             {/* {[0.25, 0.5, 0.75, 1].map((pct) => (
               <Button
                 key={pct}
@@ -149,7 +151,7 @@ export function OrderForm({
                 {pct * 100}%
               </Button>
             ))} */}
-          </div>
+          {/* </div> */}
         </div>
 
         {/* 4. Leverage */}
