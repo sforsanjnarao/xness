@@ -19,18 +19,14 @@ import {
   CandleInterval,
   Market,
 } from "@/lib/api";
-// import { useBackpackTicker } from '@/hooks/useBackpackTicker';
-
 import {
-  getMarketDetails,
-  normalizeSymbol,
   toCamelCaseSymbol,
 } from "@/lib/utils";
 import { useMarketFeed } from "@/hooks/useMarketFeed";
 
-export default function Trade():JSX.Element {
+export default function Trade(): JSX.Element {
   const [selectedPair, setSelectedPair] = useState<Market>("BTC_USDC");
-  const [selectedTimeframe, setSelectedTimeframe] =useState<CandleInterval>("1h");
+  const [selectedTimeframe, setSelectedTimeframe] = useState<CandleInterval>("1h");
   const [closingOrderId, setClosingOrderId] = useState<string | undefined>();
   
   const { toast } = useToast();
@@ -49,7 +45,6 @@ export default function Trade():JSX.Element {
         selectedTimeframe
       );
       if (error || !data) throw new Error(error);
-
       return data.data;
     },
     refetchInterval: 4000,
@@ -66,16 +61,10 @@ export default function Trade():JSX.Element {
     refetchInterval: 5000,
   });
 
-  
-
-  // const { base} = getMarketDetails(selectedPair);
-  // console.log(base);
-
   const usdcBalance = balanceData?.USDC || 0;
 
-
   // Fetch open orders
-    const { data: openOrders = [] } = useQuery({
+  const { data: openOrders = [] } = useQuery({
     queryKey: ["openOrders"],
     queryFn: async () => {
       const response = await orderApi.getOpenOrders();
@@ -83,9 +72,8 @@ export default function Trade():JSX.Element {
       const rawData = response.data as any;
       return rawData?.allOrder || [];
     },
-    refetchInterval: 2000, // Faster refresh for open positions
+    refetchInterval: 2000,
   });
-
 
   // Fetch all orders
   const { data: allOrders = [] } = useQuery({
@@ -99,19 +87,6 @@ export default function Trade():JSX.Element {
     refetchInterval: 3000,
   });
 
-
-  // //fetch all open orders
-  // const { data: openOrders = [] } = useQuery({
-  //   queryKey: ['openOrders'],
-  //   queryFn: async () => {
-  //     const response = await orderApi.getOpenOrders();
-  //     const rawData = response.data as any;
-  //     return rawData?.allOrder || [];
-  //   },
-  //   refetchInterval: 5000,
-  // });
-
-  
   // Create order mutation
   const createOrderMutation = useMutation({
     mutationFn: async (order: CreateOrderRequest) => {
@@ -121,7 +96,7 @@ export default function Trade():JSX.Element {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["openOrders"] });
-      queryClient.invalidateQueries({ queryKey: ["balance"] }); // Update margin usage immediately
+      queryClient.invalidateQueries({ queryKey: ["balance"] });
       toast({ title: "Order Placed", description: "Successfully placed order" });
     },
     onError: (error) => {
@@ -129,9 +104,7 @@ export default function Trade():JSX.Element {
     },
   });
 
-
   // Close order mutation
-  
   const closeOrderMutation = useMutation({
     mutationFn: async (orderId: string) => {
       setClosingOrderId(orderId);
@@ -141,7 +114,7 @@ export default function Trade():JSX.Element {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["openOrders"] });
-      queryClient.invalidateQueries({ queryKey: ["balance"] }); // PnL returns to balance
+      queryClient.invalidateQueries({ queryKey: ["balance"] });
       toast({ title: "Position Closed", description: "Position closed successfully" });
       setClosingOrderId(undefined);
     },
@@ -151,59 +124,36 @@ export default function Trade():JSX.Element {
     },
   });
 
-
-  // export function formatPrice(raw: number, decimals: number) {
-  //   return raw / Math.pow(10, decimals);
-  // }
-
-  // export function formatQty(qty: string, decimals: number) {
-  //   return Number(qty) / Math.pow(10, decimals);
-  // }
-
-  // Get current price from latest candle
-  // const lastCandle = candlesData[candlesData.length - 1];
-  //   const firstCandle = candlesData[0];
-
-  //   const currentPrice = lastCandle ? lastCandle.close : 0;
-
-  //   const priceChange24h = (lastCandle && firstCandle)
-  //     ? ((lastCandle.close - firstCandle.open) / firstCandle.open) * 100
-  //     : 0;
-
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
       <Header usdcBalance={usdcBalance} />
 
-      <main className="flex-1 p-2 space-y-4">
+      <main className="flex-1 p-2 md:p-4 space-y-4 max-w-[1920px] mx-auto w-full">
+        
+        {/* Market Selector - Full width */}
         <MarketSelector
           selectedPair={selectedPair}
           selectedTimeframe={selectedTimeframe}
           ticker={ticker}
-          // priceChange24h={priceChange24h}
           onPairChange={(val)=>setSelectedPair(val as Market)}
           onTimeframeChange={setSelectedTimeframe}
         />
 
-        <div className="grid grid-cols-2 lg:grid-cols-12 gap-2 ">
-          {/* Chart Section */}
-          <div className="lg:col-span-6 h-[600px]">
+        {/* Main Grid: Flex-col on mobile, Grid on desktop */}
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-3 md:gap-4">
+          
+          {/* 1. Chart Section - Full width mobile, 6 cols desktop */}
+          <div className="order-1 lg:col-span-6 h-[400px] md:h-[500px] lg:h-[600px]">
             <TradingChart candles={candlesData} isLoading={isCandlesLoading} />
           </div>
 
-          {/* Order Book */}
-          <div className="lg:col-span-3 h-[600px]">
-            {currentPrice > 0 && (
-              <OrderBook symbol={selectedPair} currentPrice={currentPrice} />
-            )}
-          </div>
-
-          {/* Order Form Section */}
-          <div className="lg:col-span-3 h-[600px]">
+          {/* 2. Order Form - Below chart on mobile, right side desktop */}
+          <div className="order-2 lg:order-3 lg:col-span-3 h-auto lg:h-[600px]">
             {currentPrice !== null && (
               <OrderForm
                 market={selectedPair}
                 currentPrice={currentPrice}
-                usdcBalance={usdcBalance} // Pass strict USDC balance
+                usdcBalance={usdcBalance}
                 onSubmit={async (order) => {
                   await createOrderMutation.mutateAsync(order);
                 }}
@@ -211,14 +161,21 @@ export default function Trade():JSX.Element {
               />
             )}
           </div>
+
+          {/* 3. Order Book - Last on mobile (or middle desktop) */}
+          <div className="order-3 lg:order-2 lg:col-span-3 h-[400px] md:h-[500px] lg:h-[600px]">
+            {currentPrice > 0 && (
+              <OrderBook symbol={selectedPair} currentPrice={currentPrice} />
+            )}
+          </div>
         </div>
 
         {/* Positions & History */}
-        <div className="bg-card border border-border rounded-lg p-4">
-          <Tabs defaultValue="positions">
-            <TabsList className="bg-secondary">
-              <TabsTrigger value="positions">Open Positions</TabsTrigger>
-              <TabsTrigger value="history">Order History</TabsTrigger>
+        <div className="bg-card border border-border rounded-lg p-2 md:p-4">
+          <Tabs defaultValue="positions" className="w-full">
+            <TabsList className="bg-secondary w-full justify-start overflow-x-auto">
+              <TabsTrigger value="positions" className="flex-1 md:flex-none">Open Positions</TabsTrigger>
+              <TabsTrigger value="history" className="flex-1 md:flex-none">Order History</TabsTrigger>
             </TabsList>
             <TabsContent value="positions" className="mt-4">
               <PositionsTable

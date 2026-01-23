@@ -398,7 +398,7 @@ export default function LandingPage() {
                   <div className="hidden sm:flex col-span-1 bg-[#09090b] flex-col text-[10px] font-mono">
                      <div className="p-2 text-zinc-500 border-b border-zinc-800">Recent Trades</div>
                      <div className="flex-1 overflow-hidden p-1 space-y-1">
-                        {[...Array(12)].map((_, i) => {
+                        {[...Array(15)].map((_, i) => {
                             const isBuy = Math.random() > 0.5;
                             return (
                                 <div key={i} className="flex justify-between">
