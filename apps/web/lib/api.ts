@@ -21,10 +21,11 @@ async function request<T>(
         ...options.headers,
       },
     });
+    console.log('response:', response)
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      return { error: errorData.message || `Request failed with status ${response.status}` };
+      return { error: errorData.error || `Request failed with status ${response.status}` };
     }
 
     const data = await response.json();
