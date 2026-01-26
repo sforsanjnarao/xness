@@ -3,8 +3,7 @@ import { redisClient } from "@repo/redis-client"
 import { prisma } from "@repo/db"
 import { engineDispatcher } from "../redis.client.engine"
 import { v4 as uuidv4 } from 'uuid';
-// import {type Symbol, SYMBOL_DECIMALS,} from "@repo/types"
-// import { GetWalletBalanceBySymbol } from "../zod/balance.zod";
+
 
 
 
@@ -19,7 +18,6 @@ export const getBalance = async (req: Request, res: Response) => {
             where: { userId: userId }
         });
 
-        // If no wallet exists, it means balance is 0
         if (!wallet) {
             return res.status(200).json({ 
                 balance: 0, 
@@ -109,10 +107,9 @@ export const depositWallet = async (req: Request, res: Response) => {
     }
 
     try {
-      // 1. DATABASE WRITE
         const updatedWallet = await prisma.wallet.upsert({
             where: {
-                userId: userId, // No need for compound key anymore
+                userId: userId, 
             },
             create: {
                 userId,
@@ -125,7 +122,6 @@ export const depositWallet = async (req: Request, res: Response) => {
         
 
 
-        // 2. GENERATE TRACE ID
         const depositId = uuidv4(); 
 
         try {
@@ -138,7 +134,6 @@ export const depositWallet = async (req: Request, res: Response) => {
                 balanceRaw: updatedWallet.balanceRaw, 
             }
          }
-         //3. SEND TO ENGINE AND AWAIT RESPONSE
            let engineResponse= await engineDispatcher(depositId,payload,5000)
            console.log('ENGINE_response',engineResponse)
 

@@ -14,7 +14,6 @@ export const GetWalletBalanceBySymbol = z.object({
 export const DepositWalletBalanceBySymbol = z.object({
     symbol: SymbolSchema,
     amount: z.coerce.number().positive(),
-    // Make decimals optional - will be auto-determined from symbol
     decimals: z.coerce.number().int().min(0).max(18).optional()
 })
 

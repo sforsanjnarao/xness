@@ -23,7 +23,7 @@ const parseStreamData = (rawFields: string[]): EngineResponse => {
     const data: EngineResponse = {}
     //iterate two steps at a time (key=i, value=i+1)
     for (let i = 0; i < rawFields.length; i += 2) {
-        //Ensure both key and value exist before assigning
+        //ensuring both key and value exist before assigning
         const key = rawFields[i];
         const value = rawFields[i + 1];
         if (key !== undefined && value !== undefined) {
@@ -59,12 +59,9 @@ async function listeningToStream() {
             for (const [streamMsgId, rawBody] of messages) {
                 lastId = streamMsgId as string;
 
-                // Parse Raw Redis Fields
                 const redisObj = parseStreamData(rawBody as string[]);
                 console.log('REDIS_OBJ:',redisObj)
 
-                //  Parse JSON Payload inside if it exists
-                //cloning
                 let finalData: any = { ...redisObj };
                 if (redisObj.payload && typeof redisObj.payload=="string") {
                     try {
@@ -97,7 +94,6 @@ async function listeningToStream() {
                     pendingRequest.delete(requestId);
                     ActiveTimeout.delete(requestId);
 
-                    // delete from Correct Stream
 
                     if (resolve){
                         console.log("BLEH", finalData)

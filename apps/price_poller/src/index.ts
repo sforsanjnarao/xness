@@ -97,7 +97,7 @@ function connect() {
       if (ws.readyState === WebSocket.OPEN) {
         ws.ping();
       }
-    }, 180000); // 3 min
+    }, 180000);
   });
 
   ws.on("pong", () => {
@@ -122,7 +122,7 @@ function connect() {
 
   ws.on("error", (err) => {
     console.error("WS Error:", err.message);
-    ws.close(); // triggers close handler
+    ws.close(); 
   });
 }
 
@@ -149,7 +149,6 @@ async function sendItToRedisStream(msg: message) {
             receivedAt: Date.now()
         }
         
-        // Change: Send as a single JSON string in 'data' field
         await redisClient.xadd(
             "trading-engine",
             "*",

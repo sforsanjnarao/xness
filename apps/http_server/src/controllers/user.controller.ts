@@ -36,19 +36,11 @@ export const signupController=async (req:Request, res:Response)=>{
                 password:hashPassword
             }
         })
-            // create default wallets
-            // await prisma.wallet.createMany({
-            // data: [
-            //     { userId: user.id, symbol: "USDC", balanceRaw: BigInt(0), balanceDecimal: 6 },
-            //     // { userId: user.id, symbol: "BTC",  balanceRaw: BigInt(0), balanceDecimal: 8 },
-            //     // { userId: user.id, symbol: "ETH",  balanceRaw: BigInt(0), balanceDecimal: 8 }
-            // ]
-            // });
-        const token= jwt.sign({userId:user.id},'sanjana')     //payload must be an object
+        const token= jwt.sign({userId:user.id},'sanjana')     
         res.cookie('token', token,{  
                 secure: process.env.NODE_ENV === "false", 
-                sameSite: 'lax', // Helps with localhost cookie behavior
-                maxAge: 24 * 60 * 60 * 1000 // Optional: 1 day expiry
+                sameSite: 'lax', 
+                maxAge: 24 * 60 * 60 * 1000 
 
         })
 
@@ -83,8 +75,8 @@ export const signinController=async (req:Request, res:Response)=>{
         const token=jwt.sign({userId:existingUser.id},'sanjana')
         res.cookie('token',token,{
                 secure: process.env.NODE_ENV === 'false', 
-                sameSite: 'lax', // Helps with localhost cookie behavior
-                maxAge: 24 * 60 * 60 * 1000 // Optional: 1 day expiry
+                sameSite: 'lax', 
+                maxAge: 24 * 60 * 60 * 1000 
 
         })
         return res.status(200).json({message:'u r success full signedUp', user:{userId:existingUser.id, email: existingUser.email}})

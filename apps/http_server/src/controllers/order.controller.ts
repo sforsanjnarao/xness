@@ -86,10 +86,8 @@ export const createOrder=async (req:Request, res:Response)=>{
         return `${prefix}_${time}_${uuid}`;
 }
 
-        //create an order id
         const orderId=createEngineId("ORDER_Id:")
 
-        //wrap all in the payload
         const payload={
             kind:'create-order',
             payload: {
@@ -170,10 +168,8 @@ export const closeOrder=async (req:Request, res:Response)=>{
     try{
         const userId= req.user?.id
         if(!userId) return res.status(401).json({error:'unauthorize'})
-        //if don't have userId
         const {orderId}= req.params
         if(!orderId) return res.status(400).json({error:'order id is required'})
-        //if don't have userId
         const {closeReason}=req.body
         
 
@@ -194,7 +190,7 @@ export const closeOrder=async (req:Request, res:Response)=>{
             kind:'close-order',
             payload:{
                 orderId,
-                userId, //ownership is required
+                userId, 
                 closeReason:closeReason,
                 closedAt: Date.now()
             }

@@ -2,7 +2,7 @@
 export interface engineOrder {
     id: string;
     userId: string;
-    asset: assetType //symbol
+    asset: assetType 
     side: Side;
     qty: number;
     leverage: number;
@@ -32,10 +32,10 @@ export interface precisionEngineOrder {
     asset: string;
     side: "LONG" | "SHORT";
     status: "OPEN" | "CLOSE"
-    qty: bigint;            // Stored as 100000000 (1.00 BTC)
-    leverage: number;       // Leverage is fine as a standard number (10x, 20x)
-    openingPrice: bigint;   // Stored as 6000000000000 (60k)
-    initialMargin: bigint;  // Calculated in BigInt
+    qty: bigint;            
+    leverage: number;       
+    openingPrice: bigint;  
+    initialMargin: bigint;  
     takeProfit?: bigint;
     stopLoss?: bigint;
     createdAt: number;
@@ -48,7 +48,7 @@ export type balanceType={
     depositId: string
     userId: string
     asset:assetType
-    balanceRaw:bigint       //bigInt Means floating
+    balanceRaw:bigint       
     balanceDecimal:number
     createdAt:Date
     updatedAt:Date

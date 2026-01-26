@@ -32,7 +32,6 @@ export const SYMBOL_MAP: SymbolType = {
     SOLUSDC: "SOL_USDC",
 }
 
-//timeFrame(time Window) -> number of seconds
 export type TimeWindowType = Record<string, number>
 
 export const TIME_WINDOW_MAP: TimeWindowType = {
@@ -51,10 +50,8 @@ export const TIME_WINDOW_MAP: TimeWindowType = {
     "1M": 5 * 365 * 24 * 60 * 60,
 }
 
-//Default fallback time range: 7 days
 export const DEFAULT_TIME_RANGE_SECONDS = 7*24*60*60
 
-//-----
 type CacheKey = `${string}:${string}`;
 
 interface CacheEntry {
@@ -63,7 +60,7 @@ interface CacheEntry {
 }
 
 const candleCache = new Map<CacheKey, CacheEntry>();
-const TTL = 4000; // 4 seconds
+const TTL = 4000; 
 
 export function getCachedCandles(symbol: string, tf: string) {
   const key: CacheKey = `${symbol}:${tf}`;
@@ -78,7 +75,6 @@ export function setCachedCandles(symbol: string, tf: string, data: CandleRespons
   candleCache.set(key, { data, fetchedAt: Date.now() });
 }
 
-//----
 export async function getCandles(req: Request, res: Response): Promise<void> {
     const validatedResult = GetCandlesQuerySchema.safeParse(req.query)
 
@@ -95,7 +91,6 @@ export async function getCandles(req: Request, res: Response): Promise<void> {
     const { timeFrame, asset } = query
 
     try {
-        //Normalize asset name to uppercase
         const assetKey = asset.toUpperCase()
 
         if (!SYMBOL_MAP[assetKey]) {
@@ -104,14 +99,12 @@ export async function getCandles(req: Request, res: Response): Promise<void> {
         }
         const symbol = SYMBOL_MAP[assetKey]
 
-        //Resolve time window
         const timeRangeInSeconds = TIME_WINDOW_MAP[timeFrame] ?? DEFAULT_TIME_RANGE_SECONDS
 
         const now = Math.floor(Date.now() / 1000);
         const startTime = now - timeRangeInSeconds;
         const endTime = now;
 
-        //Construct Request URL
         const url = new URL("https://api.backpack.exchange/api/v1/klines")
         url.searchParams.set("symbol", symbol)
         url.searchParams.set("interval", timeFrame)
@@ -151,9 +144,7 @@ export async function getCandles(req: Request, res: Response): Promise<void> {
         }))
         setCachedCandles(assetKey, timeFrame, transformed);
 
-        // res.setHeader('Cache-Control', 'no-store');
-        // res.setHeader('Pragma', 'no-cache');
-        // res.setHeader('Expires', '0');
+        
         res.json({ data: transformed })
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error"

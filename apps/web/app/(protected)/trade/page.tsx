@@ -207,11 +207,7 @@ return (
         </div>
       </main>
 
-      {/* 
-        -------------------------------
-        MOBILE STICKY FOOTER 
-        -------------------------------
-      */}
+      {/*MOBILE STICKY FOOTER*/}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-40 lg:hidden flex gap-3 pb-8 md:pb-4">
         <Button 
             className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold h-12 text-lg"
@@ -227,11 +223,7 @@ return (
         </Button>
       </div>
 
-      {/* 
-        -------------------------------
-        MOBILE DRAWER (BOTTOM SHEET)
-        -------------------------------
-      */}
+      {/* MOBILE DRAWER (BOTTOM SHEET)*/}
       {isDrawerOpen && (
         <>
             {/* Backdrop */}

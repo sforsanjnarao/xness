@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 
 export const protectMiddleware=(req:Request, res:Response, next: NextFunction)=>{
     try{
-        const token=req.cookies?.token //what cookie is undefine
+        const token=req.cookies?.token 
         if(!token){
             return res.status(401).json({error:'unauthorized'})
         }

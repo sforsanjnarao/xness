@@ -1,31 +1,23 @@
 import { prisma } from "@repo/db";
 import { redisClient } from "@repo/redis-client";
-
-// Import your shared types. 
-// Note: Make sure your @repo/types actually exports these now!
-// import { Asset, Market } from "@repo/types"; 
-
 import { 
-    balanceType, 
     ENGINE_CONSTANTS, 
-    ORDER_PRECISION, 
     precisionEngineOrder, 
     Side 
 } from "./types";
 
-const GLOBAL_ASSET = "USDC"; // The only money we care about
+const GLOBAL_ASSET = "USDC"; 
 
 let isFlushingDB = false;
 let price = new Map<string, { bid: bigint, ask: bigint }>();
 let orders = new Map<string, precisionEngineOrder>();
-// Map<UserId, Map<Asset, Balance>> 
 let balance = new Map<string, Map<string, bigint>>(); 
 
 let dbArray: any[] = [];
 const redis = redisClient();
 let lastStreamId = "$";
 
-//MATH UTILS
+
 // Scaling 8 decimals = 100,000,000
 const SCALE = BigInt(Math.pow(10, 8)); 
 
@@ -77,22 +69,18 @@ function checkRisk(order: precisionEngineOrder, currentPrice: bigint) {
     if (reason) executeClose(order, reason, currentPrice, pnl);
 }
 
-// --- BALANCE UTILS ---
 async function getBalance(userId: string): Promise<bigint> {
     if (!balance.has(userId)) {
         balance.set(userId, new Map());
     }
-    // ALWAYS fetch USDC. Ignore any other key.
     return balance.get(userId)?.get(GLOBAL_ASSET) ?? 0n;
 }
 
 function mutateBalance(userId: string, amount: bigint) {
     if (!balance.has(userId)) balance.set(userId, new Map());
     
-    // Update In-Memory
     balance.get(userId)!.set(GLOBAL_ASSET, amount);
     console.log(balance.get(userId)!.set(GLOBAL_ASSET, amount))
-    // Push to DB Queue
     queueDbAction({
         type: 'balance-update',
         payload: { 
@@ -104,28 +92,9 @@ function mutateBalance(userId: string, amount: bigint) {
     });
 }
 
-// queueDbAction({
-//         type: 'balance-update',
-//         payload: { 
-//             userId, 
-//             create:{
-//                 userId:userId,
-//                 balanceRaw:amount
-//             },
-//             update:{
-//                  balanceRaw:{
-//                     increment:amount
-//                  }
-//             }
-//         }
-//     });
-
-// --- DB BATCHER ---
 function queueDbAction(action: any) {
-    // SAFETY FIX: Do not delete data if full. Just warn.
     if (dbArray.length >= 2000) {
         console.warn(`[DB] Queue High Load! Size: ${dbArray.length}.`);
-        // Ideally: Pause Redis reading here (Backpressure)
     }
     console.log('pushing into ques')
     dbArray.push(action);
@@ -144,31 +113,26 @@ async function pushQueueJobsToDb() {
             try {
                 if (task.type == "balance-update") {
                     console.log('i am getting in db')
-                    // NEW SCHEMA LOGIC
                     let { userId, balanceRaw } = task.payload;
                     console.log('with task.payload',task.payload)
                     
-                    // We don't convert decimals here anymore. 
-                    // We assume engine uses USDC precision logic or we store raw Engine Precision.
-                    // For simplicity: Storing raw BigInt from engine to DB.
                     await prisma.wallet.upsert({
-                        where: { userId }, // Unique constraint
+                        where: { userId }, 
                         create: { 
                             userId, 
-                            asset: "USDC", // Hardcoded enum
+                            asset: "USDC", 
                             balanceRaw 
                         },
                         update: { balanceRaw }
                     });
 
                 } else if (task.type === "create_order") {
-                    // Map Payload to New DB Schema
                     const { market, ...rest } = task.payload;
                     console.log('order-payload-inside_the_create_order:',task.payload)
                     await prisma.order.create({
                         data: {
                             ...rest,
-                            market: market // Ensure this matches Enum (BTC_USDC)
+                            market: market 
                         }
                     });
 
@@ -181,7 +145,6 @@ async function pushQueueJobsToDb() {
                 }
             } catch (error) {
                 console.error(`[DB] Failed task ${task.type}:`, error);
-                // Re-queue failed task? (Advanced topic)
             }
         }
     } catch (error) {
@@ -206,7 +169,6 @@ async function executeClose(order: precisionEngineOrder, reason: string, current
 
     orders.delete(order.id);
 
-    // Map reason string to DB Enum if needed
     let dbCloseReason = reason.toLowerCase(); 
     console.log('it should get close',dbCloseReason)
 
@@ -216,8 +178,8 @@ async function executeClose(order: precisionEngineOrder, reason: string, current
             id: order.id,
             update: {
                 status: "CLOSED",
-                closePrice: currentPrice, // Storing Raw BigInt
-                Pnl: pnl,                 // Storing Raw BigInt
+                closePrice: currentPrice, 
+                Pnl: pnl,                 
                 closedAt: new Date(),
                 reason: dbCloseReason
             }
@@ -234,14 +196,11 @@ async function executeClose(order: precisionEngineOrder, reason: string, current
 }
 
 async function handlePriceUpdate(payload:any) {
-    // FIX 1: Parsing Logic
     let { a, b, s } = payload;
     
-    // Safety: Convert string to number first, then Engine BigInt
     let ask = toEnginePrecision(Number(a)); 
     let bid = toEnginePrecision(Number(b));
     
-    // FIX 2: Do NOT split the symbol. Use "BTC_USDC" as key.
     let symbol = s; 
 
     price.set(symbol, { ask, bid });
@@ -259,7 +218,6 @@ async function handleCreateOrder(payload:any) {
     
     let { id, userId, market, side, qty, leverage, takeProfit, stopLoss } = payload;
 
-    // symbol here comes from API as "BTC_USDC". This is our MARKET.
 
     if (orders.has(id)) return; 
         
@@ -282,7 +240,6 @@ async function handleCreateOrder(payload:any) {
     console.log('marginRequired',marginRequired) 
     //TODO: how much free margin we have
     console.log(userId)
-    // FIX 3: Strict USDC Check
     let userBal = await getBalance(userId); 
     console.log('userBal',userBal)
 
@@ -293,7 +250,6 @@ async function handleCreateOrder(payload:any) {
     let freeMargin=BigInt(userBal) - marginRequired
     console.log('free_margin', freeMargin)
 
-    // Deduct Balance
     // mutateBalance(userId, userBal - marginRequired);
     mutateBalance(userId, BigInt(freeMargin));
 
@@ -317,8 +273,8 @@ async function handleCreateOrder(payload:any) {
         payload: {
             id,
             userId,
-            market: market, // Maps to DB Enum
-            side: side.toUpperCase(), // DB Enum is UPPERCASE usually
+            market: market, 
+            side: side.toUpperCase(), 
             status: "OPEN",
             
             quantity: qtyInt, 
@@ -351,8 +307,6 @@ async function handleCloseOrder(payload: any) {
         return sendCallbackToRedis(id, "error", { reason: "Unauthorized" });
     }
 
-    // 3. Get Live Price
-    // We need the latest price to calculate final PnL
     console.log('close_order_asset')
     const priceData = price.get(order.asset);
     console.log('price_map',price)
@@ -362,17 +316,11 @@ async function handleCloseOrder(payload: any) {
         return sendCallbackToRedis(id, "error", { reason: "Market price not available" });
     }
 
-    // CRITICAL TRADING LOGIC:
-    // If you are LONG, you sell to the BID (Lower price)
-    // If you are SHORT, you buy from the ASK (Higher price)
     const closePrice = order.side === "LONG" ? priceData.bid : priceData.ask;
     console.log('what the close price we get',closePrice)
 
-    // 4. Calculate PnL
     const pnl = calPnL(closePrice, order.openingPrice, order.side, order.qty);
     console.log('YES>> i need pnl',pnl)
-    // 5. Execute Settlement
-    // We reuse the exact same function used for Liquidations/TakeProfit
     await executeClose(order, "manual", closePrice, pnl);
 }
 
@@ -380,7 +328,6 @@ async function handleCloseOrder(payload: any) {
 async function handleBalanceUpdate(payload: any) {
     const { depositId, userId, balanceRaw } = payload;
     
-    // We implicitly trust that the API only sends this for USDC now
     // mutateBalance(userId, BigInt(balanceRaw));
     if (!balance.has(userId)) balance.set(userId, new Map());
     
@@ -393,35 +340,31 @@ async function handleBalanceUpdate(payload: any) {
     });
 }
 
-// loading the state in the in memory
 async function loadState() {
     console.log('Restoring State from DB...');
 
-    // 1. Load Orders
     const dbOrders = await prisma.order.findMany({ where: { status: 'OPEN' } });
     
     for (let order of dbOrders) {
         orders.set(order.id, {
             id: order.id,
             userId: order.userId,
-            asset: order.market, // "BTC_USDC"
+            asset: order.market, 
             side: order.side === "LONG" ? "LONG" : "SHORT",
-            qty: order.quantity, // already BigInt
+            qty: order.quantity, 
             status: "OPEN",
             leverage: order.leverage,
-            openingPrice: order.openPrice, // alredy BigInt
-            initialMargin: order.initialMargin, // already BigInt
+            openingPrice: order.openPrice, 
+            initialMargin: order.initialMargin, 
             takeProfit: order.takeProfitPrice ?? undefined,
             stopLoss: order.stopLossPrice ?? undefined,
             createdAt: order.createdAt.getTime()
         });
     }
 
-    // 2. Load Balances
     const dbWallets = await prisma.wallet.findMany();
     for (let wallet of dbWallets) {
         if (!balance.has(wallet.userId)) balance.set(wallet.userId, new Map());
-        // Always set USDC
         balance.get(wallet.userId)!.set(GLOBAL_ASSET, wallet.balanceRaw);
     }
     
@@ -436,7 +379,6 @@ async function sendCallbackToRedis(id: string, status: string, payload: any) {
     }
 }
 
-// the main loop
 async function engine() {
     await loadState();
     console.log("Engine Started 🚀");
@@ -451,7 +393,6 @@ async function engine() {
                     lastStreamId = id;
                     let rawData = "";
                     
-                    // parsing
                     for (let i = 0; i < fields.length; i += 2) {
                         if (fields[i] === "data" || fields[i] === "payload") {
                             rawData = fields[i + 1] ?? "";
