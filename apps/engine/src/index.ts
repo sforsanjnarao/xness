@@ -38,7 +38,7 @@ const fromEnginePrecision = (val: bigint | number): number => {
 };
 
 const calPnL = (currentPrice: bigint, openPrice: bigint, side: Side, quantity: bigint) => {
-    const normalizedSide = side.toLowerCase(); 
+    const normalizedSide = side.toLocaleUpperCase(); 
     const diff = normalizedSide === "LONG" ? currentPrice - openPrice : openPrice - currentPrice;
     let calculatedPnl=(diff * quantity) / SCALE;
     // console.log('calculatedPnl:',calculatedPnl)
@@ -73,7 +73,7 @@ function checkRisk(order: precisionEngineOrder, currentPrice: bigint) {
     )) {
         reason = "STOP_LOSS";
     }
-    console.log('is their any reason',reason)
+    // console.log('is their any reason',reason)
     if (reason) executeClose(order, reason, currentPrice, pnl);
 }
 

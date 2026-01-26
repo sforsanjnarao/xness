@@ -32,7 +32,7 @@ export function Header({ usdcBalance }: HeaderProps):JSX.Element {
   return (
     <header className="sticky top-0 z-50 h-14 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 px-4 flex items-center justify-between">
       <div className="flex items-center gap-4 md:gap-8">
-        <Link href="/trade" className="text-lg md:text-xl font-bold text-primary">
+        <Link href="/" className="text-lg md:text-xl font-bold text-primary">
           Velocity
         </Link>
         

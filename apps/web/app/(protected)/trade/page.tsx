@@ -162,7 +162,7 @@ return (
            {/* Order Book */}
           <div className="lg:col-span-3 h-[400px] md:h-[500px] lg:h-[600px]">
             {currentPrice > 0 && (
-              <OrderBook symbol={selectedPair} currentPrice={currentPrice} />
+              <OrderBook symbol={selectedPair} />
             )}
           </div>
 
