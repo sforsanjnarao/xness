@@ -126,11 +126,11 @@ function connect() {
   });
 }
 
-function shutdown() {
-  manuallyClosed = true;
-  if (heartbeat) clearInterval(heartbeat);
-  ws?.close();
-}
+// function shutdown() {
+//   manuallyClosed = true;
+//   if (heartbeat) clearInterval(heartbeat);
+//   ws?.close();
+// }
 
 connect();
 
