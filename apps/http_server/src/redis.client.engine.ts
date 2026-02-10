@@ -39,7 +39,7 @@ let isListening:Boolean=true
 async function listeningToStream() {
     if (!isListening) return;
     isListening = false;
-    console.log('[Redis:Listener] 🎧 Started listening...');
+    console.log('listening');
 
     let lastId = "$";
 
@@ -49,26 +49,21 @@ async function listeningToStream() {
                 "BLOCK", 0,
                 "STREAMS", "callback_queue", lastId
             );
-            console.log('STREAM:',stream)
 
             const streamKey = stream?.[0];
             if (!streamKey || !streamKey[1] || streamKey[1].length === 0) continue;
 
             const messages = streamKey[1]; 
-            console.log('MESSAGE:',messages)
             for (const [streamMsgId, rawBody] of messages) {
                 lastId = streamMsgId as string;
 
                 const redisObj = parseStreamData(rawBody as string[]);
-                console.log('REDIS_OBJ:',redisObj)
 
                 let finalData: any = { ...redisObj };
                 if (redisObj.payload && typeof redisObj.payload=="string") {
                     try {
                         const parsedPayload = JSON.parse(redisObj.payload);
-                        console.log('parsedPayload', parsedPayload)
                         finalData = { ...finalData, ...parsedPayload };
-                        console.log('finalData:',finalData)
                     } catch (e) {
                         console.error("JSON Parse Error:", e);
                     }
@@ -77,18 +72,13 @@ async function listeningToStream() {
                 //  get the request id
                 // engine sends id or orderId inside the payload
                 const requestId = finalData.id || finalData.orderId; 
-                console.log('requestId:', requestId)
 
                 if (requestId && pendingRequest.has(requestId)) {
-                    console.log('true')
                     const resolve = pendingRequest.get(requestId);
-                    console.log('Resolve:',resolve)
                     const timeout = ActiveTimeout.get(requestId);
-                    console.log('timeout:',timeout)
 
                     if (timeout) {
                         clearTimeout(timeout);
-                        console.log('is it done')
                     }
 
                     pendingRequest.delete(requestId);
@@ -96,7 +86,6 @@ async function listeningToStream() {
 
 
                     if (resolve){
-                        console.log("BLEH", finalData)
                        resolve(finalData);
                         subscriberClient.xdel("callback_queue", streamMsgId).catch(console.error);   
                     }
@@ -113,9 +102,8 @@ async function listeningToStream() {
 
 //TODO:??
 export async function engineDispatcher(requestId:string, payload:Record<string,any>, timeoutMS:number):Promise<Record<string,any>>{
-    // if (!isListening) listeningToStream();
      listeningToStream();
-    // console.log(res)
+     
     return new Promise((resolve, reject)=>{
         const timeout=setTimeout(()=>{
             if(pendingRequest.has(requestId)){

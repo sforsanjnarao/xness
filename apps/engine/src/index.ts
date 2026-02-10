@@ -55,7 +55,6 @@ function checkRisk(order: precisionEngineOrder, currentPrice: bigint) {
     } else if (order.stopLoss && (
         (order.side == 'LONG' && currentPrice <= order.stopLoss) ||
         (order.side == 'SHORT' && currentPrice >= order.stopLoss)
-        
     )) {
         reason = "STOP_LOSS";
     }
@@ -112,7 +111,6 @@ async function pushQueueJobsToDb() {
                         },
                         update: { balanceRaw }
                     });
-
                 } else if (task.type === "create_order") {
                     const { market, ...rest } = task.payload;
                     await prisma.order.create({
@@ -121,7 +119,6 @@ async function pushQueueJobsToDb() {
                             market: market 
                         }
                     });
-
                 } else if (task.type === "order_close") {
                     await prisma.order.update({
                         where: { id: task.payload.id },
@@ -200,7 +197,6 @@ async function handleCreateOrder(payload:any) {
     
     let { id, userId, market, side, qty, leverage, takeProfit, stopLoss } = payload;
 
-
     if (orders.has(id)) return; 
         
     let priceData = price.get(market);
@@ -226,7 +222,6 @@ async function handleCreateOrder(payload:any) {
 
     mutateBalance(userId, BigInt(freeMargin));
 
-
     let order: precisionEngineOrder = {
         id, userId, asset: market, side,
         qty: qtyInt,
@@ -248,19 +243,15 @@ async function handleCreateOrder(payload:any) {
             market: market, 
             side: side.toUpperCase(), 
             status: "OPEN",
-            
             quantity: qtyInt, 
             leverage: Number(lev),
             openPrice: openingPrice,
             initialMargin: marginRequired,
-            
             takeProfitPrice: order.takeProfit,
             stopLossPrice: order.stopLoss,
-            
             createdAt: new Date()
         }
     });
-
     sendCallbackToRedis(id, 'open', { price: fromEnginePrecision(openingPrice) });
 }
 
@@ -271,11 +262,9 @@ async function handleCloseOrder(payload: any) {
     if (!order) {
         return sendCallbackToRedis(id, "error", { reason: "Order not found" });
     }
-
     if (order.userId !== userId) {
         return sendCallbackToRedis(id, "error", { reason: "Unauthorized" });
     }
-
     const priceData = price.get(order.asset);
     
     if (!priceData) {
@@ -283,7 +272,6 @@ async function handleCloseOrder(payload: any) {
     }
 
     const closePrice = order.side === "LONG" ? priceData.bid : priceData.ask;
-
     const pnl = calPnL(closePrice, order.openingPrice, order.side, order.qty);
     await executeClose(order, "manual", closePrice, pnl);
 }
@@ -291,12 +279,10 @@ async function handleCloseOrder(payload: any) {
 
 async function handleBalanceUpdate(payload: any) {
     const { depositId, userId, balanceRaw } = payload;
-    
     // mutateBalance(userId, BigInt(balanceRaw));
     if (!balance.has(userId)) balance.set(userId, new Map());
     
     balance.get(userId)!.set(GLOBAL_ASSET, balanceRaw);
-
     sendCallbackToRedis(depositId, 'balance_updated', {
         id: depositId,
         userId,
@@ -353,6 +339,7 @@ async function engine() {
                     lastStreamId = id;
                     let rawData = "";
                     
+                    console.log("fields:", fields)
                     for (let i = 0; i < fields.length; i += 2) {
                         if (fields[i] === "data" || fields[i] === "payload") {
                             rawData = fields[i + 1] ?? "";
