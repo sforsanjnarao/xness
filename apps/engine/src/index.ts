@@ -33,7 +33,6 @@ const calPnL = (currentPrice: bigint, openPrice: bigint, side: Side, quantity: b
     const normalizedSide = side.toLocaleUpperCase(); 
     const diff = normalizedSide === "LONG" ? currentPrice - openPrice : openPrice - currentPrice;
     let calculatedPnl=(diff * quantity) / SCALE;
-    // console.log('calculatedPnl:',calculatedPnl)
     return calculatedPnl
 };
 
@@ -45,11 +44,6 @@ function checkRisk(order: precisionEngineOrder, currentPrice: bigint) {
     
     const maintenanceMargin = (order.initialMargin * BigInt(Math.round(MARGIN_THRESHOLD * 100))) / 100n;
     let reason = null;
-    // console.log('remainingMargin <= maintenanceMargin:',remainingMargin <= maintenanceMargin)
-    // console.log('current price:', currentPrice)
-    // console.log('what is order.takeProfit',order.takeProfit)
-    // console.log('what is order.stopLoss',order.stopLoss)
-    // console.log(order.side)
     //TODO:how much money i have left in my account
     if (remainingMargin <= maintenanceMargin) { 
         reason = 'LIQUIDATION';
@@ -65,7 +59,6 @@ function checkRisk(order: precisionEngineOrder, currentPrice: bigint) {
     )) {
         reason = "STOP_LOSS";
     }
-    // console.log('is their any reason',reason)
     if (reason) executeClose(order, reason, currentPrice, pnl);
 }
 
@@ -80,7 +73,6 @@ function mutateBalance(userId: string, amount: bigint) {
     if (!balance.has(userId)) balance.set(userId, new Map());
     
     balance.get(userId)!.set(GLOBAL_ASSET, amount);
-    console.log(balance.get(userId)!.set(GLOBAL_ASSET, amount))
     queueDbAction({
         type: 'balance-update',
         payload: { 
@@ -96,25 +88,20 @@ function queueDbAction(action: any) {
     if (dbArray.length >= 2000) {
         console.warn(`[DB] Queue High Load! Size: ${dbArray.length}.`);
     }
-    console.log('pushing into ques')
     dbArray.push(action);
 }
 
 async function pushQueueJobsToDb() {
-    // console.log('lala')
     if (isFlushingDB || dbArray.length === 0) return;
     isFlushingDB = true;
 
     const batch = dbArray.splice(0, ENGINE_CONSTANTS.DB_BATCH_SIZE);
-    console.log('batch:',batch)
 
     try {
         for (let task of batch) {
             try {
                 if (task.type == "balance-update") {
-                    console.log('i am getting in db')
                     let { userId, balanceRaw } = task.payload;
-                    console.log('with task.payload',task.payload)
                     
                     await prisma.wallet.upsert({
                         where: { userId }, 
@@ -128,7 +115,6 @@ async function pushQueueJobsToDb() {
 
                 } else if (task.type === "create_order") {
                     const { market, ...rest } = task.payload;
-                    console.log('order-payload-inside_the_create_order:',task.payload)
                     await prisma.order.create({
                         data: {
                             ...rest,
@@ -137,7 +123,6 @@ async function pushQueueJobsToDb() {
                     });
 
                 } else if (task.type === "order_close") {
-                    console.log('close_order_getting_in_db')
                     await prisma.order.update({
                         where: { id: task.payload.id },
                         data: task.payload.update
@@ -161,7 +146,6 @@ setInterval(() => {
 
 async function executeClose(order: precisionEngineOrder, reason: string, currentPrice: bigint, pnl: bigint) {
     let credit = order.initialMargin + pnl;
-    console.log('Credit:',credit)
     if (credit < 0n) credit = 0n;
 
     let currentBalance = await getBalance(order.userId);
@@ -170,7 +154,6 @@ async function executeClose(order: precisionEngineOrder, reason: string, current
     orders.delete(order.id);
 
     let dbCloseReason = reason.toLowerCase(); 
-    console.log('it should get close',dbCloseReason)
 
     queueDbAction({
         type: 'order_close',
@@ -214,7 +197,6 @@ async function handlePriceUpdate(payload:any) {
 }
 
 async function handleCreateOrder(payload:any) {
-    console.log("Creating Order:", payload.id);
     
     let { id, userId, market, side, qty, leverage, takeProfit, stopLoss } = payload;
 
@@ -222,35 +204,26 @@ async function handleCreateOrder(payload:any) {
     if (orders.has(id)) return; 
         
     let priceData = price.get(market);
-    console.log(priceData)
     if (!priceData) {
         return sendCallbackToRedis(id, "no_price", { reason: `No price for ${market}` });
     }
 
     let openingPrice = side === "LONG" ? priceData.ask : priceData.bid;
     let qtyInt = toEnginePrecision(Number(qty));
-    console.log("qtyInt:",qtyInt)
     let lev = BigInt(leverage);
     
     //10***
     // Margin Calc
     const positionValue = (openingPrice * qtyInt) / SCALE;  //position value
-    console.log('positionValue:',positionValue)
-    let marginRequired = positionValue / lev;  //
-    console.log('marginRequired',marginRequired) 
+    let marginRequired = positionValue / lev; 
     //TODO: how much free margin we have
-    console.log(userId)
     let userBal = await getBalance(userId); 
-    console.log('userBal',userBal)
 
     if (BigInt(userBal) < marginRequired) {
         return sendCallbackToRedis(id, "insufficient_balance", { reason: "Not enough USDC" });
     }
-    console.log('is this the problem')
     let freeMargin=BigInt(userBal) - marginRequired
-    console.log('free_margin', freeMargin)
 
-    // mutateBalance(userId, userBal - marginRequired);
     mutateBalance(userId, BigInt(freeMargin));
 
 
@@ -265,7 +238,6 @@ async function handleCreateOrder(payload:any) {
         stopLoss: stopLoss ? toEnginePrecision(Number(stopLoss)) : undefined,
         createdAt: Date.now()
     };
-    console.log('ORDER:',order)
 
     orders.set(id, order);       
     queueDbAction({
@@ -293,12 +265,9 @@ async function handleCreateOrder(payload:any) {
 }
 
 async function handleCloseOrder(payload: any) {
-    console.log("CLOSE_ORDER_PAYLOAD",payload)
     const { orderId, userId } = payload;
     let id=orderId
-    // console.log("ORDERS MAP:",orders)
     const order = orders.get(id);
-    console.log("is order exist", order)
     if (!order) {
         return sendCallbackToRedis(id, "error", { reason: "Order not found" });
     }
@@ -307,20 +276,15 @@ async function handleCloseOrder(payload: any) {
         return sendCallbackToRedis(id, "error", { reason: "Unauthorized" });
     }
 
-    console.log('close_order_asset')
     const priceData = price.get(order.asset);
-    console.log('price_map',price)
-    console.log("is priceData exist", priceData)
     
     if (!priceData) {
         return sendCallbackToRedis(id, "error", { reason: "Market price not available" });
     }
 
     const closePrice = order.side === "LONG" ? priceData.bid : priceData.ask;
-    console.log('what the close price we get',closePrice)
 
     const pnl = calPnL(closePrice, order.openingPrice, order.side, order.qty);
-    console.log('YES>> i need pnl',pnl)
     await executeClose(order, "manual", closePrice, pnl);
 }
 
@@ -341,8 +305,6 @@ async function handleBalanceUpdate(payload: any) {
 }
 
 async function loadState() {
-    console.log('Restoring State from DB...');
-
     const dbOrders = await prisma.order.findMany({ where: { status: 'OPEN' } });
     
     for (let order of dbOrders) {
@@ -381,8 +343,6 @@ async function sendCallbackToRedis(id: string, status: string, payload: any) {
 
 async function engine() {
     await loadState();
-    console.log("Engine Started 🚀");
-
     while (true) {
         try {
             const response = await redis.xread("BLOCK", 0, "STREAMS", "trading-engine", lastStreamId);
@@ -407,8 +367,7 @@ async function engine() {
                     switch (kind) {
                         case "price-update": await handlePriceUpdate(payload); break;
                         case "create-order": await handleCreateOrder(payload); break;
-                        case "close-order": await handleCloseOrder(payload)// Add logic if you have specific close handler
-                            break;
+                        case "close-order": await handleCloseOrder(payload);  break;
                         case "balance-update": await handleBalanceUpdate(payload); break;
                     }
                 }

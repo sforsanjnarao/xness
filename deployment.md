@@ -102,7 +102,27 @@ SSH back in for the group change to take effect:
 ssh -i "xness-key.pem" ubuntu@YOUR_EC2_PUBLIC_IP
 ```
 
-## Step 4: Deploy Application
+## Step 4: Create Swap File (Prevent Out of Memory)
+
+**IMPORTANT:** This prevents crashes during Docker builds, especially on smaller instances.
+
+```bash
+# Create a 2GB swap file to prevent crashing
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Make swap permanent (survives reboots)
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Verify swap is active
+free -h
+```
+
+You should see 2GB of swap memory in the output.
+
+## Step 5: Deploy Application
 
 ### Option A: Clone from GitHub (Recommended)
 
@@ -160,13 +180,13 @@ docker compose -f docker-compose.prod.yml run --rm engine \
   sh -c "cd ../../packages/db && npm install -g prisma && prisma migrate deploy"
 ```
 
-## Step 5: Install Nginx
+## Step 6: Install Nginx
 
 ```bash
 sudo apt-get install -y nginx certbot python3-certbot-nginx
 ```
 
-## Step 6: Configure Nginx as Reverse Proxy
+## Step 7: Configure Nginx as Reverse Proxy
 
 ```bash
 # Backup default config
@@ -228,7 +248,7 @@ If OK, restart Nginx:
 sudo systemctl restart nginx
 ```
 
-## Step 7: Configure DNS
+## Step 8: Configure DNS
 
 Go to your domain registrar (GoDaddy, Namecheap, Cloudflare, Route53, etc.):
 
@@ -244,7 +264,7 @@ Go to your domain registrar (GoDaddy, Namecheap, Cloudflare, Route53, etc.):
 
 Wait 5-15 minutes for DNS propagation.
 
-## Step 8: Setup SSL with Let's Encrypt
+## Step 9: Setup SSL with Let's Encrypt
 
 Once DNS is propagated:
 
