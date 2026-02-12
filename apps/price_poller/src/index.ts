@@ -59,11 +59,10 @@ export interface PriceEvent {
 }
 
 export const redisClient=new Redis({
-    host:"redis",
-    // host:"localhost",
+    // host:"redis",
+    host:"localhost",
     port:6379
 })
-redisClient
 redisClient.on('connecting',()=>{
     console.log('redis client is connected')
 })
@@ -97,7 +96,7 @@ function connect() {
       if (ws.readyState === WebSocket.OPEN) {
         ws.ping();
       }
-    }, 180000);
+    }, 180000); 
   });
 
   ws.on("pong", () => {

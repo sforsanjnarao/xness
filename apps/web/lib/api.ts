@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 const USDC_DECIMALS = 8; // Hardcoded to match Backend
-const ENGINE_SCALE = 8;  // Hardcoded to match Engine
+const ENGINE_SCALE = 8;  
 
 
 interface ApiResponse<T> {
@@ -170,9 +170,6 @@ export type CandleInterval = '1m' | '5m' | '15m' | '1h' | '4h' | '1d';
 export const candlesApi = {
   getCandles: (symbol: string, interval: CandleInterval = '1m') =>
     request<CandlesResponse>(`/v1/candles?asset=${symbol}&timeFrame=${interval}`,
-      // {
-      //   cache: 'no-store',
-      // }
     ),
 };
 
@@ -194,12 +191,6 @@ export interface DepositRequest {
 
 
 
-
-
-// const fromRaw = (raw: string, decimals: number) => {
-//   return Number(raw) / 10 ** decimals;
-// };
-
 export const balanceApi = {
   getBalance: async () => {
     const { data, error } = await request<WalletResponse>("/v1/balance");
@@ -214,16 +205,11 @@ export const balanceApi = {
     };
   },
 
-  // getBalanceBySymbol: (symbol: string) =>
-  //   request<{ wallet: SymbolWallet }>(`/v1/balance/${symbol}`),
-
   deposit: (amount: number) =>
 
     request<WalletResponse>('/v1/balance/deposit', {
       method: 'POST',
-      // We force symbol USDC here
       body: JSON.stringify({ symbol: "USDC", amount }),
-      // body: JSON.stringify({  amount }), 
     }),
 };
 

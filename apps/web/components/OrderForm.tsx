@@ -50,18 +50,6 @@ export function OrderForm({
       setter(value);
     }
   };
-
-  // Percentage Handler (Calculate Max BTC buyable with current USDC)
-  const handlePercentage = (pct: number) => {
-    if (!currentPrice) return;
-    // Max Notional = Balance * Leverage
-    // Max Qty = Max Notional / Price
-    const maxQty = (usdcBalance * leverage) / currentPrice;
-    
-    // Round to 4 decimals to be safe
-    const newQty = Math.floor((maxQty * pct) * 10000) / 10000;
-    setQuantityStr(newQty.toString());
-  };
   
   const handleSubmit = async () => {
     if (!isValidOrder) return;
@@ -139,19 +127,7 @@ export function OrderForm({
               {/* {base} */} lots
             </div>
           </div>
-          {/* <div className="grid grid-cols-4 gap-2"> */}
-            {/* {[0.25, 0.5, 0.75, 1].map((pct) => (
-              <Button
-                key={pct}
-                variant="outline"
-                size="sm"
-                onClick={() => handlePercentage(pct)}
-                className="text-[10px] h-6 border-dashed"
-              >
-                {pct * 100}%
-              </Button>
-            ))} */}
-          {/* </div> */}
+          
         </div>
 
         {/* 4. Leverage */}

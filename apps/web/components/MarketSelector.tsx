@@ -47,9 +47,6 @@ export function MarketSelector({
   // Helper to close menu on selection (mobile only)
   const handlePairClick = (symbol: string) => {
     onPairChange(symbol);
-    // Optional: Keep open if they might want to switch timeframe too, 
-    // or close it immediately. Let's keep it open or let user close.
-    // setIsOpen(false); 
   };
 
   const handleTimeframeClick = (tf: CandleInterval) => {
@@ -167,74 +164,3 @@ export function MarketSelector({
   );
 }
 
-
-// 'use client'
-// import { CandleInterval } from '@/lib/api';
-// import { cn, getMarketDetails } from '@/lib/utils';
-// import { Button } from '@/components/ui/button';
-// import { Ticker } from '@/hooks/useBackpackTicker';
-
-// interface MarketSelectorProps {
-//   selectedPair: string; // "BTC_USDC"
-//   selectedTimeframe: CandleInterval;
-//   ticker: Ticker | null; // Live WebSocket Data
-//   onPairChange: (symbol: string) => void;
-//   onTimeframeChange: (timeframe: CandleInterval) => void;
-// }
-
-// const MARKETS = ["BTC_USDC", "ETH_USDC", "SOL_USDC"];
-
-// export function MarketSelector({
-//   selectedPair,
-//   selectedTimeframe,
-//   ticker,
-//   onPairChange,
-//   onTimeframeChange,
-// }: MarketSelectorProps) {
-  
-//   const { base, quote } = getMarketDetails(selectedPair);
-
-//   return (
-//     <div className="bg-card border border-border rounded-lg p-3 mb-4">
-//       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        
-//         {/* Left: Ticker Info */}
-//         <div className="flex items-center gap-6 w-full md:w-auto">
-//           {/* Pair Selector */}
-//           <div className="flex gap-1 bg-secondary/20 p-1 rounded-lg">
-//             {MARKETS.map((m) => (
-//               <button
-//                 key={m}
-//                 onClick={() => onPairChange(m)}
-//                 className={cn(
-//                   "px-3 py-1.5 text-sm font-medium rounded-md transition-all",
-//                   selectedPair === m 
-//                     ? "bg-background shadow text-foreground" 
-//                     : "text-muted-foreground hover:text-foreground"
-//                 )}
-//               >
-//                 {getMarketDetails(m).base}
-//               </button>
-//             ))}
-//           </div>
-
-//           {/* Live Price */}
-//           <div className="flex flex-col">
-//             <span className="text-2xl font-bold font-mono tracking-tight">
-//               ${(ticker?.lastPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-//             </span>
-//             <div className="flex gap-3 text-xs font-mono text-muted-foreground">
-//                <span className="text-green-500">B: {ticker?.bestBid}</span>
-//                <span className="text-red-500">A: {ticker?.bestAsk}</span>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Right: Timeframes (Optional, keeping your existing logic) */}
-//         <div className="flex gap-1">
-//            {/* ... existing timeframe buttons ... */}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }

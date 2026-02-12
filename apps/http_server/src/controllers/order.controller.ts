@@ -87,7 +87,6 @@ export const createOrder=async (req:Request, res:Response)=>{
 }
 
         const orderId=createEngineId("ORDER_Id:")
-
         const payload={
             kind:'create-order',
             payload: {
@@ -104,7 +103,6 @@ export const createOrder=async (req:Request, res:Response)=>{
                 enqueuedAt: Date.now(),
             },
         }
-        console.log("PAYLOAD:",payload)
         //need to send all of this to the engine to process
         let engineResponse= await engineDispatcher(orderId,payload,5000)
          console.log("engineResponse:",engineResponse)

@@ -7,14 +7,10 @@ export function OrderBook({ symbol }: { symbol: string }): JSX.Element {
   const { bids, asks, ticker } = useMarketFeed(symbol);
   const firstSymbol = normalizeSymbol(symbol);
 
-  // useMarketFeed already provides correctly sorted data with cumulative totals:
-  // - bids: sorted high->low (best bid first)
-  // - asks: sorted low->high (best ask first)
-  // We just need to reverse asks for display (worst ask at top, best ask at bottom)
   const displayAsks = [...asks].reverse();
   const displayBids = bids;
 
-  // Calculate max total for the depth visualization
+  // Calculate max total for the (depth visualization)
   const maxTotal = Math.max(
     ...asks.map(a => a.total),
     ...bids.map(b => b.total),

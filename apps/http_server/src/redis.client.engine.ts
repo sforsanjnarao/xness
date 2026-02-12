@@ -49,7 +49,6 @@ async function listeningToStream() {
                 "BLOCK", 0,
                 "STREAMS", "callback_queue", lastId
             );
-
             const streamKey = stream?.[0];
             if (!streamKey || !streamKey[1] || streamKey[1].length === 0) continue;
 

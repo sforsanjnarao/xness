@@ -21,9 +21,9 @@ export interface MarketFeed {
   asks: OrderBookEntry[];
   ticker: Ticker | null;
 }
-export const useMarketFeed = (symbol: string):MarketFeed => {
-  const bidsRef = useRef<Map<number, number>>(new Map());
-  const asksRef = useRef<Map<number, number>>(new Map());
+export const useMarketFeed = (symbol: string): MarketFeed => {
+  const bidsRef = useRef<Map<number, number>>(new Map()); //map<price,quantity>
+  const asksRef = useRef<Map<number, number>>(new Map()); //map<price,quantity>
   const lastPriceRef = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -45,7 +45,6 @@ export const useMarketFeed = (symbol: string):MarketFeed => {
     }
   };
 
-  // websocket
   useEffect(() => {
     const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
@@ -64,14 +63,13 @@ export const useMarketFeed = (symbol: string):MarketFeed => {
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
       if (!msg?.data) return;
-          if (msg.data.s !== formatted) return;
-      // ---- DEPTH ----
+      if (msg.data.s !== formatted) return;
+
       if (msg.stream?.startsWith("depth")) {
         if (msg.data.b) updateSide(bidsRef.current, msg.data.b);
         if (msg.data.a) updateSide(asksRef.current, msg.data.a);
       }
 
-      // ---- TICKER ----
       if (msg.stream?.startsWith("bookTicker")) {
         const bid = Number(msg.data.b);
         const ask = Number(msg.data.a);
@@ -92,20 +90,20 @@ export const useMarketFeed = (symbol: string):MarketFeed => {
     };
 
     return () => {
-        if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({
-            method: "UNSUBSCRIBE",
-            params: [
-                `depth.${formatted}`,
-                `bookTicker.${formatted}`,
-            ],
-            id: Date.now(),
-            }));
-        }
-        ws.close();
-        bidsRef.current.clear();
-        asksRef.current.clear();
-        lastPriceRef.current = null;
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          method: "UNSUBSCRIBE",
+          params: [
+            `depth.${formatted}`,
+            `bookTicker.${formatted}`,
+          ],
+          id: Date.now(),
+        }));
+      }
+      ws.close();
+      bidsRef.current.clear();
+      asksRef.current.clear();
+      lastPriceRef.current = null;
     };
   }, [formatted]);
 

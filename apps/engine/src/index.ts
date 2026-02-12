@@ -339,7 +339,7 @@ async function engine() {
                     lastStreamId = id;
                     let rawData = "";
                     
-                    console.log("fields:", fields)
+                    // console.log("fields:", fields)
                     for (let i = 0; i < fields.length; i += 2) {
                         if (fields[i] === "data" || fields[i] === "payload") {
                             rawData = fields[i + 1] ?? "";
