@@ -51,21 +51,17 @@ export function MarketSelector({
 
   const handleTimeframeClick = (tf: CandleInterval) => {
     onTimeframeChange(tf);
-    setIsOpen(false); // Close on timeframe select is usually good UX
+    setIsOpen(false); 
   };
 
   return (
     <div className="bg-card border border-border rounded-lg shadow-sm transition-all duration-200">
       
-      {/* 
-        MOBILE HEADER (Visible only on mobile) 
-        Acts as the Trigger for the collapsible
-      */}
+      
       <div 
         className="md:hidden flex items-center justify-between p-3 cursor-pointer select-none"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {/* Left: Ticker Info */}
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
             <span className="text-sm font-bold flex items-center gap-2">
@@ -85,25 +81,19 @@ export function MarketSelector({
           </div>
         </div>
 
-        {/* Right: Chevron */}
         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
           {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
       </div>
 
 
-      {/* 
-        CONTENT AREA 
-        - Hidden on mobile unless isOpen is true
-        - Always flex-row on Desktop
-      */}
       <div className={cn(
-        "px-3 pb-3 md:p-3", // Mobile padding vs Desktop padding
-        !isOpen && "hidden md:block", // Hide on mobile if closed, always block on desktop
-        "md:flex md:items-center md:justify-between md:gap-4" // Desktop layout
+        "px-3 pb-3 md:p-3", 
+        !isOpen && "hidden md:block", 
+        "md:flex md:items-center md:justify-between md:gap-4" 
       )}>
         
-        {/* Desktop Ticker (Hidden on Mobile inside the list, because it's in the header) */}
+        {/* Desktop Ticker */}
         <div className="hidden md:flex flex-col items-end md:items-start min-w-[100px] order-2">
             <span className="text-2xl font-bold font-mono tracking-tight leading-none">
               ${(ticker?.lastPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}

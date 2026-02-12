@@ -10,7 +10,7 @@ import {
 import { Order } from "@/lib/api";
 import { JSX } from "react";
 
-// Helper to convert Engine BigInt (string) to Number
+
 const fromEngine = (val: string | null | undefined) => {
   if (!val) return 0;
   return Number(val) / 100_000_000; // 10^8

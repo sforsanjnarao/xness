@@ -59,8 +59,8 @@ export interface PriceEvent {
 }
 
 export const redisClient=new Redis({
-    // host:"redis",
-    host:"localhost",
+    host:"redis",
+    // host:"localhost",
     port:6379
 })
 redisClient.on('connecting',()=>{

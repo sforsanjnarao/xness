@@ -70,7 +70,7 @@ export default function WalletPage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header usdcBalance={usdcBalance}/>
+      {/* <Header usdcBalance={usdcBalance}/> */}
 
       <main className="flex-1 p-4 md:p-6 max-w-4xl mx-auto w-full space-y-6 md:space-y-8">
         
@@ -107,11 +107,7 @@ export default function WalletPage(): JSX.Element {
             <h2 className="text-lg md:text-xl font-semibold">Deposit Funds</h2>
           </div>
           
-          {/* 
-             RESPONSIVE CHANGE: 
-             flex-col on mobile (stack input & button)
-             flex-row on md+ (side by side)
-          */}
+        
           <div className="flex flex-col md:flex-row gap-4 max-w-lg md:items-end">
             <div className="flex-1 space-y-2">
               <Label htmlFor="amount">Amount (USDC)</Label>

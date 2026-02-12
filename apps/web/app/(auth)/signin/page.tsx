@@ -39,7 +39,7 @@ export default function SignIn():JSX.Element {
         variant: 'destructive',
       });
     } else {
-      navigate.push('/trade');
+      navigate.push('/market');
     }
   };
 

@@ -149,17 +149,15 @@ export const orderApi = {
 
 // Candles API
 export interface Candle {
-  time: number | string; // Use string if your JSON sends "2026-01-08...", number if Unix timestamp
-  open: number;
+  time: number | string; 
   high: number;
   low: number;
   close: number;
   volume?: number;
-  symbol?: string; // Optional: based on your backend response
-  bucket?: string; // Optional: based on your backend response
+  symbol?: string; 
+  bucket?: string; 
 }
 
-// 2. Define the structure of the API Response (The wrapper)
 export interface CandlesResponse {
   data: Candle[];
 }
@@ -175,8 +173,8 @@ export const candlesApi = {
 
 // Balance API
 export interface WalletResponse {
-  balance: string; // "1000000" (BigInt string)
-  symbol: string;  // "USDC"
+  balance: string; 
+  symbol: string;  
   formatted?: string;
 }
 

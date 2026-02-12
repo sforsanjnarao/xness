@@ -89,7 +89,7 @@ function GuideHeader() {
           </Link>
         </div>
         <div>
-            <Link href="/trade">
+            <Link href="/market">
                 <Button size="sm" variant="outline" className="border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900 h-8 text-xs">
                     Launch Terminal
                 </Button>
@@ -417,7 +417,7 @@ export default function UserGuide() {
                 {/* Final CTA */}
                 <div className="pt-12 mt-12 border-t border-zinc-800 text-center">
                     <p className="text-zinc-400 mb-6">Ready to apply what you've learned?</p>
-                    <Link href="/trade">
+                    <Link href="/market">
                         <Button className="bg-white text-black hover:bg-zinc-200 font-bold px-8 h-10">
                             Open Terminal
                         </Button>

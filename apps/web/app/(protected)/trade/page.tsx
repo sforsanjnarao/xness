@@ -2,7 +2,7 @@
 
 import { JSX, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Header } from "@/components/Header";
+
 import { TradingChart } from "@/components/TradingChart";
 import { OrderForm } from "@/components/OrderForm";
 import { PositionsTable } from "@/components/PositionsTable";
@@ -138,9 +138,8 @@ export default function Trade(): JSX.Element {
 
 return (
     <div className="min-h-screen bg-background flex flex-col pb-[80px] lg:pb-0"> 
-      {/* Added pb-[80px] to body so content isn't hidden behind sticky footer */}
       
-      <Header usdcBalance={usdcBalance} />
+
 
       <main className="flex-1 p-2 md:p-4 space-y-4 max-w-[1920px] mx-auto w-full">
         
@@ -166,10 +165,6 @@ return (
             )}
           </div>
 
-          {/* 
-            DESKTOP ONLY: Order Form 
-            Hidden on mobile (lg:block, hidden)
-          */}
           <div className="hidden lg:block lg:col-span-3 h-[600px]">
             {currentPrice !== null && (
               <OrderForm
@@ -181,8 +176,6 @@ return (
               />
             )}
           </div>
-
-         
         </div>
 
         {/* Positions & History */}
@@ -246,7 +239,7 @@ return (
                         market={selectedPair}
                         currentPrice={currentPrice}
                         usdcBalance={usdcBalance}
-                        defaultSide={drawerSide} // Pass the side clicked
+                        defaultSide={drawerSide} 
                         onSubmit={async (order) => { await createOrderMutation.mutateAsync(order); }}
                         isSubmitting={createOrderMutation.isPending}
                     />

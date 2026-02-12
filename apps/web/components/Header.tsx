@@ -14,10 +14,12 @@ import { User, LogOut, Wallet } from 'lucide-react';
 import { JSX } from "react";
 
 interface HeaderProps {
-  usdcBalance: number
+  usdcBalance: number;
+  onNavigate?: (view: string) => void; 
+  activeView?: string; 
 }
 
-export function Header({ usdcBalance }: HeaderProps):JSX.Element {
+export function Header({ usdcBalance, onNavigate, activeView }: HeaderProps):JSX.Element {
   const { user, signOut } = useAuth();
   const navigate = useRouter();
   const pathname = usePathname(); 
@@ -26,8 +28,11 @@ export function Header({ usdcBalance }: HeaderProps):JSX.Element {
     await signOut();
     navigate.push('/signin');
   };
-  const isTrade = pathname === '/trade';
-  const isWallet = pathname === '/wallet';
+  
+ 
+  const currentView = activeView || pathname.replace('/', '');
+  const isTrade = currentView === 'trade' || pathname === '/trade';
+  const isWallet = currentView === 'wallet' || pathname === '/wallet';
 
   return (
     <header className="sticky top-0 z-50 h-14 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 px-4 flex items-center justify-between">
@@ -37,32 +42,65 @@ export function Header({ usdcBalance }: HeaderProps):JSX.Element {
         </Link>
         
         <nav className="flex items-center gap-1">
-          <Link href="/trade">
-            <Button 
-              size="sm"
-              className={
-                isTrade
-                  ? "bg-red-600 text-white hover:bg-red-500"
-                  : "text-foreground hover:text-primary"
-              }
-              variant={isTrade ? "default" : "ghost"}
-            >
-              Trade
-            </Button>
-          </Link>
-          <Link href="/wallet">
-            <Button 
-              size="sm"
-              className={
-                isWallet
-                  ? "bg-red-600 text-white hover:bg-red-500"
-                  : "text-foreground hover:text-primary"
-              }
-              variant={isWallet ? "default" : "ghost"}
-            >
-              Wallet
-            </Button>
-          </Link>
+          {onNavigate ? (
+          
+            <>
+              <Button 
+                size="sm"
+                onClick={() => onNavigate('trade')}
+                className={
+                  isTrade
+                    ? "bg-red-600 text-white hover:bg-red-500"
+                    : "text-foreground hover:text-primary"
+                }
+                variant={isTrade ? "default" : "ghost"}
+              >
+                Trade
+              </Button>
+              <Button 
+                size="sm"
+                onClick={() => onNavigate('wallet')}
+                className={
+                  isWallet
+                    ? "bg-red-600 text-white hover:bg-red-500"
+                    : "text-foreground hover:text-primary"
+                }
+                variant={isWallet ? "default" : "ghost"}
+              >
+                Wallet
+              </Button>
+            </>
+          ) : (
+           
+            <>
+              <Link href="/trade">
+                <Button 
+                  size="sm"
+                  className={
+                    isTrade
+                      ? "bg-red-600 text-white hover:bg-red-500"
+                      : "text-foreground hover:text-primary"
+                  }
+                  variant={isTrade ? "default" : "ghost"}
+                >
+                  Trade
+                </Button>
+              </Link>
+              <Link href="/wallet">
+                <Button 
+                  size="sm"
+                  className={
+                    isWallet
+                      ? "bg-red-600 text-white hover:bg-red-500"
+                      : "text-foreground hover:text-primary"
+                  }
+                  variant={isWallet ? "default" : "ghost"}
+                >
+                  Wallet
+                </Button>
+              </Link>
+            </>
+          )}
         </nav>
       </div>
 

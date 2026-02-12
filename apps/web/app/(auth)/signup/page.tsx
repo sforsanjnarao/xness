@@ -53,7 +53,7 @@ export default function SignUp():JSX.Element {
         title: 'Account Created',
         description: 'Welcome to Velocity!',
       });
-      navigate.push('/trade');
+      navigate.push('/market');
     }
   };
 

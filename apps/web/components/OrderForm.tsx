@@ -11,10 +11,10 @@ import { Wallet } from 'lucide-react';
 interface OrderFormProps {
   market: Market      
   currentPrice: number;
-  usdcBalance: number; // This is strictly USDC
+  usdcBalance: number; 
   onSubmit: (order: CreateOrderRequest) => Promise<void>;
   isSubmitting?: boolean;
-  defaultSide?: OrderSide; // Optional: pre-select Long/Short (for mobile drawer)
+  defaultSide?: OrderSide; 
 }
 
 export function OrderForm({ 
@@ -27,24 +27,19 @@ export function OrderForm({
 }: OrderFormProps):JSX.Element {
   const [side, setSide] = useState<OrderSide>(defaultSide);
   
-  // Inputs
   const [quantityStr, setQuantityStr] = useState('');
   const [leverage, setLeverage] = useState<number>(1);
   const [takeProfitStr, setTakeProfitStr] = useState('');
   const [stopLossStr, setStopLossStr] = useState('');
 
-  // Helper: "BTC_USDC" -> base: "BTC", quote: "USDC"
   const { base, quote } = getMarketDetails(market);
 
-  // Calculations
   const quantity = parseFloat(quantityStr) || 0;
   
-  // Formula: (Size * Price) / Leverage = Margin Used (in USDC)
   const marginRequired = currentPrice > 0 ? (quantity * currentPrice) / leverage : 0;
   
   const isValidOrder = quantity > 0 && marginRequired <= usdcBalance;
 
-  // Handle Input (Allow decimals)
   const handleInputChange = (value: string, setter: (v: string) => void) => {
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
       setter(value);
@@ -57,13 +52,12 @@ export function OrderForm({
     await onSubmit({
       market, 
       side,
-      quantity, // Sending Asset Quantity (e.g. 0.1 BTC)
+      quantity,
       leverage,
       takeProfit: takeProfitStr ? parseFloat(takeProfitStr) : null,
       stopLoss: stopLossStr ? parseFloat(stopLossStr) : null,
     });
     
-    // Reset
     setQuantityStr('');
     setTakeProfitStr('');
     setStopLossStr('');
@@ -112,7 +106,7 @@ export function OrderForm({
         {/* 3. Quantity Input */}
         <div className="space-y-2">
           <Label className="text-s">Order Size ({base})</Label>
-          {/* <Label className="text-s">Order Size</Label> */}
+         
 
           <div className="relative">
             <Input

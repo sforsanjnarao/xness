@@ -244,7 +244,7 @@ function CompactHeader() {
     <header className="fixed top-0 z-50 w-full border-b border-white/5 bg-black/80 backdrop-blur-md h-14">
       <div className="container mx-auto px-4 h-full flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href="/trade" className="flex items-center gap-2">
+          <Link href="/market" className="flex items-center gap-2">
             <span className="font-extrabold text-lg md:text-xl tracking-tighter text-white">
               velocity<span className="text-[#ef4444]">.</span>
             </span>
@@ -264,7 +264,7 @@ function CompactHeader() {
           <Link href="/signin" className="hidden sm:block text-xs font-medium text-zinc-400 hover:text-white transition-colors">
             Log In
           </Link>
-          <Link href="/trade">
+          <Link href="/market">
             <Button size="sm" className="bg-[#ef4444] hover:bg-[#dc2626] text-white text-[10px] md:text-xs font-semibold h-8 px-3 md:px-4 rounded-md">
               Launch <span className="hidden sm:inline ml-1">Simulator</span>
             </Button>

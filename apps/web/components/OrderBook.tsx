@@ -10,7 +10,7 @@ export function OrderBook({ symbol }: { symbol: string }): JSX.Element {
   const displayAsks = [...asks].reverse();
   const displayBids = bids;
 
-  // Calculate max total for the (depth visualization)
+ 
   const maxTotal = Math.max(
     ...asks.map(a => a.total),
     ...bids.map(b => b.total),
