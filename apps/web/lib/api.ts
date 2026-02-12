@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 const USDC_DECIMALS = 8; // Hardcoded to match Backend
-const ENGINE_SCALE = 8;  
+const ENGINE_SCALE = 8;
 
 
 interface ApiResponse<T> {
@@ -149,13 +149,14 @@ export const orderApi = {
 
 // Candles API
 export interface Candle {
-  time: number | string; 
+  time: number | string;
+  open: number;
   high: number;
   low: number;
   close: number;
   volume?: number;
-  symbol?: string; 
-  bucket?: string; 
+  symbol?: string;
+  bucket?: string;
 }
 
 export interface CandlesResponse {
@@ -173,8 +174,8 @@ export const candlesApi = {
 
 // Balance API
 export interface WalletResponse {
-  balance: string; 
-  symbol: string;  
+  balance: string;
+  symbol: string;
   formatted?: string;
 }
 
