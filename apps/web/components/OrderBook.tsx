@@ -10,12 +10,17 @@ export function OrderBook({ symbol }: { symbol: string }): JSX.Element {
   const displayAsks = [...asks].reverse();
   const displayBids = bids;
 
- 
   const maxTotal = Math.max(
     ...asks.map(a => a.total),
     ...bids.map(b => b.total),
     1
   );
+
+//  [
+//   { price: 100, quantity: 2, total: 2 },
+//   { price: 101, quantity: 3, total: 5 },
+//   { price: 102, quantity: 4, total: 9 },
+// ]
 
   return (
     <div className="flex flex-col h-full w-full bg-card border border-border rounded-lg overflow-hidden text-[10px] md:text-xs font-mono">
