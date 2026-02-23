@@ -5,10 +5,38 @@ import orderRoute from './routes/order.routes'
 import balanceRoute from './routes/balance.route'
 import candleRoute from './routes/candles.route'
 import cros from 'cors'
-
+import pinoHttp from 'pino-http'
+import logger from './logger'
 
 import "../utils/biginit-json";
 const app = express()
+
+app.use(pinoHttp({
+    logger,
+    customSuccessMessage: (req, res) => {
+        return `${req.method} ${req.url} completed`
+    },
+    customErrorMessage: (req, res, err) => {
+        return `${req.method} ${req.url} failed: ${err.message}`
+    },
+    customAttributeKeys: {
+        req: 'request',
+        res: 'response',
+    },
+    serializers: {
+        req(req) {
+            return {
+                method: req.method,
+                url: req.url,
+                ip: req.headers['x-forwarded-for'] || req.remoteAddress,
+            }
+        },
+        res(res) {
+            return { statusCode: res.statusCode }
+        },
+    },
+}))
+
 app.use(cros({
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -30,5 +58,5 @@ app.use('/v1/candles', candleRoute)
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-    console.log(`port is listening on ${PORT}`)
+    logger.info(`🚀 Server started on port ${PORT}`)
 })
