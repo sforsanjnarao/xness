@@ -20,7 +20,6 @@ export const protectMiddleware = (req: Request, res: Response, next: NextFunctio
         const decode = jwt.verify(token, JWT_SECRET) as JwtPayload
         req.user = { id: decode.userId }
 
-        logger.debug({ ip, userId: decode.userId, url: req.url }, 'Auth passed')
         next()
     } catch (err: any) {
         logger.warn({ ip, url: req.url, reason: err?.message }, '🚨 Auth failed: invalid or expired token')
