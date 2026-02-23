@@ -53,7 +53,7 @@ export default function Trade(): JSX.Element {
       if (error || !data) throw new Error(error);
       return data.data;
     },
-    refetchInterval: 4000,
+    refetchInterval: 10000,
   });
 
   // Fetch balance
@@ -64,7 +64,7 @@ export default function Trade(): JSX.Element {
       if (error) throw new Error(error);
       return data; 
     },
-    refetchInterval: 5000,
+    refetchInterval: 15000,
   });
 
   const usdcBalance = balanceData?.USDC || 0;
@@ -78,7 +78,7 @@ export default function Trade(): JSX.Element {
       const rawData = response.data as any;
       return rawData?.allOrder || [];
     },
-    refetchInterval: 2000,
+    refetchInterval: 15000,
   });
 
   // Fetch all orders
@@ -90,7 +90,7 @@ export default function Trade(): JSX.Element {
       const rawData = response.data as any;
       return rawData?.allOrder || [];
     },
-    refetchInterval: 3000,
+    refetchInterval: 15000,
   });
 
   // Create order mutation

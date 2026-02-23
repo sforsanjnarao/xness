@@ -13,6 +13,12 @@ const app = express()
 
 app.use(pinoHttp({
     logger,
+    autoLogging: {
+        ignore: (req) => {
+            const skip = ['/v1/candles', '/v1/balance', '/v1/orders', '/v1/balance']
+            return skip.some(path => req.url?.startsWith(path))
+        }
+    },
     customSuccessMessage: (req, res) => {
         return `${req.method} ${req.url} completed`
     },
