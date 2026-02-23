@@ -270,7 +270,7 @@ Nginx is used as a reverse proxy to route traffic and terminate SSL.
 │              │     │              │     │ closePrice   │
 │              │     │              │     │ leverage     │
 │              │     │              │     │ initialMargin│
-│              │     │              │     │ Pnl          │
+│              │     │              │     │ Pnl          │˘
 │              │     │              │     │ takeProfit   │
 │              │     │              │     │ stopLoss     │
 │              │     │              │     │ reason       │
