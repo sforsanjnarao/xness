@@ -58,11 +58,13 @@ export interface PriceEvent {
     receivedAt: number;
 }
 
-export const redisClient=new Redis({
-    host:"redis",
-    // host:"localhost",
-    port:6379
-})
+// Support REDIS_URL (Render.com) or fallback to Docker Compose defaults
+export const redisClient = process.env.REDIS_URL
+    ? new Redis(process.env.REDIS_URL)
+    : new Redis({
+        host: process.env.REDIS_HOST || "redis",
+        port: Number(process.env.REDIS_PORT) || 6379
+    })
 redisClient.on('connecting',()=>{
     console.log('redis client is connected')
 })
