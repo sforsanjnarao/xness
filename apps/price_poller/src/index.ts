@@ -154,10 +154,10 @@ async function sendItToRedisStream(msg: message) {
             "data", JSON.stringify({
                 kind: "price-update",
                 payload: {
-                    s: event.payload.data.s,
-                    b: event.payload.data.b,
-                    a: event.payload.data.a,
-                    E: event.payload.data.E
+                    s: event.payload.data.s, // symbol (BTC_USDC)
+                    b: event.payload.data.b, // bid price
+                    a: event.payload.data.a,  // ask price
+                    E: event.payload.data.E  // event time
                 }
             })
         )
