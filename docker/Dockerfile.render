@@ -1,0 +1,12 @@
+# All-in-one backend for Render's free tier:
+# Redis + http_server + engine + price_poller as separate processes in one container.
+FROM node:20-alpine
+RUN apk add --no-cache redis bash
+WORKDIR /app
+RUN npm install -g pnpm@9
+COPY . .
+RUN rm -f .env apps/*/.env packages/*/.env
+RUN pnpm install
+RUN pnpm exec turbo run build --filter=http_server... --filter=engine... --filter=price_poller...
+ENV NODE_ENV=production REDIS_HOST=127.0.0.1 REDIS_PORT=6379
+CMD ["bash", "docker/start-backend.sh"]

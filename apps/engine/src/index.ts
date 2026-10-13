@@ -321,7 +321,7 @@ async function loadState() {
 
 async function sendCallbackToRedis(id: string, status: string, payload: any) {
     try {
-        await redis.xadd("callback_queue", "*", "id", id, "status", status, "payload", JSON.stringify(payload));
+        await redis.xadd("callback_queue", "MAXLEN", "~", "10000", "*", "id", id, "status", status, "payload", JSON.stringify(payload));
     } catch (err) {
         console.error("Redis Error:", err);
     }

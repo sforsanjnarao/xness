@@ -55,6 +55,8 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use(cookieParser())
 
+app.get('/health', (_req, res) => { res.send('ok') })
+
 app.use('/v1/auth', authRoute)
 app.use('/v1/orders', orderRoute)
 app.use('/v1/balance', balanceRoute)

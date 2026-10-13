@@ -152,6 +152,7 @@ async function sendItToRedisStream(msg: message) {
         
         await redisClient.xadd(
             "trading-engine",
+            "MAXLEN", "~", "10000",
             "*",
             "data", JSON.stringify({
                 kind: "price-update",
@@ -190,6 +191,7 @@ async function sendItRedisStream(msg:message){
         }
         await redisClient.xadd(
             "trading-engine",
+            "MAXLEN", "~", "10000",
             "*",
             "kind", event.kind,
             "symbol", event.payload.data.s,

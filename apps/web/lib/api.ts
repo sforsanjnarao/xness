@@ -1,4 +1,6 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+// Production default is same-origin: /v1/* is proxied to the backend (see next.config.js)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000');
 const USDC_DECIMALS = 8; // Hardcoded to match Backend
 const ENGINE_SCALE = 8;
 

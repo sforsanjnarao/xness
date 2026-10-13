@@ -34,6 +34,7 @@ export const signupController = async (req: Request, res: Response) => {
 
         const token = jwt.sign({ userId: user.id }, JWT_SECRET)
         res.cookie('token', token, {
+            httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000
@@ -71,6 +72,7 @@ export const signinController = async (req: Request, res: Response) => {
 
         const token = jwt.sign({ userId: existingUser.id }, JWT_SECRET)
         res.cookie('token', token, {
+            httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000
